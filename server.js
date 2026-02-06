@@ -240,7 +240,7 @@ app.get('/admin', (req, res) => {
 });
 
 // Serve other static HTML files from public directory
-app.get('*.html', (req, res, next) => {
+app.get(/\.html$/, (req, res, next) => {
   const filePath = path.join(PUBLIC_DIR, req.path);
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     res.sendFile(filePath);
