@@ -237,18 +237,29 @@ app.get('/admin/login', (req, res) => {
 
 app.post('/api/admin/login', (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) {
+  const safeEmail = (email || '').trim();
+  const safePassword = password || '';
+  if (!safeEmail || !safePassword) {
     return res.status(400).json({ success: false, message: 'Email and password are required.' });
   }
 
-  const admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(email);
-  if (!admin) {
-    return res.status(401).json({ success: false, message: 'Invalid credentials' });
-  }
+  const envEmail = (process.env.ADMIN_EMAIL || '').trim();
+  const envPassword = process.env.ADMIN_PASSWORD || '';
+  const matchesEnv = envEmail && envPassword && safeEmail === envEmail && safePassword === envPassword;
 
-  const ok = bcrypt.compareSync(password, admin.password_hash);
+  let admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(safeEmail);
+  const ok = admin ? bcrypt.compareSync(safePassword, admin.password_hash) : false;
+
   if (!ok) {
-    return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    if (matchesEnv) {
+      ensureBootstrapAdmin();
+      admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(envEmail);
+      if (!admin) {
+        return res.status(500).json({ success: false, message: 'Admin bootstrap failed.' });
+      }
+    } else {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
   }
 
   req.session.adminId = admin.id;
