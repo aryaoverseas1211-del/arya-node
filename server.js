@@ -8,11 +8,12 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Resolve app root reliably (Hostinger sometimes sets different CWD)
+// Repo root is the app root; static assets live in public_html/public
 const APP_ROOT = process.env.APP_ROOT || __dirname;
-const PUBLIC_DIR = path.join(APP_ROOT, 'public');
-const uploadsDir = path.join(APP_ROOT, 'uploads');
-const dataDir = path.join(APP_ROOT, 'data');
+const PUBLIC_HTML_DIR = path.join(APP_ROOT, 'public_html');
+const PUBLIC_DIR = path.join(PUBLIC_HTML_DIR, 'public');
+const uploadsDir = path.join(PUBLIC_HTML_DIR, 'uploads');
+const dataDir = path.join(PUBLIC_HTML_DIR, 'data');
 
 // Middleware
 app.use(cors());
@@ -56,6 +57,11 @@ const upload = multer({
 
 // Data file path
 const productsFile = path.join(dataDir, 'products.json');
+
+function resolveUploadPath(urlPath) {
+  const clean = (urlPath || '').replace(/^\\//, '');
+  return path.join(PUBLIC_HTML_DIR, clean);
+}
 
 // Helper functions
 function readProducts() {
@@ -174,7 +180,7 @@ app.put('/api/products/:id', upload.single('image'), (req, res) => {
 
     if (req.file) {
       // Delete old image if exists
-      const oldImagePath = path.join(APP_ROOT, products[index].image);
+      const oldImagePath = resolveUploadPath(products[index].image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -202,7 +208,7 @@ app.delete('/api/products/:id', (req, res) => {
     }
 
     // Delete associated image
-    const imagePath = path.join(APP_ROOT, products[index].image);
+    const imagePath = resolveUploadPath(products[index].image);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }

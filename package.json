@@ -2,9 +2,9 @@
   "name": "arya-node",
   "version": "1.0.0",
   "description": "Arya Overseas product CMS",
-  "main": "public_html/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node public_html/server.js"
+    "start": "node server.js"
   },
   "type": "commonjs",
   "dependencies": {

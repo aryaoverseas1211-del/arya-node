@@ -42,19 +42,20 @@ A modern, Node.js-based Product Content Management System with image uploads, MO
 ## Project Structure
 
 ```
-public_html/
+arya-node/
 ├── server.js              # Express server and API routes
 ├── package.json           # Dependencies and scripts
-├── public/                # Frontend files
-│   ├── index.html         # Homepage
-│   ├── product/
-│   │   ├── product_cms.html  # Admin panel
-│   │   └── detail.html        # Product detail page
-│   ├── assets/            # Static assets (images, etc.)
-│   └── ...                # Other HTML pages
-├── uploads/               # Uploaded product images (auto-created)
-└── data/                  # JSON data storage (auto-created)
-    └── products.json      # Product database
+└── public_html/
+    ├── public/            # Frontend files
+    │   ├── index.html     # Homepage
+    │   ├── product/
+    │   │   ├── product_cms.html  # Admin panel
+    │   │   └── detail.html        # Product detail page
+    │   ├── assets/        # Static assets (images, etc.)
+    │   └── ...            # Other HTML pages
+    ├── uploads/           # Uploaded product images (auto-created)
+    └── data/              # JSON data storage (auto-created)
+        └── products.json  # Product database
 ```
 
 ## API Endpoints

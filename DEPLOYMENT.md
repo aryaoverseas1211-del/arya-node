@@ -22,7 +22,7 @@ In hPanel → **Websites → Node.js → Your App**:
 
 - **Framework**: `Express`
 - **Root directory**: `arya-node`
-- **Entry file**: `public_html/server.js`
+- **Entry file**: `server.js`
 - **Node version**: `18.x` or `20.x`
 - **Install command**: `npm install`
 - **Start command**: `npm start` (or leave empty if not required)
@@ -33,8 +33,8 @@ In hPanel → **Websites → Node.js → Your App**:
 arya-node/
 ├── package.json
 ├── .gitignore
+├── server.js
 ├── public_html/
-│   ├── server.js
 │   ├── public/
 │   │   ├── index.html
 │   │   ├── product/
@@ -56,7 +56,7 @@ arya-node/
 ## 🔧 Troubleshooting
 
 ### 503 Error
-- Verify entry file is `public_html/server.js`
+- Verify entry file is `server.js`
 - Check that server.js listens on `0.0.0.0`
 - Ensure root directory is exactly `arya-node`
 
