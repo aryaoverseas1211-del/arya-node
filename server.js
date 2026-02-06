@@ -59,7 +59,7 @@ const upload = multer({
 const productsFile = path.join(dataDir, 'products.json');
 
 function resolveUploadPath(urlPath) {
-  const clean = (urlPath || '').replace(/^\\//, '');
+  const clean = (urlPath || '').replace(/^\/+/, '');
   return path.join(PUBLIC_HTML_DIR, clean);
 }
 
