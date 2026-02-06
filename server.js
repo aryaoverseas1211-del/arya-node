@@ -24,9 +24,12 @@ app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Sessions
+const isProduction = process.env.NODE_ENV === 'production';
 if (!process.env.SESSION_SECRET) {
   console.warn('SESSION_SECRET is not set. Set it in Hostinger environment variables.');
 }
+// Trust proxy so secure cookies work behind Hostinger/LSWS proxy
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
   resave: false,
@@ -34,7 +37,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
+    secure: isProduction ? 'auto' : false
   }
 }));
 
