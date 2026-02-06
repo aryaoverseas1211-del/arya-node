@@ -1,35 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
-
 :root {
-  --brand-900: #0b3d3a;
-  --brand-800: #0f5e57;
-  --brand-700: #0f766e;
-  --brand-600: #0d9488;
-  --brand-500: #14b8a6;
-  --accent-700: #b45309;
-  --accent-600: #d97706;
-  --accent-500: #f59e0b;
-  --accent-400: #fbbf24;
-  --sand-50: #f8fafc;
-  --sand-100: #f1f5f9;
-  --ink-900: #0f172a;
-  --ink-700: #334155;
+  --brand-950: #0a2421;
+  --brand-900: #0f3d3a;
+  --brand-800: #145046;
+  --brand-700: #1b6a5a;
+  --brand-600: #2d8570;
+  --brand-500: #3fa28a;
+  --accent-700: #a77b2f;
+  --accent-600: #c49a4e;
+  --accent-500: #d8b26b;
+  --accent-400: #ead3a1;
+  --sand-50: #f7f3ee;
+  --sand-100: #f1ebe3;
+  --ink-900: #1f2937;
+  --ink-700: #374151;
+  --font-body: 'Manrope', sans-serif;
+  --font-display: 'Cormorant Garamond', serif;
 }
 
 body {
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-body);
   color: var(--ink-900);
   background-color: var(--sand-50);
 }
 
 h1, h2, h3, h4, .brand-title {
-  font-family: 'Space Grotesk', sans-serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
 }
 
 .bg-clip-text.text-transparent {
-  font-family: 'Space Grotesk', sans-serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
 }
 
 /* Brand color overrides for Tailwind classes used across pages */
@@ -79,12 +80,12 @@ h1, h2, h3, h4, .brand-title {
 
 .bg-blue-50,
 .bg-blue-100 {
-  background-color: #ecfeff !important;
+  background-color: #edf7f4 !important;
 }
 
 .bg-purple-50,
 .bg-purple-100 {
-  background-color: #fffbeb !important;
+  background-color: #faf4e6 !important;
 }
 
 .border-blue-100,
@@ -112,14 +113,14 @@ h1, h2, h3, h4, .brand-title {
 
 /* Gradient overrides */
 .from-blue-50 {
-  --tw-gradient-from: #ecfeff var(--tw-gradient-from-position);
-  --tw-gradient-to: rgba(236, 254, 255, 0) var(--tw-gradient-to-position);
+  --tw-gradient-from: #edf7f4 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(237, 247, 244, 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
 .from-blue-100 {
-  --tw-gradient-from: #cffafe var(--tw-gradient-from-position);
-  --tw-gradient-to: rgba(207, 250, 254, 0) var(--tw-gradient-to-position);
+  --tw-gradient-from: #dff1ea var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(223, 241, 234, 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -132,8 +133,8 @@ h1, h2, h3, h4, .brand-title {
 
 .from-purple-50,
 .from-purple-100 {
-  --tw-gradient-from: #fffbeb var(--tw-gradient-from-position);
-  --tw-gradient-to: rgba(255, 251, 235, 0) var(--tw-gradient-to-position);
+  --tw-gradient-from: #faf4e6 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(250, 244, 230, 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -146,7 +147,7 @@ h1, h2, h3, h4, .brand-title {
 
 .to-purple-50,
 .to-purple-100 {
-  --tw-gradient-to: #fffbeb var(--tw-gradient-to-position);
+  --tw-gradient-to: #faf4e6 var(--tw-gradient-to-position);
 }
 
 .to-purple-500,
@@ -181,12 +182,20 @@ h1, h2, h3, h4, .brand-title {
 }
 
 .card-glow {
-  box-shadow: 0 20px 60px rgba(15, 118, 110, 0.2);
+  box-shadow: 0 20px 60px rgba(20, 80, 70, 0.18);
 }
 
 /* Hero animated background override (used in index) */
 .animated-bg {
-  background: linear-gradient(-45deg, #0f3d3a, #0f766e, #0d9488, #f59e0b);
+  background: linear-gradient(-45deg, var(--brand-900), var(--brand-700), var(--brand-600), var(--accent-600));
   background-size: 400% 400%;
-  animation: gradientShift 14s ease infinite;
+  animation: gradientShift 16s ease infinite;
+}
+
+a {
+  color: var(--brand-700);
+}
+
+a:hover {
+  color: var(--brand-800);
 }

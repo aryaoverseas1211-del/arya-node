@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="/assets/veom-logo.png">
+<link rel="apple-touch-icon" href="/assets/veom-logo.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Arya Overseas - Complete stationery solution for businesses, institutions, and retailers. Importer & wholesaler since 2020, backed by 30+ years of industry expertise.">
@@ -25,9 +30,6 @@
 <title>Arya Overseas | Importer & Wholesaler - Complete Stationery Solutions</title>
 
 <!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="/assets/theme.css">
 
@@ -37,13 +39,13 @@
 }
 
 body { 
-  font-family: 'Inter', 'League Spartan', sans-serif;
+  font-family: 'Manrope', sans-serif;
   overflow-x: hidden;
 }
 
 /* Animated Background */
 .animated-bg {
-  background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #2563eb, #1e40af);
+  background: linear-gradient(-45deg, var(--brand-900), var(--brand-700), var(--brand-600), var(--accent-600));
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
 }
@@ -66,8 +68,8 @@ body {
 
 /* Pulse Animation */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+  0%, 100% { box-shadow: 0 0 20px rgba(27, 106, 90, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(27, 106, 90, 0.8); }
 }
 
 .pulse-glow {
@@ -161,7 +163,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(27, 106, 90, 0.12) 0%, rgba(196, 154, 78, 0.12) 100%);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -184,7 +186,7 @@ body {
 
 /* Gradient Text */
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--brand-900) 0%, var(--accent-600) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -290,7 +292,7 @@ header.scrolled {
 .stat-number {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--brand-900) 0%, var(--accent-600) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
