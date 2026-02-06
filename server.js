@@ -47,8 +47,8 @@ try {
   console.error('Failed to create data/uploads directories:', err);
 }
 
-// Database init
-const db = initDb();
+// Database init (async)
+let db;
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -181,7 +181,19 @@ function ensureBootstrapAdmin() {
   console.log('Bootstrap admin created:', email);
 }
 
-ensureBootstrapAdmin();
+async function startServer() {
+  try {
+    db = await initDb();
+    ensureBootstrapAdmin();
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
+      console.log(`Admin panel: http://0.0.0.0:${PORT}/admin`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
 
 function getAdminById(id) {
   return db.prepare('SELECT id, email, name, role, created_at FROM admins WHERE id = ?').get(id);
@@ -1017,7 +1029,4 @@ app.get('/health', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-  console.log(`Admin panel: http://0.0.0.0:${PORT}/admin`);
-});
+startServer();

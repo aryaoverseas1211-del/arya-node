@@ -11,6 +11,7 @@ A modern, Node.js-based Product Content Management System with image uploads, MO
 - ✅ **SEO Optimized**: Meta tags, structured data, and semantic HTML
 - ✅ **Responsive Design**: Mobile-friendly UI with Tailwind CSS
 - ✅ **RESTful API**: Clean API endpoints for product management
+- ✅ **Admin Login**: Session-based CMS access with environment-configured admin
 
 ## Prerequisites
 
@@ -163,7 +164,7 @@ const PORT = process.env.PORT || 3000;
 
 - File uploads are validated (type and size)
 - Images are stored locally (consider cloud storage for production)
-- No authentication implemented (add for production use)
+- Admin access requires login (set `SESSION_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`)
 
 ## Production Deployment
 

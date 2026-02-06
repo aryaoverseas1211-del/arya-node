@@ -13,7 +13,7 @@ This will install:
 - Body-parser (request parsing)
 - express-session (admin sessions)
 - bcryptjs (password hashing)
-- better-sqlite3 (SQLite database)
+- sql.js (SQLite database, pure JS/WASM)
 - papaparse (CSV import/export)
 
 ## Step 2: Start the Server
@@ -103,4 +103,4 @@ npm run dev
 
 After first run, these directories will be created:
 - `uploads/` - Product images
-- `data/` - JSON database file
+- `data/` - SQLite database file
