@@ -5,7 +5,6 @@ package-lock.json
 *.log
 uploads/*
 !uploads/.gitkeep
-data/products.json
-public_html/data/*.db
-public_html/data/*.db-*
+data/*.db
+data/*.db-*
 *.zip

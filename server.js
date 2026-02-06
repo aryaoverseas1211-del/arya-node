@@ -12,12 +12,11 @@ const { initDb } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Repo root is the app root; static assets live in public_html/public
+// App root is the deploy root; static assets live in /public
 const APP_ROOT = process.env.APP_ROOT || __dirname;
-const PUBLIC_HTML_DIR = path.join(APP_ROOT, 'public_html');
-const PUBLIC_DIR = path.join(PUBLIC_HTML_DIR, 'public');
-const uploadsDir = path.join(PUBLIC_HTML_DIR, 'uploads');
-const dataDir = path.join(PUBLIC_HTML_DIR, 'data');
+const PUBLIC_DIR = path.join(APP_ROOT, 'public');
+const uploadsDir = path.join(APP_ROOT, 'uploads');
+const dataDir = path.join(APP_ROOT, 'data');
 
 // Middleware
 app.use(cors());
@@ -83,7 +82,7 @@ const importUpload = multer({
 
 function resolveUploadPath(urlPath) {
   const clean = (urlPath || '').replace(/^\/+/, '');
-  return path.join(PUBLIC_HTML_DIR, clean);
+  return path.join(APP_ROOT, clean);
 }
 
 function safeJsonParse(value, fallback) {

@@ -7,28 +7,28 @@ DEPLOYMENT READY CHECKLIST
 - .gitignore updated for deployment
 
 📦 TO CREATE ZIP:
-1. Go to: /Users/Arya/Downloads/arya-node/
-2. Right-click "arya-node" folder
-3. Select "Compress" (Mac) or use zip command
+1. Go to: /Users/Arya/Downloads/arya-node/arya-node/
+2. Select all contents inside
+3. Right-click → "Compress" (Mac) or use zip command
 4. Name it: arya-node.zip
 
 ⚠️ IMPORTANT - ZIP STRUCTURE:
-The ZIP should contain:
-  arya-node/
-    ├── package.json
-    ├── public_html/
-    └── ...
+The ZIP should contain (at root):
+  ├── package.json
+  ├── server.js
+  ├── public/
+  └── ...
 
 NOT:
-  arya-node/
+  arya-node.zip
     └── arya-node/
         ├── package.json
         └── ...
 
 🚀 HOSTINGER SETTINGS:
 - Framework: Express
-- Root directory: arya-node
-- Entry file: public_html/server.js
+- Root directory: ./
+- Entry file: server.js
 - Node version: 18.x or 20.x
 - Install: npm install
 - Start: npm start

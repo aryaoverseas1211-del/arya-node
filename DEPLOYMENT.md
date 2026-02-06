@@ -8,8 +8,8 @@
 
 ## 📦 How to Create Deployment ZIP
 
-1. **Navigate to the parent folder** (the one that contains `arya-node/`)
-2. **Zip the `arya-node` folder** (NOT the contents inside it)
+1. **Open the `arya-node/` folder**
+2. **Zip the contents inside `arya-node/`** (so `server.js` is at the ZIP root)
 3. **Exclude these from ZIP:**
    - `node_modules/` (Hostinger will install)
    - `.DS_Store` files
@@ -21,7 +21,7 @@
 In hPanel → **Websites → Node.js → Your App**:
 
 - **Framework**: `Express`
-- **Root directory**: `arya-node`
+- **Root directory**: `./`
 - **Entry file**: `server.js`
 - **Node version**: `18.x` or `20.x`
 - **Install command**: `npm install`
@@ -43,15 +43,14 @@ arya-node/
 ├── package.json
 ├── .gitignore
 ├── server.js
-├── public_html/
-│   ├── public/
-│   │   ├── index.html
-│   │   ├── product/
-│   │   ├── categories/
-│   │   └── ...
-│   ├── data/
-│   │   └── app.db (SQLite database, auto-created)
-│   └── uploads/ (will be created automatically)
+├── public/
+│   ├── index.html
+│   ├── product/
+│   ├── categories/
+│   └── ...
+├── data/
+│   └── app.db (SQLite database, auto-created)
+└── uploads/ (will be created automatically)
 ```
 
 ## ✅ After Deployment
@@ -67,14 +66,14 @@ arya-node/
 ### 503 Error
 - Verify entry file is `server.js`
 - Check that server.js listens on `0.0.0.0`
-- Ensure root directory is exactly `arya-node`
+- Ensure root directory is `./`
 
 ### Build Fails
-- Check package.json is in root of `arya-node/`
+- Check package.json is in the root directory
 - Verify all dependencies are listed
 - Check Node version (use 18.x or 20.x)
 
 ### Files Not Found
 - Verify ZIP structure (no double nesting)
-- Check that `public_html/public/` exists
-- Ensure `assets/veom-logo.png` is in `public_html/public/assets/`
+- Check that `public/` exists
+- Ensure `assets/veom-logo.png` is in `public/assets/`

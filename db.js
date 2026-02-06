@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const initSqlJs = require('sql.js');
 
-const DB_PATH = path.join(__dirname, 'public_html', 'data', 'app.db');
+const DB_PATH = path.join(__dirname, 'data', 'app.db');
 
 let dbInstance;
 let sqlInstance;
