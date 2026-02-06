@@ -279,6 +279,21 @@ app.get('/api/admin/me', requireAdmin, (req, res) => {
   res.json({ success: true, admin: req.admin });
 });
 
+// Debug endpoint to verify env + admin bootstrap (no secrets exposed)
+app.get('/api/admin/env-check', (req, res) => {
+  const envEmail = (process.env.ADMIN_EMAIL || '').trim();
+  const envPassword = process.env.ADMIN_PASSWORD || '';
+  const adminCountRow = db.prepare('SELECT COUNT(*) as count FROM admins').get();
+  const adminCount = adminCountRow ? adminCountRow.count : 0;
+  res.json({
+    success: true,
+    hasSessionSecret: Boolean(process.env.SESSION_SECRET),
+    adminEmail: envEmail || null,
+    hasAdminPassword: Boolean(envPassword),
+    adminCount
+  });
+});
+
 // Admin UI routes (protected)
 app.get('/admin', requireAdmin, (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'product', 'product_cms.html'));
