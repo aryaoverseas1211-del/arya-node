@@ -163,8 +163,8 @@ function logAudit(adminId, action, entity, entityId, details) {
 }
 
 function ensureBootstrapAdmin() {
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
+  const email = (process.env.ADMIN_EMAIL || '').trim();
+  const password = process.env.ADMIN_PASSWORD || '';
   const name = process.env.ADMIN_NAME || 'Administrator';
 
   if (!email || !password) {
@@ -184,16 +184,11 @@ function ensureBootstrapAdmin() {
     return;
   }
 
-  const count = db.prepare('SELECT COUNT(*) as count FROM admins').get().count;
-  if (count === 0) {
-    db.prepare(`
-      INSERT INTO admins (email, password_hash, name, role, created_at)
-      VALUES (?, ?, ?, 'admin', ?)
-    `).run(email, hash, name, new Date().toISOString());
-    console.log('Bootstrap admin created:', email);
-  } else {
-    console.warn('ADMIN_EMAIL provided but an admin already exists with a different email. No new admin created.');
-  }
+  db.prepare(`
+    INSERT INTO admins (email, password_hash, name, role, created_at)
+    VALUES (?, ?, ?, 'admin', ?)
+  `).run(email, hash, name, new Date().toISOString());
+  console.log('Bootstrap admin created:', email);
 }
 
 async function startServer() {
