@@ -163,9 +163,6 @@ function logAudit(adminId, action, entity, entityId, details) {
 }
 
 function ensureBootstrapAdmin() {
-  const count = db.prepare('SELECT COUNT(*) as count FROM admins').get().count;
-  if (count > 0) return;
-
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
   const name = process.env.ADMIN_NAME || 'Administrator';
@@ -176,11 +173,27 @@ function ensureBootstrapAdmin() {
   }
 
   const hash = bcrypt.hashSync(password, 10);
-  db.prepare(`
-    INSERT INTO admins (email, password_hash, name, role, created_at)
-    VALUES (?, ?, ?, 'admin', ?)
-  `).run(email, hash, name, new Date().toISOString());
-  console.log('Bootstrap admin created:', email);
+  const existing = db.prepare('SELECT id FROM admins WHERE email = ?').get(email);
+  if (existing && existing.id) {
+    db.prepare(`
+      UPDATE admins
+      SET password_hash = ?, name = ?, role = 'admin'
+      WHERE id = ?
+    `).run(hash, name, existing.id);
+    console.log('Bootstrap admin updated:', email);
+    return;
+  }
+
+  const count = db.prepare('SELECT COUNT(*) as count FROM admins').get().count;
+  if (count === 0) {
+    db.prepare(`
+      INSERT INTO admins (email, password_hash, name, role, created_at)
+      VALUES (?, ?, ?, 'admin', ?)
+    `).run(email, hash, name, new Date().toISOString());
+    console.log('Bootstrap admin created:', email);
+  } else {
+    console.warn('ADMIN_EMAIL provided but an admin already exists with a different email. No new admin created.');
+  }
 }
 
 async function startServer() {
