@@ -1,0 +1,36 @@
+DEPLOYMENT READY CHECKLIST
+===========================
+
+✅ FIXED:
+- Server.js now listens on 0.0.0.0 (line 239)
+- package.json has correct start script
+- .gitignore updated for deployment
+
+📦 TO CREATE ZIP:
+1. Go to: /Users/Arya/Downloads/arya-node/
+2. Right-click "arya-node" folder
+3. Select "Compress" (Mac) or use zip command
+4. Name it: arya-node.zip
+
+⚠️ IMPORTANT - ZIP STRUCTURE:
+The ZIP should contain:
+  arya-node/
+    ├── package.json
+    ├── public_html/
+    └── ...
+
+NOT:
+  arya-node/
+    └── arya-node/
+        ├── package.json
+        └── ...
+
+🚀 HOSTINGER SETTINGS:
+- Framework: Express
+- Root directory: arya-node
+- Entry file: public_html/server.js
+- Node version: 18.x or 20.x
+- Install: npm install
+- Start: npm start
+
+✅ READY TO DEPLOY!

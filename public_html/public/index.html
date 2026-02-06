@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Arya Overseas - Complete stationery solution for businesses, institutions, and retailers. Importer & wholesaler since 2020, backed by 30+ years of industry expertise.">
+<meta name="keywords" content="stationery, custom printing, ID cards, lanyards, corporate gifting, wholesale, importer, Arya Overseas, lamination, binding, files folders">
+<meta name="author" content="Arya Overseas">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aryaoverseas.in/">
+<meta property="og:title" content="Arya Overseas | Importer & Wholesaler">
+<meta property="og:description" content="Complete stationery solution for businesses, institutions, and retailers">
+<meta property="og:image" content="https://aryaoverseas.in/assets/veom-logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://aryaoverseas.in/">
+<meta property="twitter:title" content="Arya Overseas | Importer & Wholesaler">
+<meta property="twitter:description" content="Complete stationery solution for businesses, institutions, and retailers">
+<meta property="twitter:image" content="https://aryaoverseas.in/assets/veom-logo.png">
+
+<title>Arya Overseas | Importer & Wholesaler - Complete Stationery Solutions</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+
+<style>
+* {
+  scroll-behavior: smooth;
+}
+
+body { 
+  font-family: 'Inter', 'League Spartan', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Animated Background */
+.animated-bg {
+  background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #2563eb, #1e40af);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse Animation */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Slide In Animations */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease-out;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.8s ease-out;
+}
+
+/* Product Card Hover Effects */
+.product-card {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.product-card:hover::before {
+  left: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* Category Card */
+.category-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.category-card:hover::after {
+  opacity: 1;
+}
+
+.category-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+/* Glass Morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Stagger Animation */
+.stagger-item {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Scroll Effect */
+header.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Number Counter Animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Smooth Scroll Indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+  40% { transform: translateX(-50%) translateY(-10px); }
+  60% { transform: translateX(-50%) translateY(-5px); }
+}
+
+/* Feature Card Hover */
+.feature-card {
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+/* Button Hover Effects */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Stats Counter */
+.stat-number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Blob Animation */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+</style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Arya Overseas",
+  "url": "https://aryaoverseas.in",
+  "logo": "https://aryaoverseas.in/assets/veom-logo.png",
+  "description": "Complete stationery solution for businesses, institutions, and retailers. Importer & wholesaler since 2020, backed by 30+ years of industry expertise.",
+  "foundingDate": "2020",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+91-9667371899",
+    "contactType": "Sales",
+    "availableLanguage": ["English", "Hindi"]
+  },
+  "sameAs": [
+    "https://wa.me/919667371899"
+  ]
+}
+</script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+<!-- HEADER -->
+<header id="mainHeader" class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-all group">
+      <img src="/assets/veom-logo.png" class="h-12 w-auto transition-transform group-hover:scale-110" alt="Arya Overseas Logo" loading="eager">
+      <span class="text-2xl font-bold tracking-wide bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">ARYA OVERSEAS</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8 font-medium">
+      <a href="#categories" class="relative group hover:text-blue-700 transition-colors">
+        Categories
+        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
+      </a>
+      <a href="#products" class="relative group hover:text-blue-700 transition-colors">
+        Products
+        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
+      </a>
+      <a href="/login/index.html" class="hover:text-blue-700 transition-colors">Dealer Login</a>
+      <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
+         class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        WhatsApp
+      </a>
+    </nav>
+
+    <!-- Mobile menu button -->
+    <button id="mobileMenuBtn" class="md:hidden text-gray-700 hover:text-blue-700 transition-colors">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+    <div class="px-4 py-3 space-y-2">
+      <a href="#categories" class="block py-2 hover:text-blue-700 transition-colors">Categories</a>
+      <a href="#products" class="block py-2 hover:text-blue-700 transition-colors">Products</a>
+      <a href="/login/index.html" class="block py-2 hover:text-blue-700 transition-colors">Dealer Login</a>
+      <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
+         class="block bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2 rounded-full text-center font-semibold hover:from-green-600 hover:to-green-700 transition-all">
+        WhatsApp
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO SECTION -->
+<section class="animated-bg text-white relative overflow-hidden min-h-[90vh] flex items-center">
+  <!-- Animated Background Elements -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+    <div class="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+    <div class="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative z-10">
+    <div class="text-center max-w-4xl mx-auto slide-in-up">
+      <div class="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-sm font-semibold">
+        ✨ Trusted by 1000+ Businesses
+      </div>
+      <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
+        Complete Stationery Solutions
+        <span class="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300 mt-2">
+          For Your Business
+        </span>
+      </h1>
+
+      <p class="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
+        Importer & Wholesaler | Since 2020 | Backed by <span class="font-bold text-yellow-300">30+ Years</span> of Industry Expertise
+      </p>
+
+      <p class="text-lg md:text-xl text-blue-100 mb-10 leading-relaxed max-w-3xl mx-auto">
+        At Arya Overseas, we offer a complete stationery solution designed for businesses, institutions, and retailers. With over 30 years of industry experience, we are a trusted name in the import and wholesale market, committed to quality, variety, and value.
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-4 mb-12">
+        <a href="#categories"
+           class="btn-primary bg-white text-blue-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2">
+          <span>Explore Categories</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+        </a>
+
+        <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
+           class="bg-transparent border-3 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-900 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          <span>Chat on WhatsApp</span>
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-8 mt-12">
+        <div class="text-center">
+          <div class="stat-number text-4xl font-extrabold mb-1">30+</div>
+          <div class="text-sm text-blue-200">Years Experience</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-number text-4xl font-extrabold mb-1">1000+</div>
+          <div class="text-sm text-blue-200">Happy Clients</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-number text-4xl font-extrabold mb-1">10+</div>
+          <div class="text-sm text-blue-200">Product Categories</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+      <svg class="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES SECTION -->
+<section id="categories" class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 slide-in-up">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+        Our <span class="gradient-text">Product Categories</span>
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Explore our wide range of stationery and office supply categories
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+      <!-- Category 1: Lamination -->
+      <a href="/categories/lamination.html" class="category-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg border-2 border-blue-200 stagger-item" style="animation-delay: 0.1s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Lamination</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Materials & Machines for all your lamination needs</p>
+        <span class="text-blue-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 2: Binding Solutions -->
+      <a href="/categories/binding.html" class="category-card bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl shadow-lg border-2 border-purple-200 stagger-item" style="animation-delay: 0.2s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Binding Solutions</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Complete binding equipment and supplies</p>
+        <span class="text-purple-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 3: Files & Folders -->
+      <a href="/categories/files-folders.html" class="category-card bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl shadow-lg border-2 border-green-200 stagger-item" style="animation-delay: 0.3s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Files & Folders</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Available in all sizes & colors</p>
+        <span class="text-green-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 4: ID Card Holders & Lanyards -->
+      <a href="/categories/id-cards-lanyards.html" class="category-card bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-2xl shadow-lg border-2 border-orange-200 stagger-item" style="animation-delay: 0.4s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">ID Cards & Lanyards</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">ID Card Holders & Lanyards</p>
+        <span class="text-orange-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 5: Photo Media & Inks -->
+      <a href="/categories/photo-media-inks.html" class="category-card bg-gradient-to-br from-pink-50 to-pink-100 p-8 rounded-2xl shadow-lg border-2 border-pink-200 stagger-item" style="animation-delay: 0.5s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Photo Media & Inks</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">High-quality photo media and printing inks</p>
+        <span class="text-pink-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 6: Sublimation Products -->
+      <a href="/categories/sublimation.html" class="category-card bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl shadow-lg border-2 border-indigo-200 stagger-item" style="animation-delay: 0.6s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Sublimation Products</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Sublimation Products & Equipment</p>
+        <span class="text-indigo-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 7: Printing Supplies -->
+      <a href="/categories/printing-supplies.html" class="category-card bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-2xl shadow-lg border-2 border-red-200 stagger-item" style="animation-delay: 0.7s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Printing Supplies</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Complete range of printing supplies</p>
+        <span class="text-red-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 8: School Stationery -->
+      <a href="/categories/school-stationery.html" class="category-card bg-gradient-to-br from-yellow-50 to-yellow-100 p-8 rounded-2xl shadow-lg border-2 border-yellow-200 stagger-item" style="animation-delay: 0.8s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">School Stationery</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Complete school stationery solutions</p>
+        <span class="text-yellow-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 9: Note Counting Machines -->
+      <a href="/categories/note-counting.html" class="category-card bg-gradient-to-br from-teal-50 to-teal-100 p-8 rounded-2xl shadow-lg border-2 border-teal-200 stagger-item" style="animation-delay: 0.9s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Note Counting & Shredders</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Note Counting Machines & Shredders</p>
+        <span class="text-teal-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+
+      <!-- Category 10: Corporate Gifting -->
+      <a href="/categories/corporate-gifting.html" class="category-card bg-gradient-to-br from-rose-50 to-rose-100 p-8 rounded-2xl shadow-lg border-2 border-rose-200 stagger-item" style="animation-delay: 1s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-3 text-gray-900">Corporate Gifting</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">Fully Customized Corporate Gifting Options</p>
+        <span class="text-rose-600 font-semibold inline-flex items-center gap-2">
+          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS SECTION -->
+<section id="products" class="py-20 bg-gradient-to-b from-gray-50 to-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 slide-in-up">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+        Featured <span class="gradient-text">Products</span>
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Discover our premium products and custom solutions tailored to your needs
+      </p>
+    </div>
+
+    <div id="productGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div id="loadingSpinner" class="col-span-full">
+        <div class="loading-spinner"></div>
+        <p class="text-center text-gray-600 mt-4 text-lg">Loading products...</p>
+      </div>
+    </div>
+
+    <div id="noProducts" class="hidden text-center py-16">
+      <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+      </svg>
+      <p class="text-gray-500 text-xl mb-2">No products available at the moment.</p>
+      <p class="text-gray-400">Check back soon for our latest offerings.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE US SECTION -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 slide-in-up">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+        Why Choose <span class="gradient-text">Arya Overseas?</span>
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        We deliver excellence with every product, backed by decades of expertise
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="feature-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg border border-blue-200 stagger-item" style="animation-delay: 0.1s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-4">Premium Quality</h3>
+        <p class="text-gray-600 leading-relaxed">We source only the finest materials and maintain strict quality control standards for every product.</p>
+      </div>
+
+      <div class="feature-card bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl shadow-lg border border-purple-200 stagger-item" style="animation-delay: 0.2s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 8V7m0 1v8m0 0v1"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-4">Best Rates</h3>
+        <p class="text-gray-600 leading-relaxed">Competitive pricing with flexible MOQ-based pricing to suit businesses of all sizes.</p>
+      </div>
+
+      <div class="feature-card bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl shadow-lg border border-green-200 stagger-item" style="animation-delay: 0.3s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold mb-4">Fast Delivery</h3>
+        <p class="text-gray-600 leading-relaxed">Quick turnaround times and reliable shipping to ensure your products reach you on time, every time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white relative overflow-hidden">
+  <div class="absolute inset-0 bg-black/20"></div>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+    <h2 class="text-4xl md:text-5xl font-extrabold mb-6">
+      Partner with Arya Overseas
+    </h2>
+    <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+      Your one-stop solution for all stationery and office supply needs. Best rates and premium quality guaranteed!
+    </p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
+         class="bg-white text-blue-900 px-10 py-5 rounded-full text-lg font-bold hover:bg-gray-100 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-3 pulse-glow">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        Chat on WhatsApp
+      </a>
+      <a href="#categories"
+         class="bg-transparent border-3 border-white text-white px-10 py-5 rounded-full text-lg font-bold hover:bg-white hover:text-blue-900 transition-all shadow-2xl transform hover:scale-105">
+        Browse Categories
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-400 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <img src="/assets/veom-logo.png" class="h-10 w-auto" alt="Arya Overseas">
+          <span class="text-xl font-bold text-white">ARYA OVERSEAS</span>
+        </div>
+        <p class="text-sm leading-relaxed">
+          Complete stationery solution for businesses, institutions, and retailers. Importer & wholesaler since 2020, backed by 30+ years of industry expertise.
+        </p>
+      </div>
+      <div>
+        <h3 class="text-white font-bold mb-4">Quick Links</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#categories" class="hover:text-white transition-colors">Categories</a></li>
+          <li><a href="#products" class="hover:text-white transition-colors">Products</a></li>
+          <li><a href="/login/index.html" class="hover:text-white transition-colors">Dealer Login</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-white font-bold mb-4">Contact</h3>
+        <ul class="space-y-2 text-sm">
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">+91 9667371899</a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-white font-bold mb-4">Follow Us</h3>
+        <div class="flex gap-4">
+          <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 pt-8 text-center text-sm">
+      <p>© 2026 Arya Overseas · Importer & Wholesaler · All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Mobile menu toggle
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+  const menu = document.getElementById('mobileMenu');
+  menu.classList.toggle('hidden');
+});
+
+// Header scroll effect
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const header = document.getElementById('mainHeader');
+  const currentScroll = window.pageYOffset;
+  
+  if (currentScroll > 100) {
+    header.classList.add('scrolled');
+  } else {
+    header.classList.remove('scrolled');
+  }
+  lastScroll = currentScroll;
+});
+
+// API Configuration
+const API_BASE = window.location.origin;
+
+// Load products from API
+async function loadProducts() {
+  const grid = document.getElementById('productGrid');
+  const loadingSpinner = document.getElementById('loadingSpinner');
+  const noProducts = document.getElementById('noProducts');
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/products`);
+    const data = await response.json();
+    
+    loadingSpinner.style.display = 'none';
+    
+    if (data.success && data.products && data.products.length > 0) {
+      grid.innerHTML = '';
+      data.products.forEach((p, index) => {
+        const imageSrc = p.image ? `${API_BASE}${p.image}` : '/assets/veom-logo.png';
+        const detailLink = `/product/${p.id}`;
+        const startingPrice = p.pricing && p.pricing.length > 0 
+          ? `Starting from ₹${p.pricing[0].price.toFixed(2)}` 
+          : '';
+        
+        const productCard = document.createElement('a');
+        productCard.href = detailLink;
+        productCard.className = 'product-card bg-white rounded-3xl shadow-lg overflow-hidden stagger-item';
+        productCard.style.animationDelay = `${index * 0.15}s`;
+        
+        productCard.innerHTML = `
+          <div class="relative overflow-hidden h-64">
+            <img src="${imageSrc}" alt="${p.title}" 
+                 class="w-full h-full object-cover transition-transform duration-500"
+                 loading="lazy"
+                 onerror="this.src='/assets/veom-logo.png'">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+            <div class="absolute bottom-4 left-4 right-4 transform translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+              <span class="inline-block bg-white text-blue-700 px-4 py-2 rounded-full text-sm font-bold">
+                View Details →
+              </span>
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-2xl font-bold mb-3 text-gray-900 group-hover:text-blue-700 transition-colors">${p.title}</h3>
+            <p class="text-gray-600 mb-4 line-clamp-2 leading-relaxed">${p.shortDesc || p.description?.substring(0, 120) || ''}</p>
+            ${startingPrice ? `
+              <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Starting Price</p>
+                  <p class="text-2xl font-extrabold text-blue-600">${startingPrice}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </div>
+            ` : `
+              <div class="pt-4">
+                <span class="inline-flex items-center gap-2 text-blue-700 font-semibold">
+                  View Details
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </span>
+              </div>
+            `}
+          </div>
+        `;
+        
+        // Add group class for hover effects
+        productCard.classList.add('group');
+        grid.appendChild(productCard);
+      });
+    } else {
+      noProducts.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error loading products:', error);
+    loadingSpinner.innerHTML = `
+      <div class="text-center py-12">
+        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p class="text-red-600 mb-4 text-lg font-semibold">Failed to load products</p>
+        <button onclick="loadProducts()" class="text-blue-600 underline hover:text-blue-700 font-medium">Try again</button>
+      </div>
+    `;
+  }
+}
+
+// Intersection Observer for animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, observerOptions);
+
+// Observe all stagger items
+document.addEventListener('DOMContentLoaded', () => {
+  loadProducts();
+  
+  // Animate stats on scroll
+  const stats = document.querySelectorAll('.stat-number');
+  stats.forEach(stat => {
+    observer.observe(stat);
+  });
+});
+</script>
+
+</body>
+</html>

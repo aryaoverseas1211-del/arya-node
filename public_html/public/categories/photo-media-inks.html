@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Media & Inks | Arya Overseas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+<style>body{font-family:Inter,sans-serif}.category-hero{background:linear-gradient(135deg,#ec4899 0%,#be185d 100%)}.product-card{transition:all 0.3s ease}.product-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.15)}</style>
+</head>
+<body class="bg-gray-50">
+<header class="bg-white shadow-md sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+<a href="/" class="flex items-center gap-3"><svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg><span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Arya Overseas</span></a>
+<a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-lg flex items-center gap-2">WhatsApp</a>
+</div></header>
+<section class="category-hero text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h1 class="text-4xl md:text-5xl font-extrabold mb-4">Photo Media & Inks</h1>
+<p class="text-xl text-pink-100 max-w-2xl mx-auto">High-quality photo media and printing inks</p>
+</div></section>
+<section class="py-16"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div id="productGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="text-center py-12 col-span-full"><div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-700"></div><p class="text-gray-600 mt-4">Loading products...</p></div>
+</div></div></section>
+<footer class="bg-gray-900 text-gray-400 py-8 text-center"><p class="text-sm">© 2026 Arya Overseas · Importer & Wholesaler</p></footer>
+<script>
+const API_BASE=window.location.origin;
+async function loadCategoryProducts(){const grid=document.getElementById('productGrid');
+try{const response=await fetch(`${API_BASE}/api/products`);const data=await response.json();
+if(data.success&&data.products){const categoryProducts=data.products.filter(p=>p.title.toLowerCase().includes('photo')||p.title.toLowerCase().includes('ink')||p.description?.toLowerCase().includes('photo')||p.description?.toLowerCase().includes('ink'));
+if(categoryProducts.length>0){grid.innerHTML='';categoryProducts.forEach(p=>{const imageSrc=p.image?`${API_BASE}${p.image}`:'/assets/veom-logo.png';const detailLink=`/product/${p.id}`;const startingPrice=p.pricing&&p.pricing.length>0?`Starting from ₹${p.pricing[0].price.toFixed(2)}`:'';
+const card=document.createElement('a');card.href=detailLink;card.className='product-card bg-white rounded-2xl shadow-lg overflow-hidden';
+card.innerHTML=`<div class="h-48 overflow-hidden"><img src="${imageSrc}" alt="${p.title}" class="w-full h-full object-cover"></div><div class="p-6"><h3 class="text-xl font-bold mb-2">${p.title}</h3><p class="text-gray-600 mb-4 line-clamp-2">${p.shortDesc||p.description?.substring(0,100)||''}</p>${startingPrice?`<p class="text-lg font-bold text-pink-600">${startingPrice}</p>`:''}</div>`;grid.appendChild(card);});}else{grid.innerHTML='<div class="col-span-full text-center py-12"><p class="text-gray-500">No products in this category yet. Check back soon!</p></div>';}}}catch(error){console.error('Error:',error);grid.innerHTML='<div class="col-span-full text-center py-12"><p class="text-red-500">Error loading products</p></div>';}}
+document.addEventListener('DOMContentLoaded',loadCategoryProducts);
+</script></body></html>

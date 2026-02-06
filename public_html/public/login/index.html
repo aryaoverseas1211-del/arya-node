@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dealer Login | Arya Overseas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
+  <h1 class="text-2xl font-bold text-center mb-1">Dealer Login</h1>
+  <p class="text-center text-gray-500 mb-6 text-sm">
+    Access your B2B dashboard
+  </p>
+
+  <input id="email" type="email" placeholder="Email"
+    class="w-full border rounded-lg p-3 mb-4 focus:ring-2 focus:ring-blue-500">
+
+  <input id="password" type="password" placeholder="Password"
+    class="w-full border rounded-lg p-3 mb-6 focus:ring-2 focus:ring-blue-500">
+
+  <button onclick="login()"
+    class="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+    Login
+  </button>
+
+  <p class="text-center text-sm mt-4">
+    New dealer?
+    <a href="/login/register.html" class="text-blue-700 font-medium">Register</a>
+  </p>
+</div>
+
+<script>
+function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("Enter login details");
+    return;
+  }
+
+  localStorage.setItem("dealerLoggedIn", "YES");
+  localStorage.setItem("dealerEmail", email);
+
+  // Default approval state
+  localStorage.setItem("dealerStatus", "PENDING");
+
+  // Demo auto-approval rule
+  if (email.endsWith("@aryaoverseas.in")) {
+    localStorage.setItem("dealerStatus", "APPROVED");
+  }
+
+  window.location.href = "/dealer/dealer_dashboard.html";
+}
+</script>
+
+</body>
+</html>

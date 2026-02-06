@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Custom Dye Sublimation Lanyards | Arya Overseas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+
+<body class="bg-gray-100">
+
+<header class="bg-blue-900 text-white sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between">
+    <a href="/" class="text-xl font-bold">Arya Overseas</a>
+    <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
+       class="bg-green-500 px-5 py-2 rounded-full text-sm font-semibold">
+      WhatsApp
+    </a>
+  </div>
+</header>
+
+<section class="max-w-5xl mx-auto px-6 py-10">
+
+<div class="bg-white shadow rounded-xl p-6 mb-6">
+  <p id="stepIndicator" class="font-semibold text-blue-800">
+    Step 1 of 4 · Select Options
+  </p>
+</div>
+
+<div class="bg-white shadow rounded-xl p-8">
+
+<!-- STEP 1 -->
+<div class="step" id="step1">
+  <h2 class="text-2xl font-bold mb-6">Select Lanyard Options</h2>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div>
+      <label class="font-medium">Width</label>
+      <select id="width" class="w-full border rounded-lg p-3">
+        <option value="16">16 mm</option>
+        <option value="20" selected>20 mm</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="font-medium">Base Color</label>
+      <input type="color" id="bgColor"
+             value="#ffffff"
+             class="w-full h-12 border rounded-lg">
+    </div>
+  </div>
+
+  <div class="text-right mt-8">
+    <button onclick="nextStep()"
+            class="bg-blue-800 text-white px-8 py-3 rounded-full">
+      Continue →
+    </button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step hidden" id="step2">
+  <h2 class="text-2xl font-bold mb-6">Design</h2>
+
+  <label class="font-medium">Text</label>
+  <input type="text" id="designText"
+         placeholder="Company Name"
+         class="w-full border rounded-lg p-3 mb-4">
+
+  <label class="font-medium">Text Color</label>
+  <input type="color" id="textColor"
+         value="#000000"
+         class="w-full h-12 border rounded-lg mb-4">
+
+  <label class="font-medium">Upload Logo</label>
+  <input type="file" id="logoUpload"
+         accept="image/*"
+         class="w-full border rounded-lg p-3 mb-6">
+
+  <div class="flex justify-between">
+    <button onclick="prevStep()" class="border px-6 py-3 rounded-full">← Back</button>
+    <button onclick="nextStep(); updatePreview()"
+            class="bg-blue-800 text-white px-8 py-3 rounded-full">
+      Continue →
+    </button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step hidden" id="step3">
+  <h2 class="text-2xl font-bold mb-6">Print Preview</h2>
+
+  <div class="bg-gray-50 border rounded p-4 mb-4">
+    <svg id="previewSVG" viewBox="0 0 1000 80" class="w-full"></svg>
+  </div>
+
+  <div class="flex flex-wrap gap-4 mb-6">
+    <button onclick="downloadSVG()"
+            class="bg-green-600 text-white px-6 py-3 rounded-full">
+      Download SVG
+    </button>
+
+    <button onclick="downloadPDF()"
+            class="bg-indigo-600 text-white px-6 py-3 rounded-full">
+      Download PDF
+    </button>
+  </div>
+
+  <div class="flex justify-between">
+    <button onclick="prevStep()" class="border px-6 py-3 rounded-full">← Back</button>
+    <button onclick="nextStep()"
+            class="bg-blue-800 text-white px-8 py-3 rounded-full">
+      Continue →
+    </button>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step hidden" id="step4">
+  <h2 class="text-2xl font-bold mb-6">Send on WhatsApp</h2>
+
+  <input type="number"
+         id="qty"
+         placeholder="Quantity"
+         class="w-full border rounded-lg p-3 mb-4">
+
+  <button onclick="sendWhatsApp()"
+          class="bg-green-600 text-white w-full py-4 rounded-full text-lg font-semibold">
+    Send Order on WhatsApp
+  </button>
+</div>
+
+</div>
+</section>
+
+<script>
+let step=1, logoData=null;
+
+document.getElementById("logoUpload").addEventListener("change", e=>{
+  const r=new FileReader();
+  r.onload=()=>logoData=r.result;
+  r.readAsDataURL(e.target.files[0]);
+});
+
+function showStep(n){
+  document.querySelectorAll(".step").forEach(s=>s.classList.add("hidden"));
+  document.getElementById("step"+n).classList.remove("hidden");
+  document.getElementById("stepIndicator").innerText=`Step ${n} of 4`;
+}
+
+function nextStep(){ if(step<4){step++;showStep(step);} }
+function prevStep(){ if(step>1){step--;showStep(step);} }
+
+function updatePreview(){
+  const svg=document.getElementById("previewSVG");
+  svg.innerHTML="";
+
+  const w=document.getElementById("width").value;
+  const bg=document.getElementById("bgColor").value;
+  const tc=document.getElementById("textColor").value;
+  const txt=document.getElementById("designText").value;
+  const h=w==="16"?64:80;
+  const ls=w==="16"?32:40;
+
+  svg.setAttribute("viewBox",`0 0 1000 ${h}`);
+
+  const bgRect=document.createElementNS("http://www.w3.org/2000/svg","rect");
+  bgRect.setAttribute("width",1000);
+  bgRect.setAttribute("height",h);
+  bgRect.setAttribute("fill",bg);
+  svg.appendChild(bgRect);
+
+  for(let x=40;x<1000;x+=180){
+    if(logoData){
+      const i=document.createElementNS("http://www.w3.org/2000/svg","image");
+      i.setAttribute("href",logoData);
+      i.setAttribute("x",x);
+      i.setAttribute("y",(h-ls)/2);
+      i.setAttribute("width",ls);
+      i.setAttribute("height",ls);
+      svg.appendChild(i);
+    }
+    if(txt){
+      const t=document.createElementNS("http://www.w3.org/2000/svg","text");
+      t.setAttribute("x",x+ls+10);
+      t.setAttribute("y",h/2+10);
+      t.setAttribute("font-size",h/2);
+      t.setAttribute("fill",tc);
+      t.textContent=txt;
+      svg.appendChild(t);
+    }
+  }
+}
+
+function downloadSVG(){
+  const svg=document.getElementById("previewSVG");
+  const data=new XMLSerializer().serializeToString(svg);
+  const b=new Blob([data],{type:"image/svg+xml"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="lanyard-print.svg";
+  a.click();
+}
+
+function downloadPDF(){
+  const svg=document.getElementById("previewSVG");
+  const data=new XMLSerializer().serializeToString(svg);
+  const blob=new Blob([data],{type:"image/svg+xml"});
+  const url=URL.createObjectURL(blob);
+
+  const iframe=document.createElement("iframe");
+  iframe.style.display="none";
+  iframe.src=url;
+  document.body.appendChild(iframe);
+
+  iframe.onload=()=>{
+    iframe.contentWindow.print();
+  };
+}
+
+function sendWhatsApp(){
+  const msg=`Custom Lanyard Order
+Width: ${width.value}mm
+Text: ${designText.value}
+Qty: ${qty.value}
+
+Files attached:
+SVG + PDF`;
+
+  window.location.href=`https://wa.me/919667371899?text=${encodeURIComponent(msg)}`;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+[
+  {
+    "id": "1",
+    "title": "Premium Lamination Pouches - A4 Size",
+    "shortDesc": "High-quality A4 lamination pouches for professional document protection",
+    "description": "Premium quality A4 size lamination pouches perfect for protecting important documents, certificates, and photos. Available in various thickness options (75, 100, 125, 175, 250 micron). Crystal clear finish ensures your documents look professional. Heat-sealable for permanent protection against moisture, dust, and wear.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 100,
+        "max": 500,
+        "price": 2.50
+      },
+      {
+        "min": 500,
+        "max": 1000,
+        "price": 2.20
+      },
+      {
+        "min": 1000,
+        "max": null,
+        "price": 2.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "title": "Spiral Binding Machine - Heavy Duty",
+    "shortDesc": "Professional spiral binding machine for documents and reports",
+    "description": "Heavy-duty spiral binding machine perfect for creating professional bound documents. Features adjustable punching mechanism, accommodates various paper sizes, and includes all necessary accessories. Ideal for offices, print shops, and educational institutions. Easy to use with consistent results every time.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 1,
+        "max": 5,
+        "price": 8500.00
+      },
+      {
+        "min": 5,
+        "max": 10,
+        "price": 8000.00
+      },
+      {
+        "min": 10,
+        "max": null,
+        "price": 7500.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "title": "PVC ID Card Holders - Standard Size",
+    "shortDesc": "Durable PVC ID card holders with lanyard attachment",
+    "description": "Premium PVC ID card holders designed for durability and professional appearance. Standard size fits most ID cards. Features clear front and back for visibility, includes lanyard attachment point. Perfect for corporate offices, events, schools, and institutions. Available in various colors and sizes.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 50,
+        "max": 200,
+        "price": 8.00
+      },
+      {
+        "min": 200,
+        "max": 500,
+        "price": 7.00
+      },
+      {
+        "min": 500,
+        "max": null,
+        "price": 6.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "title": "Custom Printed Lanyards",
+    "shortDesc": "High-quality custom printed lanyards with your branding",
+    "description": "Professional custom printed lanyards perfect for events, conferences, and corporate use. Available in various widths (16mm, 20mm, 25mm) and materials (polyester, nylon). Full-color printing with vibrant, long-lasting colors. Customizable with your logo, text, or design. Minimum order quantity applies.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 100,
+        "max": 500,
+        "price": 35.00
+      },
+      {
+        "min": 500,
+        "max": 1000,
+        "price": 30.00
+      },
+      {
+        "min": 1000,
+        "max": null,
+        "price": 25.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "5",
+    "title": "File Folders - All Sizes & Colors",
+    "shortDesc": "Premium file folders available in all standard sizes and multiple colors",
+    "description": "High-quality file folders perfect for organizing documents. Available in A4, Letter, Legal, and custom sizes. Multiple color options for easy categorization. Durable construction with reinforced edges. Includes label tabs for easy identification. Perfect for offices, schools, and home use.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 50,
+        "max": 200,
+        "price": 12.00
+      },
+      {
+        "min": 200,
+        "max": 500,
+        "price": 10.00
+      },
+      {
+        "min": 500,
+        "max": null,
+        "price": 8.50
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "6",
+    "title": "Photo Paper - Glossy & Matte",
+    "shortDesc": "Premium photo paper for high-quality photo printing",
+    "description": "Professional-grade photo paper available in both glossy and matte finishes. Compatible with all inkjet printers. Produces vibrant, fade-resistant prints. Available in various sizes (4x6, 5x7, 8x10, A4). Perfect for photo printing, presentations, and marketing materials.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 100,
+        "max": 500,
+        "price": 1.50
+      },
+      {
+        "min": 500,
+        "max": 1000,
+        "price": 1.30
+      },
+      {
+        "min": 1000,
+        "max": null,
+        "price": 1.20
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "7",
+    "title": "Sublimation Printer - Epson Compatible",
+    "shortDesc": "Professional sublimation printer for custom printing",
+    "description": "High-quality sublimation printer compatible with Epson models. Perfect for creating custom designs on fabrics, mugs, and other sublimation-compatible materials. Produces vibrant, long-lasting prints. Includes all necessary accessories and setup support.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 1,
+        "max": 3,
+        "price": 25000.00
+      },
+      {
+        "min": 3,
+        "max": 10,
+        "price": 23000.00
+      },
+      {
+        "min": 10,
+        "max": null,
+        "price": 22000.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "8",
+    "title": "School Stationery Combo Pack",
+    "shortDesc": "Complete school stationery set for students",
+    "description": "Comprehensive school stationery combo pack including notebooks, pens, pencils, erasers, sharpeners, rulers, and more. Available in various themes and colors. Perfect for schools, educational institutions, and bulk purchases. Customizable packaging available.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 50,
+        "max": 200,
+        "price": 150.00
+      },
+      {
+        "min": 200,
+        "max": 500,
+        "price": 140.00
+      },
+      {
+        "min": 500,
+        "max": null,
+        "price": 130.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "9",
+    "title": "Note Counting Machine - Digital",
+    "shortDesc": "Advanced digital note counting machine with counterfeit detection",
+    "description": "Professional digital note counting machine with advanced counterfeit detection technology. Features high-speed counting, batch counting, and automatic start/stop. LCD display shows count and denomination. Durable construction for heavy-duty use. Perfect for banks, retail stores, and businesses handling cash.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 1,
+        "max": 5,
+        "price": 15000.00
+      },
+      {
+        "min": 5,
+        "max": 10,
+        "price": 14000.00
+      },
+      {
+        "min": 10,
+        "max": null,
+        "price": 13500.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  },
+  {
+    "id": "10",
+    "title": "Corporate Gift Set - Premium",
+    "shortDesc": "Fully customized corporate gifting solutions",
+    "description": "Premium corporate gift sets fully customized with your branding. Includes options like branded pens, notebooks, USB drives, power banks, and more. Professional packaging with your company logo. Perfect for client appreciation, employee recognition, and corporate events. Minimum order quantity applies.",
+    "image": "/assets/veom-logo.png",
+    "pricing": [
+      {
+        "min": 50,
+        "max": 200,
+        "price": 500.00
+      },
+      {
+        "min": 200,
+        "max": 500,
+        "price": 450.00
+      },
+      {
+        "min": 500,
+        "max": null,
+        "price": 400.00
+      }
+    ],
+    "createdAt": "2026-01-23T00:00:00.000Z"
+  }
+]

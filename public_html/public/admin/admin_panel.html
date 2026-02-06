@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel | Arya Overseas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+</head>
+
+<body class="bg-gray-100">
+
+<header class="bg-gray-900 text-white px-6 py-4">
+  <h1 class="text-lg font-bold">Admin Panel</h1>
+</header>
+
+<main class="max-w-6xl mx-auto p-6">
+
+  <h2 class="text-xl font-semibold mb-6">Dealer Approvals</h2>
+
+  <div class="bg-white rounded-xl shadow p-6">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b">
+          <th class="py-2">Dealer Email</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="dealerList"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+// DEMO DATA (Replace with backend later)
+const dealers = [
+  { email: "test@gmail.com", status: "PENDING" },
+  { email: "dealer@aryaoverseas.in", status: "APPROVED" }
+];
+
+const list = document.getElementById("dealerList");
+
+dealers.forEach(d => {
+  list.innerHTML += `
+    <tr class="border-b">
+      <td class="py-2">${d.email}</td>
+      <td>${d.status}</td>
+      <td>
+        ${d.status === "PENDING"
+          ? '<button class="bg-green-600 text-white px-4 py-1 rounded">Approve</button>'
+          : '-'}
+      </td>
+    </tr>
+  `;
+});
+</script>
+
+</body>
+</html>
