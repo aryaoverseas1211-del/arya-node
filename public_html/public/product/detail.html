@@ -264,19 +264,30 @@ function updateSEO(p) {
   if (twitterDescription) twitterDescription.content = p.shortDesc || p.description?.substring(0, 160) || '';
 
   // Add structured data
+  const variantPrices = Array.isArray(p.variants)
+    ? p.variants.map(v => v.price).filter(v => v !== null && v !== undefined)
+    : [];
+  const offers = p.pricing && p.pricing.length > 0 ? {
+    "@type": "AggregateOffer",
+    "priceCurrency": "INR",
+    "lowPrice": Math.min(...p.pricing.map(t => t.price)).toString(),
+    "highPrice": Math.max(...p.pricing.map(t => t.price)).toString(),
+    "offerCount": p.pricing.length.toString()
+  } : (variantPrices.length > 0 ? {
+    "@type": "AggregateOffer",
+    "priceCurrency": "INR",
+    "lowPrice": Math.min(...variantPrices).toString(),
+    "highPrice": Math.max(...variantPrices).toString(),
+    "offerCount": variantPrices.length.toString()
+  } : undefined);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": p.title,
     "description": p.description,
     "image": p.image ? `${API_BASE}${p.image}` : '',
-    "offers": p.pricing && p.pricing.length > 0 ? {
-      "@type": "AggregateOffer",
-      "priceCurrency": "INR",
-      "lowPrice": Math.min(...p.pricing.map(t => t.price)).toString(),
-      "highPrice": Math.max(...p.pricing.map(t => t.price)).toString(),
-      "offerCount": p.pricing.length.toString()
-    } : undefined
+    "offers": offers
   };
 
   let script = document.getElementById('structuredData');
@@ -295,6 +306,12 @@ function renderProduct(p) {
   // Format pricing tiers
   let pricingHTML = "";
   if (p.pricing && p.pricing.length > 0) {
+    const pricingList = [...p.pricing].sort((a, b) => (a.min || 0) - (b.min || 0));
+    const bestIndex = pricingList.reduce((bestIdx, tier, idx) => {
+      if (tier.price < pricingList[bestIdx].price) return idx;
+      if (tier.price === pricingList[bestIdx].price && (tier.min || 0) > (pricingList[bestIdx].min || 0)) return idx;
+      return bestIdx;
+    }, 0);
     pricingHTML = `
       <div class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 md:p-10 border-2 border-blue-100">
         <div class="flex items-center gap-3 mb-6">
@@ -306,11 +323,11 @@ function renderProduct(p) {
           <h3 class="text-3xl font-extrabold text-gray-900">MOQ-Based Pricing</h3>
         </div>
         <div class="grid md:grid-cols-2 gap-4 mb-4">
-          ${p.pricing.map((tier, index) => {
+          ${pricingList.map((tier, index) => {
             const range = tier.max 
               ? `${tier.min} - ${tier.max} units`
               : `${tier.min}+ units`;
-            const isBestValue = index === p.pricing.length - 1 && !tier.max;
+            const isBestValue = index === bestIndex;
             return `
               <div class="pricing-card bg-white rounded-xl p-6 border-2 ${isBestValue ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} shadow-lg">
                 ${isBestValue ? `
@@ -340,6 +357,32 @@ function renderProduct(p) {
           </svg>
           * MOQ = Minimum Order Quantity. Prices may vary based on customization requirements.
         </p>
+      </div>
+    `;
+  }
+
+  let variantHTML = "";
+  if ((!p.pricing || p.pricing.length === 0) && p.variants && p.variants.length > 0) {
+    variantHTML = `
+      <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
+        <h3 class="text-2xl font-extrabold text-gray-900 mb-4">Available Variants</h3>
+        <div class="space-y-3">
+          ${p.variants.map(variant => {
+            const attrs = variant.attributes ? Object.entries(variant.attributes).map(([k,v]) => `${k}: ${v}`).join(', ') : '';
+            return `
+              <div class="flex items-center justify-between border rounded-xl p-4">
+                <div>
+                  <p class="text-sm text-gray-500">${attrs || 'Standard'}</p>
+                  <p class="text-lg font-semibold text-gray-900">${variant.sku || 'Variant'}</p>
+                </div>
+                <div class="text-right">
+                  ${variant.price !== null && variant.price !== undefined ? `<p class="text-xl font-bold text-blue-600">₹${Number(variant.price).toFixed(2)}</p>` : ''}
+                  <p class="text-xs text-gray-500">Stock: ${variant.stockQty ?? 0}</p>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
     `;
   }
@@ -385,6 +428,7 @@ function renderProduct(p) {
         </div>
 
         ${pricingHTML}
+        ${variantHTML}
 
         <div class="pt-6">
           <button onclick="sendWhatsApp()"
@@ -441,6 +485,13 @@ function sendWhatsApp() {
         ? `${tier.min}-${tier.max} units`
         : `${tier.min}+ units`;
       pricingText += `• ${range}: ₹${tier.price.toFixed(2)} per unit\n`;
+    });
+  } else if (product.variants && product.variants.length > 0) {
+    pricingText = "\n\n*Variants:*\n";
+    product.variants.forEach(variant => {
+      const attrs = variant.attributes ? Object.entries(variant.attributes).map(([k,v]) => `${k}: ${v}`).join(', ') : 'Standard';
+      const price = variant.price !== null && variant.price !== undefined ? `₹${Number(variant.price).toFixed(2)}` : 'Price on request';
+      pricingText += `• ${attrs} - ${price}\n`;
     });
   }
 

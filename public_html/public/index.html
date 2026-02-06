@@ -475,6 +475,23 @@ header.scrolled {
       </p>
     </div>
 
+    <div class="mb-10 rounded-3xl overflow-hidden border border-emerald-200 shadow-xl bg-gradient-to-r from-emerald-700 via-teal-600 to-amber-500 text-white">
+      <div class="p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <p class="text-sm uppercase tracking-widest text-emerald-100 mb-2">Custom Lanyards</p>
+          <h3 class="text-3xl md:text-4xl font-bold mb-2">Design Your Own Lanyard in Minutes</h3>
+          <p class="text-emerald-50 max-w-2xl">Choose width, colors, text, and logo. Download the preview and request a quote instantly.</p>
+        </div>
+        <a href="/product/custom-lanyard.html"
+           class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold px-6 py-3 rounded-full shadow-lg hover:opacity-90 transition">
+          Start Designing
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
       <!-- Category 1: Lamination -->
       <a href="/categories/lamination.html" class="category-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg border-2 border-blue-200 stagger-item" style="animation-delay: 0.1s;">
@@ -810,9 +827,14 @@ async function loadProducts() {
       data.products.forEach((p, index) => {
         const imageSrc = p.image ? `${API_BASE}${p.image}` : '/assets/veom-logo.png';
         const detailLink = `/product/${p.id}`;
-        const startingPrice = p.pricing && p.pricing.length > 0 
-          ? `Starting from ₹${p.pricing[0].price.toFixed(2)}` 
-          : '';
+        const pricingTiers = Array.isArray(p.pricing) ? p.pricing : [];
+        let minPrice = null;
+        if (pricingTiers.length > 0) {
+          minPrice = Math.min(...pricingTiers.map(t => t.price));
+        } else if (p.priceMin !== null && p.priceMin !== undefined) {
+          minPrice = p.priceMin;
+        }
+        const startingPrice = minPrice !== null ? `Starting from ₹${Number(minPrice).toFixed(2)}` : '';
         
         const productCard = document.createElement('a');
         productCard.href = detailLink;

@@ -54,8 +54,8 @@ arya-node/
     │   ├── assets/        # Static assets (images, etc.)
     │   └── ...            # Other HTML pages
     ├── uploads/           # Uploaded product images (auto-created)
-    └── data/              # JSON data storage (auto-created)
-        └── products.json  # Product database
+    └── data/              # SQLite data storage (auto-created)
+        └── app.db         # Product database
 ```
 
 ## API Endpoints
@@ -156,7 +156,7 @@ const PORT = process.env.PORT || 3000;
 ## File Storage
 
 - **Images**: Stored in `uploads/` directory
-- **Data**: Products stored in `data/products.json`
+- **Data**: Products stored in `data/app.db` (SQLite)
 - Both directories are auto-created on first run
 
 ## Security Notes

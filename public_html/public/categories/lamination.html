@@ -65,30 +65,31 @@ body { font-family: 'Inter', sans-serif; }
   <p class="text-sm">© 2026 Arya Overseas · Importer & Wholesaler</p>
 </footer>
 
+
 <script>
 const API_BASE = window.location.origin;
+const CATEGORY_SLUG = 'lamination';
 
 async function loadCategoryProducts() {
   const grid = document.getElementById('productGrid');
   try {
-    const response = await fetch(`${API_BASE}/api/products`);
+    const response = await fetch(`${API_BASE}/api/categories/${CATEGORY_SLUG}/products`);
     const data = await response.json();
-    
     if (data.success && data.products) {
-      // Filter products by category (you can add category field to products)
-      const categoryProducts = data.products.filter(p => 
-        p.title.toLowerCase().includes('lamination') || 
-        p.description?.toLowerCase().includes('lamination')
-      );
-      
-      if (categoryProducts.length > 0) {
+      if (data.products.length > 0) {
         grid.innerHTML = '';
-        categoryProducts.forEach(p => {
+        data.products.forEach(p => {
           const imageSrc = p.image ? `${API_BASE}${p.image}` : '/assets/veom-logo.png';
           const detailLink = `/product/${p.id}`;
-          const startingPrice = p.pricing && p.pricing.length > 0 
-            ? `Starting from ₹${p.pricing[0].price.toFixed(2)}` : '';
-          
+          const pricingTiers = Array.isArray(p.pricing) ? p.pricing : [];
+          let minPrice = null;
+          if (pricingTiers.length > 0) {
+            minPrice = Math.min(...pricingTiers.map(t => t.price));
+          } else if (p.priceMin !== null && p.priceMin !== undefined) {
+            minPrice = p.priceMin;
+          }
+          const startingPrice = minPrice !== null ? `Starting from ₹${Number(minPrice).toFixed(2)}` : '';
+
           const card = document.createElement('a');
           card.href = detailLink;
           card.className = 'product-card bg-white rounded-2xl shadow-lg overflow-hidden';
@@ -116,5 +117,6 @@ async function loadCategoryProducts() {
 
 document.addEventListener('DOMContentLoaded', loadCategoryProducts);
 </script>
+
 </body>
 </html>

@@ -11,6 +11,10 @@ This will install:
 - Multer (file upload handling)
 - CORS (cross-origin resource sharing)
 - Body-parser (request parsing)
+- express-session (admin sessions)
+- bcryptjs (password hashing)
+- better-sqlite3 (SQLite database)
+- papaparse (CSV import/export)
 
 ## Step 2: Start the Server
 
@@ -25,6 +29,17 @@ The server will start on **http://localhost:3000**
 - **Homepage**: http://localhost:3000
 - **Admin Panel**: http://localhost:3000/admin
 - **API**: http://localhost:3000/api/products
+
+## Step 3.1: Admin Credentials (Required)
+
+Set these environment variables before starting:
+
+```bash
+export SESSION_SECRET="your-long-random-secret"
+export ADMIN_EMAIL="admin@example.com"
+export ADMIN_PASSWORD="strong-password"
+export ADMIN_NAME="Admin"
+```
 
 ## Step 4: Add Your First Product
 
@@ -54,6 +69,11 @@ PORT=8080 npm start
 - Check that the `data/` folder exists
 - Verify write permissions
 - Check server console for errors
+
+### Admin login not working
+
+- Confirm `ADMIN_EMAIL` and `ADMIN_PASSWORD` are set
+- Restart the server after setting env variables
 
 ## Development Mode
 

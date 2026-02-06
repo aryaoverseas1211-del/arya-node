@@ -22,13 +22,56 @@
 <div class="text-center py-12 col-span-full"><div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-700"></div><p class="text-gray-600 mt-4">Loading products...</p></div>
 </div></div></section>
 <footer class="bg-gray-900 text-gray-400 py-8 text-center"><p class="text-sm">© 2026 Arya Overseas · Importer & Wholesaler</p></footer>
+
 <script>
-const API_BASE=window.location.origin;
-async function loadCategoryProducts(){const grid=document.getElementById('productGrid');
-try{const response=await fetch(`${API_BASE}/api/products`);const data=await response.json();
-if(data.success&&data.products){const categoryProducts=data.products.filter(p=>p.title.toLowerCase().includes('printing')||p.description?.toLowerCase().includes('printing'));
-if(categoryProducts.length>0){grid.innerHTML='';categoryProducts.forEach(p=>{const imageSrc=p.image?`${API_BASE}${p.image}`:'/assets/veom-logo.png';const detailLink=`/product/${p.id}`;const startingPrice=p.pricing&&p.pricing.length>0?`Starting from ₹${p.pricing[0].price.toFixed(2)}`:'';
-const card=document.createElement('a');card.href=detailLink;card.className='product-card bg-white rounded-2xl shadow-lg overflow-hidden';
-card.innerHTML=`<div class="h-48 overflow-hidden"><img src="${imageSrc}" alt="${p.title}" class="w-full h-full object-cover"></div><div class="p-6"><h3 class="text-xl font-bold mb-2">${p.title}</h3><p class="text-gray-600 mb-4 line-clamp-2">${p.shortDesc||p.description?.substring(0,100)||''}</p>${startingPrice?`<p class="text-lg font-bold text-red-600">${startingPrice}</p>`:''}</div>`;grid.appendChild(card);});}else{grid.innerHTML='<div class="col-span-full text-center py-12"><p class="text-gray-500">No products in this category yet. Check back soon!</p></div>';}}}catch(error){console.error('Error:',error);grid.innerHTML='<div class="col-span-full text-center py-12"><p class="text-red-500">Error loading products</p></div>';}}
-document.addEventListener('DOMContentLoaded',loadCategoryProducts);
-</script></body></html>
+const API_BASE = window.location.origin;
+const CATEGORY_SLUG = 'printing-supplies';
+
+async function loadCategoryProducts() {
+  const grid = document.getElementById('productGrid');
+  try {
+    const response = await fetch(`${API_BASE}/api/categories/${CATEGORY_SLUG}/products`);
+    const data = await response.json();
+    if (data.success && data.products) {
+      if (data.products.length > 0) {
+        grid.innerHTML = '';
+        data.products.forEach(p => {
+          const imageSrc = p.image ? `${API_BASE}${p.image}` : '/assets/veom-logo.png';
+          const detailLink = `/product/${p.id}`;
+          const pricingTiers = Array.isArray(p.pricing) ? p.pricing : [];
+          let minPrice = null;
+          if (pricingTiers.length > 0) {
+            minPrice = Math.min(...pricingTiers.map(t => t.price));
+          } else if (p.priceMin !== null && p.priceMin !== undefined) {
+            minPrice = p.priceMin;
+          }
+          const startingPrice = minPrice !== null ? `Starting from ₹${Number(minPrice).toFixed(2)}` : '';
+
+          const card = document.createElement('a');
+          card.href = detailLink;
+          card.className = 'product-card bg-white rounded-2xl shadow-lg overflow-hidden';
+          card.innerHTML = `
+            <div class="h-48 overflow-hidden">
+              <img src="${imageSrc}" alt="${p.title}" class="w-full h-full object-cover">
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">${p.title}</h3>
+              <p class="text-gray-600 mb-4 line-clamp-2">${p.shortDesc || p.description?.substring(0, 100) || ''}</p>
+              ${startingPrice ? `<p class="text-lg font-bold text-blue-600">${startingPrice}</p>` : ''}
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } else {
+        grid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-500">No products in this category yet. Check back soon!</p></div>';
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    grid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-red-500">Error loading products</p></div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadCategoryProducts);
+</script>
+</body></html>

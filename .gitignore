@@ -6,4 +6,6 @@ package-lock.json
 uploads/*
 !uploads/.gitkeep
 data/products.json
+public_html/data/*.db
+public_html/data/*.db-*
 *.zip

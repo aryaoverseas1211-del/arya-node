@@ -27,6 +27,15 @@ In hPanel → **Websites → Node.js → Your App**:
 - **Install command**: `npm install`
 - **Start command**: `npm start` (or leave empty if not required)
 
+## 🔐 Environment Variables (Required)
+
+Set these in Hostinger → Node.js app → Environment Variables:
+
+- `SESSION_SECRET` (long random string)
+- `ADMIN_EMAIL` (admin login email)
+- `ADMIN_PASSWORD` (admin login password)
+- `ADMIN_NAME` (display name)
+
 ## 📁 Expected File Structure in ZIP
 
 ```
@@ -41,7 +50,7 @@ arya-node/
 │   │   ├── categories/
 │   │   └── ...
 │   ├── data/
-│   │   └── products.json (optional, will be created)
+│   │   └── app.db (SQLite database, auto-created)
 │   └── uploads/ (will be created automatically)
 ```
 
