@@ -163,12 +163,32 @@ function logAudit(adminId, action, entity, entityId, details) {
 }
 
 function ensureBootstrapAdmin() {
-  const email = (process.env.ADMIN_EMAIL || '').trim();
-  const password = process.env.ADMIN_PASSWORD || '';
-  const name = process.env.ADMIN_NAME || 'Administrator';
+  const envEmail = (process.env.ADMIN_EMAIL || '').trim();
+  const envPassword = process.env.ADMIN_PASSWORD || '';
+  const envName = process.env.ADMIN_NAME || 'Administrator';
+
+  let email = envEmail;
+  let password = envPassword;
+  let name = envName;
+  let source = 'env';
 
   if (!email || !password) {
-    console.warn('ADMIN_EMAIL or ADMIN_PASSWORD not set. Admin login will not be available until set.');
+    const seedPath = path.join(dataDir, 'admin_seed.json');
+    if (fs.existsSync(seedPath)) {
+      try {
+        const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+        email = (seed.email || '').trim();
+        password = seed.password || '';
+        name = seed.name || 'Administrator';
+        source = 'file';
+      } catch (err) {
+        console.warn('Failed to parse admin_seed.json:', err);
+      }
+    }
+  }
+
+  if (!email || !password) {
+    console.warn('ADMIN_EMAIL or ADMIN_PASSWORD not set (and no admin_seed.json). Admin login will not be available until set.');
     return;
   }
 
@@ -180,7 +200,7 @@ function ensureBootstrapAdmin() {
       SET password_hash = ?, name = ?, role = 'admin'
       WHERE id = ?
     `).run(hash, name, existing.id);
-    console.log('Bootstrap admin updated:', email);
+    console.log(`Bootstrap admin updated (${source}):`, email);
     return;
   }
 
@@ -188,7 +208,7 @@ function ensureBootstrapAdmin() {
     INSERT INTO admins (email, password_hash, name, role, created_at)
     VALUES (?, ?, ?, 'admin', ?)
   `).run(email, hash, name, new Date().toISOString());
-  console.log('Bootstrap admin created:', email);
+  console.log(`Bootstrap admin created (${source}):`, email);
 }
 
 async function startServer() {
