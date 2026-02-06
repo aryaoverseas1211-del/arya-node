@@ -1,8 +1,24 @@
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const initSqlJs = require('sql.js');
 
-const DB_PATH = path.join(__dirname, 'data', 'app.db');
+const DEFAULT_DB_PATH = path.join(__dirname, 'data', 'app.db');
+const PERSIST_DIR = process.env.PERSIST_DIR || path.join(os.homedir(), 'aryaoverseas-storage');
+const PERSIST_DB_PATH = path.join(PERSIST_DIR, 'app.db');
+
+function resolveDbPath() {
+  if (process.env.DB_PATH) return process.env.DB_PATH;
+  try {
+    fs.mkdirSync(PERSIST_DIR, { recursive: true });
+    fs.accessSync(PERSIST_DIR, fs.constants.W_OK);
+    return PERSIST_DB_PATH;
+  } catch (err) {
+    return DEFAULT_DB_PATH;
+  }
+}
+
+const DB_PATH = resolveDbPath();
 
 let dbInstance;
 let sqlInstance;
@@ -246,6 +262,14 @@ async function getSql() {
 async function initDb() {
   if (dbInstance) return dbInstance;
   ensureDirExists(path.dirname(DB_PATH));
+  if (DB_PATH !== DEFAULT_DB_PATH && !fs.existsSync(DB_PATH) && fs.existsSync(DEFAULT_DB_PATH)) {
+    try {
+      ensureDirExists(path.dirname(DB_PATH));
+      fs.copyFileSync(DEFAULT_DB_PATH, DB_PATH);
+    } catch (err) {
+      // fallback to default if copy fails
+    }
+  }
   const SQL = await getSql();
   let db;
   if (fs.existsSync(DB_PATH)) {
