@@ -142,168 +142,126 @@
 </section>
 
 <section id="configurator" class="max-w-6xl mx-auto px-6 pb-12">
-  <div class="bg-white shadow rounded-2xl p-6 mb-6 flex items-center justify-between">
-    <p id="stepIndicator" class="font-semibold text-blue-800 step-pill px-4 py-2 rounded-full">
-      Step 1 of 4 · Select Options
-    </p>
-    <p class="text-sm text-gray-500">Minimum order: 1 piece</p>
-  </div>
-
-  <div class="bg-white shadow rounded-2xl p-8">
-
-    <!-- STEP 1 -->
-    <div class="step" id="step1">
-      <div class="flex items-center gap-3 mb-6">
-        <span class="step-pill text-sm font-semibold px-3 py-1 rounded-full">Step 1</span>
-        <h2 class="text-2xl font-semibold">Choose Lanyard Style</h2>
+  <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
+    <div class="bg-white shadow rounded-2xl p-6 lg:sticky lg:top-24 h-fit">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xl font-semibold">Live Lanyard Preview</h2>
+        <span class="text-xs text-slate-500">Front + Back + Accessories</span>
       </div>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <div>
-          <p class="font-medium mb-3">Lanyard Style</p>
-          <div id="styleOptions" class="grid grid-cols-2 gap-3"></div>
-          <p class="text-xs text-slate-500 mt-2">Managed from CMS → Lanyards.</p>
-        </div>
-
-        <div>
-          <p class="font-medium mb-3">Fittings</p>
-          <div id="fittingOptions" class="grid grid-cols-2 gap-2"></div>
-          <p class="text-xs text-slate-500 mt-2">Choose one or more fittings.</p>
-        </div>
+      <div class="border rounded-xl bg-slate-50 p-3">
+        <canvas id="livePreviewCanvas" width="1100" height="760" class="w-full rounded-lg bg-white"></canvas>
       </div>
-
-      <div class="mt-6">
-        <p class="font-medium mb-3">Brand Base Color</p>
-        <input type="color" id="bgColor" value="#ffffff" class="w-full h-12 border rounded-lg">
-      </div>
-
-      <div class="grid md:grid-cols-4 gap-6 mt-6">
-        <div>
-          <label class="font-medium">Width</label>
-          <select id="width" class="w-full border rounded-lg p-3">
-            <option value="7">1/4 inch (7 mm)</option>
-            <option value="10">3/8 inch (10 mm)</option>
-            <option value="12">1/2 inch (12 mm)</option>
-            <option value="15">5/8 inch (15 mm)</option>
-            <option value="20" selected>3/4 inch (20 mm)</option>
-            <option value="25">1 inch (25 mm)</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-medium">Length</label>
-          <select id="length" class="w-full border rounded-lg p-3">
-            <option value="30">Small 30 inch</option>
-            <option value="36" selected>Standard 36 inch</option>
-            <option value="42">Large 42 inch</option>
-            <option value="48">Extra Large 48 inch</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-medium">Quality</label>
-          <select id="quality" class="w-full border rounded-lg p-3">
-            <option value="Standard" selected>Standard</option>
-            <option value="Premium">Premium</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-medium">Printing Style</label>
-          <select id="printing" class="w-full border rounded-lg p-3">
-            <option value="Laser Printing" selected>Laser Printing</option>
-            <option value="Screen Printing">Screen Printing</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="text-right mt-8">
-        <button onclick="nextStep()" class="bg-blue-800 text-white px-8 py-3 rounded-full">
-          Continue →
-        </button>
-      </div>
+      <p class="text-xs text-slate-500 mt-3">Preview is indicative for production planning.</p>
     </div>
 
-    <!-- STEP 2 -->
-    <div class="step hidden" id="step2">
-      <div class="flex items-center gap-3 mb-6">
-        <span class="step-pill text-sm font-semibold px-3 py-1 rounded-full">Step 2</span>
-        <h2 class="text-2xl font-semibold">Design Your Lanyard</h2>
+    <div class="space-y-6">
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Design Studio</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="font-medium">Lanyard Type</label>
+            <select id="typeSelect" class="w-full border rounded-lg p-3"></select>
+          </div>
+          <div>
+            <label class="font-medium">Main Accessory</label>
+            <select id="mainAccessorySelect" class="w-full border rounded-lg p-3"></select>
+          </div>
+          <div>
+            <label class="font-medium">Add-on Accessory (Optional)</label>
+            <select id="addonAccessorySelect" class="w-full border rounded-lg p-3"></select>
+          </div>
+          <div>
+            <label class="font-medium">Qty for this design</label>
+            <input id="lineQty" type="number" min="1" value="100" class="w-full border rounded-lg p-3">
+          </div>
+          <div>
+            <label class="font-medium">Width (mm)</label>
+            <select id="width" class="w-full border rounded-lg p-3">
+              <option value="15">15 mm</option>
+              <option value="20" selected>20 mm</option>
+              <option value="25">25 mm</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-medium">Length (mm)</label>
+            <select id="lengthMm" class="w-full border rounded-lg p-3">
+              <option value="800">800 mm</option>
+              <option value="900" selected>900 mm</option>
+              <option value="1000">1000 mm</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-medium">Printing Style</label>
+            <select id="printing" class="w-full border rounded-lg p-3">
+              <option value="Laser Printing">Laser Printing</option>
+              <option value="Screen Printing">Screen Printing</option>
+              <option value="Sublimation">Sublimation</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-medium">Quality</label>
+            <select id="quality" class="w-full border rounded-lg p-3">
+              <option value="Standard">Standard</option>
+              <option value="Premium">Premium</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="font-medium">Front Text *</label>
+            <input type="text" id="frontText" placeholder="Front Text" class="w-full border rounded-lg p-3">
+          </div>
+          <div>
+            <label class="font-medium">Back Text *</label>
+            <input type="text" id="backText" placeholder="Back Text" class="w-full border rounded-lg p-3">
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="font-medium">Lanyard Color</label>
+            <input type="color" id="bgColor" value="#111111" class="w-full h-12 border rounded-lg">
+          </div>
+          <div>
+            <label class="font-medium">Text Color</label>
+            <input type="color" id="textColor" value="#ffffff" class="w-full h-12 border rounded-lg">
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="font-medium">Upload Logo (optional)</label>
+          <input type="file" id="logoUpload" accept="image/*" class="w-full border rounded-lg p-3">
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-2">
+          <button id="addToCartBtn" class="bg-blue-800 text-white px-5 py-2 rounded-full font-semibold">Add Design to Cart</button>
+          <button id="clearDesignBtn" class="border px-5 py-2 rounded-full">Clear Current</button>
+        </div>
+        <p id="designMessage" class="text-xs text-slate-500 mt-3"></p>
       </div>
 
-      <label class="font-medium">Text</label>
-      <input type="text" id="designText" placeholder="Company Name"
-             class="w-full border rounded-lg p-3 mb-4">
-
-      <label class="font-medium">Text Color</label>
-      <input type="color" id="textColor" value="#0f3d3a"
-             class="w-full h-12 border rounded-lg mb-4">
-
-      <label class="font-medium">Upload Logo</label>
-      <input type="file" id="logoUpload" accept="image/*"
-             class="w-full border rounded-lg p-3 mb-6">
-
-      <div class="flex justify-between">
-        <button onclick="prevStep()" class="border px-6 py-3 rounded-full">← Back</button>
-        <button onclick="nextStep(); updatePreview()" class="bg-blue-800 text-white px-8 py-3 rounded-full">
-          Continue →
-        </button>
-      </div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div class="step hidden" id="step3">
-      <div class="flex items-center gap-3 mb-6">
-        <span class="step-pill text-sm font-semibold px-3 py-1 rounded-full">Step 3</span>
-        <h2 class="text-2xl font-semibold">Print Preview</h2>
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Design Cart</h3>
+        <div id="designCartList" class="space-y-2"></div>
       </div>
 
-      <div class="bg-gray-50 border rounded p-4 mb-4">
-        <svg id="previewSVG" viewBox="0 0 1000 80" class="w-full"></svg>
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Submit Enquiry</h3>
+        <div class="grid md:grid-cols-2 gap-3 mb-3">
+          <input type="text" id="customerName" placeholder="Your name *" class="w-full border rounded-lg p-3">
+          <input type="text" id="customerPhone" placeholder="Phone *" class="w-full border rounded-lg p-3">
+        </div>
+        <div class="grid md:grid-cols-2 gap-3 mb-3">
+          <input type="email" id="customerEmail" placeholder="Email" class="w-full border rounded-lg p-3">
+          <input type="text" id="customerCompany" placeholder="Company" class="w-full border rounded-lg p-3">
+        </div>
+        <div class="grid md:grid-cols-2 gap-3">
+          <button id="submitRequestBtn" class="bg-blue-800 text-white w-full py-3 rounded-full text-base font-semibold">Submit Design Request</button>
+          <button id="sendWhatsappBtn" class="bg-green-600 text-white w-full py-3 rounded-full text-base font-semibold">Send on WhatsApp</button>
+        </div>
+        <p id="submitMessage" class="text-sm text-slate-500 mt-3"></p>
       </div>
-
-      <div class="flex flex-wrap gap-4 mb-6">
-        <button onclick="downloadSVG()" class="bg-green-600 text-white px-6 py-3 rounded-full">
-          Download SVG
-        </button>
-        <button onclick="downloadPDF()" class="bg-indigo-600 text-white px-6 py-3 rounded-full">
-          Download PDF
-        </button>
-      </div>
-
-      <div class="flex justify-between">
-        <button onclick="prevStep()" class="border px-6 py-3 rounded-full">← Back</button>
-        <button onclick="nextStep()" class="bg-blue-800 text-white px-8 py-3 rounded-full">
-          Continue →
-        </button>
-      </div>
-    </div>
-
-    <!-- STEP 4 -->
-    <div class="step hidden" id="step4">
-      <div class="flex items-center gap-3 mb-6">
-        <span class="step-pill text-sm font-semibold px-3 py-1 rounded-full">Step 4</span>
-        <h2 class="text-2xl font-semibold">Submit Design Request</h2>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-3 mb-3">
-        <input type="text" id="customerName" placeholder="Your name *" class="w-full border rounded-lg p-3">
-        <input type="text" id="customerPhone" placeholder="Phone *" class="w-full border rounded-lg p-3">
-      </div>
-      <div class="grid md:grid-cols-2 gap-3 mb-3">
-        <input type="email" id="customerEmail" placeholder="Email" class="w-full border rounded-lg p-3">
-        <input type="text" id="customerCompany" placeholder="Company" class="w-full border rounded-lg p-3">
-      </div>
-      <input type="number" id="qty" placeholder="Quantity" class="w-full border rounded-lg p-3 mb-4">
-
-      <div class="grid md:grid-cols-2 gap-3">
-        <button onclick="submitDesignRequest()"
-                class="bg-blue-800 text-white w-full py-4 rounded-full text-lg font-semibold">
-          Save Request
-        </button>
-        <button onclick="sendWhatsApp()"
-                class="bg-green-600 text-white w-full py-4 rounded-full text-lg font-semibold">
-          Send on WhatsApp
-        </button>
-      </div>
-      <p id="submitMessage" class="text-sm text-slate-500 mt-3"></p>
     </div>
   </div>
 </section>
@@ -386,42 +344,26 @@
 </section>
 
 <script>
-let step = 1;
 let logoData = null;
-let catalog = { types: [], fittings: [] };
+let catalog = { types: [], mainAccessories: [], addonAccessories: [] };
+let designCart = [];
 
-document.getElementById("logoUpload").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => { logoData = reader.result; };
-  reader.readAsDataURL(file);
-});
+const canvas = document.getElementById('livePreviewCanvas');
+const ctx = canvas.getContext('2d');
+const imageCache = new Map();
 
-function showStep(n){
-  document.querySelectorAll(".step").forEach(s => s.classList.add("hidden"));
-  document.getElementById("step" + n).classList.remove("hidden");
-  const labels = ["Select Options", "Design", "Preview", "Send Order"];
-  document.getElementById("stepIndicator").innerText = `Step ${n} of 4 · ${labels[n-1]}`;
-}
-
-function nextStep(){
-  if (step < 4) {
-    step++;
-    showStep(step);
-  }
-}
-
-function prevStep(){
-  if (step > 1) {
-    step--;
-    showStep(step);
-  }
-}
-
-function selectedStyleInput() {
-  return document.querySelector("input[name='style']:checked");
-}
+const typeSelect = document.getElementById('typeSelect');
+const mainAccessorySelect = document.getElementById('mainAccessorySelect');
+const addonAccessorySelect = document.getElementById('addonAccessorySelect');
+const frontTextInput = document.getElementById('frontText');
+const backTextInput = document.getElementById('backText');
+const widthInput = document.getElementById('width');
+const lengthMmInput = document.getElementById('lengthMm');
+const textColorInput = document.getElementById('textColor');
+const bgColorInput = document.getElementById('bgColor');
+const lineQtyInput = document.getElementById('lineQty');
+const qualityInput = document.getElementById('quality');
+const printingInput = document.getElementById('printing');
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -430,125 +372,187 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+
+function findById(list, id) {
+  return list.find((item) => String(item.id) === String(id));
 }
 
-function selectedStyle() {
-  const node = selectedStyleInput();
-  return node ? node.value : '';
+async function getImage(src) {
+  if (!src) return null;
+  if (imageCache.has(src)) return imageCache.get(src);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  const p = new Promise((resolve) => {
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+  });
+  img.src = src;
+  imageCache.set(src, p);
+  return p;
 }
 
-function selectedStyleId() {
-  const node = selectedStyleInput();
-  return node ? Number(node.dataset.id || 0) : null;
-}
-
-function selectedFittingIds() {
-  return Array.from(document.querySelectorAll("input[name='fitting']:checked"))
-    .map(node => Number(node.dataset.id || 0))
-    .filter(Boolean);
-}
-
-function selectedFittingNames() {
-  return Array.from(document.querySelectorAll("input[name='fitting']:checked"))
-    .map(node => node.value)
-    .filter(Boolean);
-}
-
-function updatePreview(){
-  const svg = document.getElementById("previewSVG");
-  svg.innerHTML = "";
-
-  const widthMm = parseInt(document.getElementById("width").value, 10);
-  const bg = document.getElementById("bgColor").value;
-  const tc = document.getElementById("textColor").value;
-  const txt = document.getElementById("designText").value.trim();
-
-  const h = Math.max(48, Math.round(widthMm * 4));
-  const logoSize = Math.round(h * 0.5);
-  svg.setAttribute("viewBox", `0 0 1000 ${h}`);
-
-  const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  bgRect.setAttribute("width", 1000);
-  bgRect.setAttribute("height", h);
-  bgRect.setAttribute("fill", bg);
-  svg.appendChild(bgRect);
-
-  for (let x = 40; x < 1000; x += 180) {
-    if (logoData) {
-      const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-      img.setAttribute("href", logoData);
-      img.setAttribute("x", x);
-      img.setAttribute("y", (h - logoSize) / 2);
-      img.setAttribute("width", logoSize);
-      img.setAttribute("height", logoSize);
-      svg.appendChild(img);
-    }
-    if (txt) {
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", x + logoSize + 10);
-      text.setAttribute("y", h / 2 + 10);
-      text.setAttribute("font-size", Math.round(h * 0.45));
-      text.setAttribute("fill", tc);
-      text.textContent = txt;
-      svg.appendChild(text);
-    }
-  }
-}
-
-function downloadSVG(){
-  const svg = document.getElementById("previewSVG");
-  const data = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([data], { type: "image/svg+xml" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "lanyard-print.svg";
-  link.click();
-}
-
-function downloadPDF(){
-  const svg = document.getElementById("previewSVG");
-  const data = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([data], { type: "image/svg+xml" });
-  const url = URL.createObjectURL(blob);
-
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = url;
-  document.body.appendChild(iframe);
-
-  iframe.onload = () => {
-    iframe.contentWindow.print();
+function currentLineItem() {
+  return {
+    lineId: `line-${Date.now()}`,
+    lanyardTypeId: Number(typeSelect.value || 0),
+    mainAccessoryId: Number(mainAccessorySelect.value || 0),
+    addonAccessoryId: addonAccessorySelect.value ? Number(addonAccessorySelect.value) : null,
+    widthMm: Number(widthInput.value || 20),
+    lengthMm: Number(lengthMmInput.value || 900),
+    frontText: (frontTextInput.value || '').trim(),
+    backText: (backTextInput.value || '').trim() || (frontTextInput.value || '').trim(),
+    textColor: textColorInput.value,
+    bgColor: bgColorInput.value,
+    logoData: logoData || '',
+    repeatSpacingPx: 120,
+    quantity: Number(lineQtyInput.value || 0),
+    quality: qualityInput.value,
+    printingStyle: printingInput.value
   };
 }
 
-function sendWhatsApp(){
-  const style = selectedStyle();
-  const fittings = selectedFittingNames();
-  const width = document.getElementById("width").value;
-  const length = document.getElementById("length").value;
-  const quality = document.getElementById("quality").value;
-  const printing = document.getElementById("printing").value;
-  const bgColor = document.getElementById("bgColor").value;
-  const text = document.getElementById("designText").value;
-  const textColor = document.getElementById("textColor").value;
-  const qty = document.getElementById("qty").value;
-  const hasLogo = logoData ? "Yes" : "No";
+function drawRepeatedStrip(text, y, widthPx, logoImg, color, bg) {
+  const stripHeight = Math.max(14, widthPx);
+  const startX = 90;
+  const stripWidth = 920;
+  ctx.fillStyle = bg;
+  ctx.fillRect(startX, y, stripWidth, stripHeight);
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.strokeRect(startX, y, stripWidth, stripHeight);
 
-  const msg = `Custom Lanyard Order\n` +
-    `Style: ${style}\n` +
-    `Fittings: ${fittings.length ? fittings.join(", ") : "-"}\n` +
-    `Width: ${width}mm\n` +
-    `Length: ${length} inch\n` +
-    `Quality: ${quality}\n` +
-    `Printing: ${printing}\n` +
-    `Base Color: ${bgColor}\n` +
-    `Text: ${text || "-"}\n` +
-    `Text Color: ${textColor}\n` +
-    `Logo Attached: ${hasLogo}\n` +
-    `Qty: ${qty || "-"}\n\n` +
-    `Files attached: SVG + PDF`;
+  ctx.fillStyle = color;
+  ctx.font = `${Math.max(11, widthPx * 0.58)}px Manrope`;
+  const textWidth = Math.max(80, ctx.measureText(text || 'YOUR TEXT').width);
+  const logoSlot = logoImg ? stripHeight + 10 : 0;
+  const blockWidth = logoSlot + textWidth + 45;
+  const repeatCount = Math.max(2, Math.floor(stripWidth / blockWidth));
 
-  window.location.href = `https://wa.me/919667371899?text=${encodeURIComponent(msg)}`;
+  for (let i = 0; i < repeatCount; i += 1) {
+    const x = startX + 14 + (i * blockWidth);
+    if (logoImg) {
+      ctx.drawImage(logoImg, x, y + 2, stripHeight - 4, stripHeight - 4);
+    } else {
+      ctx.strokeStyle = color;
+      ctx.strokeRect(x, y + 3, stripHeight - 6, stripHeight - 6);
+      ctx.fillStyle = color;
+      ctx.font = `${Math.max(9, widthPx * 0.42)}px Manrope`;
+      ctx.fillText('LOGO', x + 4, y + stripHeight - 8);
+    }
+    ctx.fillStyle = color;
+    ctx.font = `${Math.max(11, widthPx * 0.58)}px Manrope`;
+    ctx.fillText(text || 'YOUR TEXT', x + logoSlot + 5, y + stripHeight - Math.max(4, widthPx * 0.2));
+  }
+}
+
+async function renderLivePreview() {
+  const line = currentLineItem();
+  const type = findById(catalog.types, line.lanyardTypeId);
+  const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+  const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 32px Manrope';
+  ctx.fillText('Live Lanyard Artwork', 40, 46);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '18px Manrope';
+  ctx.fillText(`Type: ${type ? type.name : '-'}`, 40, 80);
+  ctx.fillText(`Length: ${line.lengthMm} mm  •  Width: ${line.widthMm} mm`, 40, 108);
+
+  const stripPx = Math.max(18, Math.min(42, Math.round(line.widthMm * 1.4)));
+  const logoImg = line.logoData ? await getImage(line.logoData) : null;
+  drawRepeatedStrip(line.frontText, 140, stripPx, logoImg, line.textColor, line.bgColor);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '16px Manrope';
+  ctx.fillText('Front', 40, 160);
+
+  drawRepeatedStrip(line.backText, 220, stripPx, logoImg, line.textColor, line.bgColor);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillText('Back', 40, 240);
+
+  const baseY = 350;
+  ctx.fillStyle = line.bgColor;
+  ctx.fillRect(130, baseY, 780, stripPx + 4);
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.strokeRect(130, baseY, 780, stripPx + 4);
+
+  const mainImage = await getImage((main && (main.preview_image || main.image)) || '');
+  const addonImage = await getImage((addon && (addon.preview_image || addon.image)) || '');
+  const mainAnchor = main && main.preview_anchor ? main.preview_anchor : { x: -34, y: -16, scale: 1, rotation: 0 };
+  const addonAnchor = addon && addon.preview_anchor ? addon.preview_anchor : { x: 4, y: -14, scale: 1, rotation: 0 };
+
+  if (mainImage) {
+    const mw = 52 * (Number(mainAnchor.scale) || 1);
+    const mh = 52 * (Number(mainAnchor.scale) || 1);
+    ctx.drawImage(mainImage, 130 + (Number(mainAnchor.x) || 0), baseY + (Number(mainAnchor.y) || 0), mw, mh);
+  } else {
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(95, baseY - 10, 40, 24);
+  }
+  if (addonImage) {
+    const aw = 40 * (Number(addonAnchor.scale) || 1);
+    const ah = 40 * (Number(addonAnchor.scale) || 1);
+    ctx.drawImage(addonImage, 910 + (Number(addonAnchor.x) || 0), baseY + (Number(addonAnchor.y) || 0), aw, ah);
+  } else if (addon) {
+    ctx.fillStyle = '#6b7280';
+    ctx.fillRect(920, baseY - 2, 24, 24);
+  }
+
+  const baseImg = await getImage((type && (type.preview_base_image || type.image)) || '');
+  if (baseImg) {
+    ctx.globalAlpha = 0.16;
+    ctx.drawImage(baseImg, 680, 100, 360, 220);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function renderCart() {
+  const container = document.getElementById('designCartList');
+  container.innerHTML = '';
+  if (!designCart.length) {
+    container.innerHTML = '<p class="text-sm text-slate-500">No designs added yet.</p>';
+    return;
+  }
+  designCart.forEach((line, idx) => {
+    const type = findById(catalog.types, line.lanyardTypeId);
+    const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+    const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+    const row = document.createElement('div');
+    row.className = 'border rounded-lg p-3';
+    row.innerHTML = `
+      <p class="font-semibold text-sm">Line ${idx + 1} · ${escapeHtml(type ? type.name : '-')}</p>
+      <p class="text-xs text-slate-500">${escapeHtml(line.frontText)} / ${escapeHtml(line.backText)}</p>
+      <p class="text-xs text-slate-500">Main: ${escapeHtml(main ? main.name : '-')} · Add-on: ${escapeHtml(addon ? addon.name : '-')} · Qty: ${line.quantity || '-'}</p>
+      <button class="text-xs text-red-600 mt-2" data-remove="${line.lineId}">Remove</button>
+    `;
+    container.appendChild(row);
+  });
+  container.querySelectorAll('[data-remove]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      designCart = designCart.filter((item) => item.lineId !== btn.getAttribute('data-remove'));
+      renderCart();
+    });
+  });
+}
+
+function populateCatalogSelects() {
+  typeSelect.innerHTML = '';
+  mainAccessorySelect.innerHTML = '';
+  addonAccessorySelect.innerHTML = '<option value="">No add-on</option>';
+
+  catalog.types.forEach((type) => {
+    typeSelect.insertAdjacentHTML('beforeend', `<option value="${type.id}">${escapeHtml(type.name)}</option>`);
+  });
+  catalog.mainAccessories.forEach((item) => {
+    mainAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
+  });
+  catalog.addonAccessories.forEach((item) => {
+    addonAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
+  });
 }
 
 async function loadCatalog() {
@@ -558,42 +562,21 @@ async function loadCatalog() {
     if (!data.success) throw new Error(data.message || 'Failed to load catalog');
     catalog = {
       types: data.types || [],
-      fittings: data.fittings || []
+      mainAccessories: data.mainAccessories || [],
+      addonAccessories: data.addonAccessories || []
     };
-    renderCatalog();
+    populateCatalogSelects();
+    renderLivePreview();
   } catch (err) {
-    document.getElementById('styleOptions').innerHTML = '<p class="text-sm text-red-600 col-span-2">Unable to load styles.</p>';
-    document.getElementById('fittingOptions').innerHTML = '<p class="text-sm text-red-600 col-span-2">Unable to load fittings.</p>';
+    document.getElementById('designMessage').textContent = 'Unable to load lanyard catalog. Please try again.';
   }
 }
 
-function renderCatalog() {
-  const styleWrap = document.getElementById('styleOptions');
-  const fittingWrap = document.getElementById('fittingOptions');
-  styleWrap.innerHTML = '';
-  fittingWrap.innerHTML = '';
-
-  (catalog.types || []).forEach((type, index) => {
-    const safeName = escapeHtml(type.name);
-    const label = document.createElement('label');
-    label.className = 'option-tile';
-    label.innerHTML = `
-      <input type="radio" name="style" value="${safeName}" data-id="${type.id}" class="hidden" ${index === 0 ? 'checked' : ''}>
-      <span class="block border rounded-xl px-3 py-2 text-sm font-semibold">${safeName}</span>
-    `;
-    styleWrap.appendChild(label);
-  });
-
-  (catalog.fittings || []).forEach((fitting) => {
-    const safeName = escapeHtml(fitting.name);
-    const label = document.createElement('label');
-    label.className = 'option-tile';
-    label.innerHTML = `
-      <input type="checkbox" name="fitting" value="${safeName}" data-id="${fitting.id}" class="hidden">
-      <span class="block border rounded-xl px-3 py-2 text-sm">${safeName}</span>
-    `;
-    fittingWrap.appendChild(label);
-  });
+function validateCurrentDesign(line) {
+  if (!line.lanyardTypeId || !line.mainAccessoryId || !line.frontText || !line.backText || !line.quantity) {
+    return 'Type, main accessory, front/back text, and quantity are required.';
+  }
+  return '';
 }
 
 async function submitDesignRequest() {
@@ -601,10 +584,9 @@ async function submitDesignRequest() {
   const phone = document.getElementById('customerPhone').value.trim();
   const email = document.getElementById('customerEmail').value.trim();
   const company = document.getElementById('customerCompany').value.trim();
-  const qty = document.getElementById('qty').value;
 
-  if (!name || !phone) {
-    document.getElementById('submitMessage').textContent = 'Name and phone are required.';
+  if (!name || !phone || !designCart.length) {
+    document.getElementById('submitMessage').textContent = 'Name, phone, and at least one design in cart are required.';
     return;
   }
 
@@ -613,17 +595,7 @@ async function submitDesignRequest() {
     phone,
     email,
     company,
-    quantity: qty ? Number(qty) : null,
-    lanyardTypeId: selectedStyleId(),
-    fittingIds: selectedFittingIds(),
-    widthMm: Number(document.getElementById('width').value),
-    lengthInch: Number(document.getElementById('length').value),
-    quality: document.getElementById('quality').value,
-    printingStyle: document.getElementById('printing').value,
-    bgColor: document.getElementById('bgColor').value,
-    designText: document.getElementById('designText').value,
-    textColor: document.getElementById('textColor').value,
-    logoData: logoData || '',
+    lineItems: designCart,
     sourcePage: '/product/custom-lanyard.html',
     notes: ''
   };
@@ -642,7 +614,60 @@ async function submitDesignRequest() {
   }
 }
 
-showStep(1);
+function sendWhatsApp() {
+  if (!designCart.length) {
+    document.getElementById('submitMessage').textContent = 'Add at least one design before sending to WhatsApp.';
+    return;
+  }
+  const lines = designCart.map((line, idx) => {
+    const type = findById(catalog.types, line.lanyardTypeId);
+    const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+    const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+    return `Line ${idx + 1}: ${type ? type.name : '-'} | Front: ${line.frontText} | Back: ${line.backText} | Main: ${main ? main.name : '-'} | Add-on: ${addon ? addon.name : '-'} | Qty: ${line.quantity || '-'}`;
+  }).join('\n');
+  const msg = `Custom Lanyard Enquiry\n${lines}`;
+  window.location.href = `https://wa.me/919667371899?text=${encodeURIComponent(msg)}`;
+}
+
+document.getElementById('logoUpload').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    logoData = reader.result;
+    renderLivePreview();
+  };
+  reader.readAsDataURL(file);
+});
+
+[typeSelect, mainAccessorySelect, addonAccessorySelect, frontTextInput, backTextInput, widthInput, lengthMmInput, textColorInput, bgColorInput, lineQtyInput, qualityInput, printingInput]
+  .forEach((el) => el.addEventListener('input', renderLivePreview));
+
+document.getElementById('addToCartBtn').addEventListener('click', () => {
+  const line = currentLineItem();
+  const error = validateCurrentDesign(line);
+  if (error) {
+    document.getElementById('designMessage').textContent = error;
+    return;
+  }
+  designCart.push(line);
+  document.getElementById('designMessage').textContent = 'Design added to cart.';
+  renderCart();
+});
+
+document.getElementById('clearDesignBtn').addEventListener('click', () => {
+  frontTextInput.value = '';
+  backTextInput.value = '';
+  lineQtyInput.value = 100;
+  logoData = null;
+  document.getElementById('logoUpload').value = '';
+  renderLivePreview();
+});
+
+document.getElementById('submitRequestBtn').addEventListener('click', submitDesignRequest);
+document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsApp);
+
+renderCart();
 loadCatalog();
 </script>
 

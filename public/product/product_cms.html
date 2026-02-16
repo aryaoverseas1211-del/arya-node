@@ -281,6 +281,7 @@
 
   <!-- LANYARDS TAB -->
   <section id="tab-lanyards" class="hidden-section">
+    <div id="catalogHealth" class="bg-white rounded-2xl shadow p-4 mb-6"></div>
     <div class="grid xl:grid-cols-3 gap-6 mb-6">
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-xl font-bold mb-4">Lanyard Types</h2>
@@ -291,27 +292,47 @@
           <input id="lanyardTypeSort" type="number" placeholder="Sort order" class="w-full border rounded-lg p-2">
           <textarea id="lanyardTypeDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
           <input id="lanyardTypeImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
-          <select id="lanyardTypeActive" class="w-full border rounded-lg p-2">
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
-          </select>
+          <input id="lanyardTypeBaseImage" type="text" placeholder="Preview base image URL (/uploads/...)" class="w-full border rounded-lg p-2">
+          <div class="grid grid-cols-2 gap-3">
+            <select id="lanyardTypeBreakaway" class="w-full border rounded-lg p-2">
+              <option value="1">Breakaway supported</option>
+              <option value="0">No breakaway</option>
+            </select>
+            <select id="lanyardTypeActive" class="w-full border rounded-lg p-2">
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
           <div class="flex gap-2">
             <button type="submit" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg">Save</button>
             <button type="button" id="resetLanyardType" class="flex-1 border rounded-lg py-2">Clear</button>
           </div>
         </form>
-        <div id="lanyardTypeList" class="mt-4 space-y-2"></div>
+        <div id="lanyardTypeList" class="mt-4 space-y-2 max-h-[540px] overflow-auto"></div>
       </div>
 
       <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-bold mb-4">Lanyard Fittings</h2>
+        <h2 class="text-xl font-bold mb-4">Accessories</h2>
         <form id="lanyardFittingForm" class="space-y-3">
           <input type="hidden" id="lanyardFittingId">
-          <input id="lanyardFittingName" type="text" placeholder="Fitting name" class="w-full border rounded-lg p-2" required>
+          <input id="lanyardFittingName" type="text" placeholder="Accessory name" class="w-full border rounded-lg p-2" required>
           <input id="lanyardFittingSlug" type="text" placeholder="Slug (optional)" class="w-full border rounded-lg p-2">
-          <input id="lanyardFittingSort" type="number" placeholder="Sort order" class="w-full border rounded-lg p-2">
+          <div class="grid grid-cols-2 gap-3">
+            <select id="lanyardFittingKind" class="w-full border rounded-lg p-2">
+              <option value="main">Main accessory</option>
+              <option value="addon">Add-on accessory</option>
+            </select>
+            <input id="lanyardFittingSort" type="number" placeholder="Sort order" class="w-full border rounded-lg p-2">
+          </div>
           <textarea id="lanyardFittingDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
           <input id="lanyardFittingImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
+          <input id="lanyardFittingPreviewImage" type="text" placeholder="Preview image URL (/uploads/...)" class="w-full border rounded-lg p-2">
+          <div class="grid grid-cols-4 gap-2">
+            <input id="fittingAnchorX" type="number" step="0.1" placeholder="x" class="border rounded-lg p-2 text-sm">
+            <input id="fittingAnchorY" type="number" step="0.1" placeholder="y" class="border rounded-lg p-2 text-sm">
+            <input id="fittingAnchorScale" type="number" step="0.1" placeholder="scale" class="border rounded-lg p-2 text-sm">
+            <input id="fittingAnchorRotation" type="number" step="1" placeholder="rot" class="border rounded-lg p-2 text-sm">
+          </div>
           <select id="lanyardFittingActive" class="w-full border rounded-lg p-2">
             <option value="1">Active</option>
             <option value="0">Inactive</option>
@@ -321,7 +342,7 @@
             <button type="button" id="resetLanyardFitting" class="flex-1 border rounded-lg py-2">Clear</button>
           </div>
         </form>
-        <div id="lanyardFittingList" class="mt-4 space-y-2"></div>
+        <div id="lanyardFittingList" class="mt-4 space-y-2 max-h-[540px] overflow-auto"></div>
       </div>
 
       <div class="bg-white rounded-2xl shadow p-6">
@@ -463,7 +484,8 @@ const state = {
   backups: [],
   lanyardTypes: [],
   lanyardFittings: [],
-  lanyardSubmissions: []
+  lanyardSubmissions: [],
+  lanyardMetrics: null
 };
 
 const API = '';
@@ -622,19 +644,23 @@ async function loadDbStatus() {
   const data = await fetchJSON('/api/admin/db/status');
   state.database = data.database;
   state.backups = data.backups || [];
+  state.lanyardMetrics = data.lanyardMetrics || null;
   renderDbStatus();
+  renderLanyardHealth();
 }
 
 async function loadLanyardTypes() {
   const data = await fetchJSON('/api/admin/lanyard/types');
   state.lanyardTypes = data.types || [];
   renderLanyardTypeList();
+  renderLanyardHealth();
 }
 
 async function loadLanyardFittings() {
   const data = await fetchJSON('/api/admin/lanyard/fittings');
   state.lanyardFittings = data.fittings || [];
   renderLanyardFittingList();
+  renderLanyardHealth();
 }
 
 async function loadLanyardSubmissions() {
@@ -844,7 +870,9 @@ function renderLanyardTypeList() {
         <div>
           <p class="font-semibold text-sm">${safeName}</p>
           <p class="text-xs text-slate-500">${safeSlug} · sort ${item.sort_order || 0}</p>
+          <p class="text-xs ${item.is_breakaway_supported ? 'text-emerald-700' : 'text-amber-700'}">${item.is_breakaway_supported ? 'Breakaway supported' : 'No breakaway'}</p>
           <p class="text-xs text-slate-500 mt-1">${safeDesc}</p>
+          <p class="text-xs text-slate-500 mt-1">Base preview: ${escapeHtml(item.preview_base_image || '-')}</p>
         </div>
         ${item.image ? `<img src="${escapeHtml(item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
       </div>
@@ -872,10 +900,11 @@ function renderLanyardFittingList() {
       <div class="flex items-start justify-between gap-3">
         <div>
           <p class="font-semibold text-sm">${safeName}</p>
-          <p class="text-xs text-slate-500">${safeSlug} · sort ${item.sort_order || 0}</p>
+          <p class="text-xs text-slate-500">${safeSlug} · ${item.fitting_kind || 'main'} · sort ${item.sort_order || 0}</p>
           <p class="text-xs text-slate-500 mt-1">${safeDesc}</p>
+          <p class="text-xs text-slate-500 mt-1">Anchor: ${escapeHtml(JSON.stringify(item.preview_anchor || { x: 0, y: 0, scale: 1, rotation: 0 }))}</p>
         </div>
-        ${item.image ? `<img src="${escapeHtml(item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
+        ${(item.preview_image || item.image) ? `<img src="${escapeHtml(item.preview_image || item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
       </div>
       <div class="mt-2 flex gap-3 text-xs">
         <button class="text-emerald-700" onclick="editLanyardFitting(${item.id})">Edit</button>
@@ -907,14 +936,29 @@ function renderSubmissionList() {
     const safeQty = escapeHtml(item.quantity || '-');
     const safeDesignText = escapeHtml(item.design_text || '-');
     const safeNotes = escapeHtml(item.notes || '');
+    const lineItems = Array.isArray(item.line_items) ? item.line_items : [];
+    const lineItemsHtml = lineItems.length
+      ? lineItems.map((line, idx) => `
+        <div class="rounded border p-2 text-xs">
+          <p><strong>Line ${idx + 1}</strong> · Qty ${escapeHtml(line.quantity || '-')} · ${escapeHtml(line.widthMm || '-')}mm</p>
+          <p>Front: ${escapeHtml(line.frontText || '-')}</p>
+          <p>Back: ${escapeHtml(line.backText || '-')}</p>
+          <p>Main: ${escapeHtml(line.mainAccessoryId || '-')} · Add-on: ${escapeHtml(line.addonAccessoryId || '-')}</p>
+        </div>
+      `).join('')
+      : '<p class="text-xs text-slate-500">No line items captured.</p>';
     const row = document.createElement('div');
     row.className = 'border rounded-lg p-3';
     row.innerHTML = `
       <p class="text-sm font-semibold">${safeName} · ${safePhone}</p>
       <p class="text-xs text-slate-500">${safeEmail} · ${safeCompany}</p>
-      <p class="text-xs text-slate-500 mt-1">Type: ${safeTypeName} · Qty: ${safeQty}</p>
+      <p class="text-xs text-slate-500 mt-1">Type: ${safeTypeName} · Qty: ${safeQty} · Lines: ${item.line_items_count || lineItems.length || 0}</p>
       <p class="text-xs text-slate-500">Created: ${new Date(item.created_at).toLocaleString()}</p>
       <p class="text-xs text-slate-500 mt-1">Text: ${safeDesignText}</p>
+      <details class="mt-2">
+        <summary class="text-xs font-semibold cursor-pointer">View line items</summary>
+        <div class="mt-2 space-y-2">${lineItemsHtml}</div>
+      </details>
       <div class="mt-2 grid grid-cols-1 gap-2">
         <select data-submission-status="${item.id}" class="border rounded-lg p-2 text-xs">
           <option value="new" ${status === 'new' ? 'selected' : ''}>New</option>
@@ -930,14 +974,47 @@ function renderSubmissionList() {
   });
 }
 
+function renderLanyardHealth() {
+  const el = document.getElementById('catalogHealth');
+  if (!el) return;
+  const activeTypes = state.lanyardTypes.filter((item) => item.is_active).length;
+  const activeMain = state.lanyardFittings.filter((item) => item.is_active && item.fitting_kind !== 'addon').length;
+  const activeAddon = state.lanyardFittings.filter((item) => item.is_active && item.fitting_kind === 'addon').length;
+  const metrics = state.lanyardMetrics || {};
+  const warnings = [];
+  if (!activeTypes) warnings.push('No active lanyard types.');
+  if (!activeMain) warnings.push('No active main accessories.');
+  if (!activeAddon) warnings.push('No active add-on accessories.');
+  el.innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap gap-2 text-xs">
+        <span class="px-2 py-1 rounded-full bg-slate-100">Active Types: ${activeTypes}</span>
+        <span class="px-2 py-1 rounded-full bg-slate-100">Main Accessories: ${activeMain}</span>
+        <span class="px-2 py-1 rounded-full bg-slate-100">Add-ons: ${activeAddon}</span>
+        <span class="px-2 py-1 rounded-full bg-slate-100">Submissions: ${metrics.submissionsCount || 0}</span>
+      </div>
+      <div class="text-xs text-slate-500">Latest Submission: ${metrics.latestSubmissionAt ? new Date(metrics.latestSubmissionAt).toLocaleString() : '-'}</div>
+    </div>
+    ${warnings.length ? `<div class="mt-3 text-xs text-amber-700">${warnings.join(' ')}</div>` : '<div class="mt-3 text-xs text-emerald-700">Catalog health is good.</div>'}
+  `;
+}
+
 function resetLanyardTypeForm() {
   document.getElementById('lanyardTypeForm').reset();
   document.getElementById('lanyardTypeId').value = '';
+  document.getElementById('lanyardTypeBreakaway').value = '1';
+  document.getElementById('lanyardTypeActive').value = '1';
 }
 
 function resetLanyardFittingForm() {
   document.getElementById('lanyardFittingForm').reset();
   document.getElementById('lanyardFittingId').value = '';
+  document.getElementById('lanyardFittingKind').value = 'main';
+  document.getElementById('fittingAnchorX').value = 0;
+  document.getElementById('fittingAnchorY').value = 0;
+  document.getElementById('fittingAnchorScale').value = 1;
+  document.getElementById('fittingAnchorRotation').value = 0;
+  document.getElementById('lanyardFittingActive').value = '1';
 }
 
 function addPricingTierRow(tier = {}) {
@@ -1144,6 +1221,8 @@ async function editLanyardType(id) {
   document.getElementById('lanyardTypeSlug').value = item.slug || '';
   document.getElementById('lanyardTypeSort').value = item.sort_order || 0;
   document.getElementById('lanyardTypeDesc').value = item.description || '';
+  document.getElementById('lanyardTypeBaseImage').value = item.preview_base_image || '';
+  document.getElementById('lanyardTypeBreakaway').value = item.is_breakaway_supported ? '1' : '0';
   document.getElementById('lanyardTypeActive').value = item.is_active ? '1' : '0';
 }
 
@@ -1155,6 +1234,13 @@ async function editLanyardFitting(id) {
   document.getElementById('lanyardFittingSlug').value = item.slug || '';
   document.getElementById('lanyardFittingSort').value = item.sort_order || 0;
   document.getElementById('lanyardFittingDesc').value = item.description || '';
+  document.getElementById('lanyardFittingKind').value = item.fitting_kind || 'main';
+  document.getElementById('lanyardFittingPreviewImage').value = item.preview_image || '';
+  const anchor = item.preview_anchor || { x: 0, y: 0, scale: 1, rotation: 0 };
+  document.getElementById('fittingAnchorX').value = anchor.x ?? 0;
+  document.getElementById('fittingAnchorY').value = anchor.y ?? 0;
+  document.getElementById('fittingAnchorScale').value = anchor.scale ?? 1;
+  document.getElementById('fittingAnchorRotation').value = anchor.rotation ?? 0;
   document.getElementById('lanyardFittingActive').value = item.is_active ? '1' : '0';
 }
 
@@ -1401,6 +1487,8 @@ document.getElementById('lanyardTypeForm').addEventListener('submit', async (e) 
   formData.append('name', document.getElementById('lanyardTypeName').value.trim());
   formData.append('slug', document.getElementById('lanyardTypeSlug').value.trim());
   formData.append('description', document.getElementById('lanyardTypeDesc').value.trim());
+  formData.append('preview_base_image', document.getElementById('lanyardTypeBaseImage').value.trim());
+  formData.append('is_breakaway_supported', document.getElementById('lanyardTypeBreakaway').value);
   formData.append('sort_order', document.getElementById('lanyardTypeSort').value);
   formData.append('is_active', document.getElementById('lanyardTypeActive').value);
   const file = document.getElementById('lanyardTypeImage').files[0];
@@ -1428,6 +1516,14 @@ document.getElementById('lanyardFittingForm').addEventListener('submit', async (
   formData.append('name', document.getElementById('lanyardFittingName').value.trim());
   formData.append('slug', document.getElementById('lanyardFittingSlug').value.trim());
   formData.append('description', document.getElementById('lanyardFittingDesc').value.trim());
+  formData.append('fitting_kind', document.getElementById('lanyardFittingKind').value);
+  formData.append('preview_image', document.getElementById('lanyardFittingPreviewImage').value.trim());
+  formData.append('preview_anchor_json', JSON.stringify({
+    x: Number(document.getElementById('fittingAnchorX').value || 0),
+    y: Number(document.getElementById('fittingAnchorY').value || 0),
+    scale: Number(document.getElementById('fittingAnchorScale').value || 1),
+    rotation: Number(document.getElementById('fittingAnchorRotation').value || 0)
+  }));
   formData.append('sort_order', document.getElementById('lanyardFittingSort').value);
   formData.append('is_active', document.getElementById('lanyardFittingActive').value);
   const file = document.getElementById('lanyardFittingImage').files[0];

@@ -217,6 +217,8 @@ function migrate(db) {
       slug TEXT NOT NULL UNIQUE,
       description TEXT,
       image TEXT,
+      preview_base_image TEXT,
+      is_breakaway_supported INTEGER DEFAULT 1,
       is_active INTEGER DEFAULT 1,
       sort_order INTEGER DEFAULT 0,
       created_at TEXT NOT NULL,
@@ -229,6 +231,9 @@ function migrate(db) {
       slug TEXT NOT NULL UNIQUE,
       description TEXT,
       image TEXT,
+      fitting_kind TEXT DEFAULT 'main',
+      preview_image TEXT,
+      preview_anchor_json TEXT,
       is_active INTEGER DEFAULT 1,
       sort_order INTEGER DEFAULT 0,
       created_at TEXT NOT NULL,
@@ -252,6 +257,7 @@ function migrate(db) {
       design_text TEXT,
       text_color TEXT,
       logo_data TEXT,
+      line_items_json TEXT,
       status TEXT DEFAULT 'new',
       source_page TEXT,
       notes TEXT,
@@ -266,8 +272,33 @@ function migrate(db) {
     CREATE INDEX IF NOT EXISTS idx_audit_admin ON audit_log(admin_id);
     CREATE INDEX IF NOT EXISTS idx_lanyard_types_active ON lanyard_types(is_active, sort_order);
     CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_active ON lanyard_fittings(is_active, sort_order);
+    CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_kind ON lanyard_fittings(fitting_kind, is_active, sort_order);
     CREATE INDEX IF NOT EXISTS idx_design_submissions_status ON design_submissions(status, created_at);
   `);
+}
+
+function hasColumn(db, table, column) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  return cols.some((col) => col.name === column);
+}
+
+function addColumnIfMissing(db, table, column, definition) {
+  if (!hasColumn(db, table, column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+function evolveSchema(db) {
+  addColumnIfMissing(db, 'lanyard_types', 'preview_base_image', 'TEXT');
+  addColumnIfMissing(db, 'lanyard_types', 'is_breakaway_supported', 'INTEGER DEFAULT 1');
+
+  addColumnIfMissing(db, 'lanyard_fittings', 'fitting_kind', "TEXT DEFAULT 'main'");
+  addColumnIfMissing(db, 'lanyard_fittings', 'preview_image', 'TEXT');
+  addColumnIfMissing(db, 'lanyard_fittings', 'preview_anchor_json', 'TEXT');
+
+  addColumnIfMissing(db, 'design_submissions', 'line_items_json', 'TEXT');
+  db.exec(`UPDATE lanyard_fittings SET fitting_kind = 'main' WHERE fitting_kind IS NULL OR fitting_kind = ''`);
+  db.exec(`UPDATE lanyard_types SET is_breakaway_supported = 1 WHERE is_breakaway_supported IS NULL`);
 }
 
 function seedCategories(db) {
@@ -308,36 +339,38 @@ function seedLanyardCatalog(db) {
 
   const now = new Date().toISOString();
   const types = [
-    { name: 'Full Color Sublimation', slug: 'full-color-sublimation' },
-    { name: 'Polyester', slug: 'polyester' },
-    { name: 'Nylon', slug: 'nylon' },
-    { name: 'Woven', slug: 'woven' }
+    { name: 'Full Color Sublimation', slug: 'full-color-sublimation', isBreakawaySupported: 1 },
+    { name: 'Polyester', slug: 'polyester', isBreakawaySupported: 1 },
+    { name: 'Nylon', slug: 'nylon', isBreakawaySupported: 1 },
+    { name: 'Woven', slug: 'woven', isBreakawaySupported: 0 }
   ];
 
   const fittings = [
-    { name: 'Metal Hook', slug: 'metal-hook' },
-    { name: 'Lobster Hook', slug: 'lobster-hook' },
-    { name: 'Bulldog Clip', slug: 'bulldog-clip' },
-    { name: 'Safety Breakaway', slug: 'safety-breakaway' },
-    { name: 'Buckle Release', slug: 'buckle-release' },
-    { name: 'Badge Reel', slug: 'badge-reel' }
+    { name: 'Lobster Clip', slug: 'lobster-clip', kind: 'main' },
+    { name: 'Duck Egg Clip', slug: 'duck-egg-clip', kind: 'main' },
+    { name: 'Swivel Hook', slug: 'swivel-hook', kind: 'main' },
+    { name: 'Bulldog Clip', slug: 'bulldog-clip', kind: 'main' },
+    { name: 'Keyring', slug: 'keyring', kind: 'main' },
+    { name: 'Detachable Buckle', slug: 'detachable-buckle', kind: 'addon' },
+    { name: 'Safety Buckle', slug: 'safety-buckle', kind: 'addon' },
+    { name: 'Mobile Phone Strap', slug: 'mobile-phone-strap', kind: 'addon' }
   ];
 
   const tx = db.transaction(() => {
     if (!typeCount || typeCount.count === 0) {
       const insertType = db.prepare(`
-        INSERT INTO lanyard_types (name, slug, description, is_active, sort_order, created_at, updated_at)
-        VALUES (?, ?, '', 1, ?, ?, ?)
+        INSERT INTO lanyard_types (name, slug, description, preview_base_image, is_breakaway_supported, is_active, sort_order, created_at, updated_at)
+        VALUES (?, ?, '', '', ?, 1, ?, ?, ?)
       `);
-      types.forEach((item, index) => insertType.run(item.name, item.slug, index + 1, now, now));
+      types.forEach((item, index) => insertType.run(item.name, item.slug, item.isBreakawaySupported, index + 1, now, now));
     }
 
     if (!fittingCount || fittingCount.count === 0) {
       const insertFitting = db.prepare(`
-        INSERT INTO lanyard_fittings (name, slug, description, is_active, sort_order, created_at, updated_at)
-        VALUES (?, ?, '', 1, ?, ?, ?)
+        INSERT INTO lanyard_fittings (name, slug, description, image, fitting_kind, preview_image, preview_anchor_json, is_active, sort_order, created_at, updated_at)
+        VALUES (?, ?, '', '', ?, '', '', 1, ?, ?, ?)
       `);
-      fittings.forEach((item, index) => insertFitting.run(item.name, item.slug, index + 1, now, now));
+      fittings.forEach((item, index) => insertFitting.run(item.name, item.slug, item.kind, index + 1, now, now));
     }
   });
 
@@ -375,6 +408,7 @@ async function initDb() {
   const adapter = createAdapter(db);
   adapter.pragma('foreign_keys = ON');
   migrate(adapter);
+  evolveSchema(adapter);
   seedCategories(adapter);
   seedLanyardCatalog(adapter);
   dbInstance = adapter;
