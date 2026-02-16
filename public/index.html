@@ -192,10 +192,16 @@ body {
 
 /* Gradient Text */
 .gradient-text {
+  color: var(--brand-800);
   background: linear-gradient(135deg, var(--brand-900) 0%, var(--accent-600) 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.stock-badge {
+  background-color: #ecfdf3 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #047857 !important;
 }
 
 /* Loading Spinner */
@@ -529,7 +535,7 @@ header.scrolled {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
     <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-all group">
       <img src="/assets/veom-logo.png" class="h-12 w-auto transition-transform group-hover:scale-110" alt="Arya Overseas Logo" loading="eager">
-      <span class="text-2xl font-bold tracking-wide gradient-text">ARYA OVERSEAS</span>
+      <span class="text-2xl font-bold tracking-wide text-blue-900">ARYA OVERSEAS</span>
     </a>
 
     <nav class="hidden md:flex items-center gap-8 font-medium">
@@ -965,9 +971,23 @@ async function loadProducts() {
 
   function resolveImageSrc(rawImage) {
     if (!rawImage) return '/assets/veom-logo.png';
-    if (/^https?:\/\//i.test(rawImage)) return rawImage;
-    if (rawImage.startsWith('/')) return `${API_BASE}${rawImage}`;
-    return `${API_BASE}/${rawImage}`;
+    const clean = String(rawImage).trim().replace(/\\/g, '/');
+    if (/^https?:\/\//i.test(clean)) return encodeURI(clean);
+
+    const uploadsIndex = clean.indexOf('/uploads/');
+    if (uploadsIndex >= 0) {
+      return `${API_BASE}${encodeURI(clean.slice(uploadsIndex))}`;
+    }
+
+    if (clean.startsWith('uploads/')) {
+      return `${API_BASE}/${encodeURI(clean)}`;
+    }
+
+    if (clean.startsWith('/')) {
+      return `${API_BASE}${encodeURI(clean)}`;
+    }
+
+    return `${API_BASE}/${encodeURI(clean)}`;
   }
   
   try {
@@ -1009,7 +1029,7 @@ async function loadProducts() {
               </div>
             </a>
             <div class="absolute top-4 left-4">
-              <span class="inline-flex items-center rounded-full bg-green-50 text-green-700 px-3 py-1 text-xs font-bold border border-green-200">
+              <span class="stock-badge inline-flex items-center rounded-full px-3 py-1 text-xs font-bold">
                 In Stock
               </span>
             </div>
