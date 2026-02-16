@@ -41,6 +41,7 @@
     <button class="tab-btn tab-active px-4 py-2 rounded-lg text-sm font-semibold" data-tab="products">Products</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="categories">Categories</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="inventory">Inventory</button>
+    <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="lanyards">Lanyards</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="imports">Import/Export</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="audit">Audit Log</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="admins">Admins</button>
@@ -278,6 +279,68 @@
     </div>
   </section>
 
+  <!-- LANYARDS TAB -->
+  <section id="tab-lanyards" class="hidden-section">
+    <div class="grid xl:grid-cols-3 gap-6 mb-6">
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Lanyard Types</h2>
+        <form id="lanyardTypeForm" class="space-y-3">
+          <input type="hidden" id="lanyardTypeId">
+          <input id="lanyardTypeName" type="text" placeholder="Type name" class="w-full border rounded-lg p-2" required>
+          <input id="lanyardTypeSlug" type="text" placeholder="Slug (optional)" class="w-full border rounded-lg p-2">
+          <input id="lanyardTypeSort" type="number" placeholder="Sort order" class="w-full border rounded-lg p-2">
+          <textarea id="lanyardTypeDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
+          <input id="lanyardTypeImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
+          <select id="lanyardTypeActive" class="w-full border rounded-lg p-2">
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+          <div class="flex gap-2">
+            <button type="submit" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg">Save</button>
+            <button type="button" id="resetLanyardType" class="flex-1 border rounded-lg py-2">Clear</button>
+          </div>
+        </form>
+        <div id="lanyardTypeList" class="mt-4 space-y-2"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Lanyard Fittings</h2>
+        <form id="lanyardFittingForm" class="space-y-3">
+          <input type="hidden" id="lanyardFittingId">
+          <input id="lanyardFittingName" type="text" placeholder="Fitting name" class="w-full border rounded-lg p-2" required>
+          <input id="lanyardFittingSlug" type="text" placeholder="Slug (optional)" class="w-full border rounded-lg p-2">
+          <input id="lanyardFittingSort" type="number" placeholder="Sort order" class="w-full border rounded-lg p-2">
+          <textarea id="lanyardFittingDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
+          <input id="lanyardFittingImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
+          <select id="lanyardFittingActive" class="w-full border rounded-lg p-2">
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+          <div class="flex gap-2">
+            <button type="submit" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg">Save</button>
+            <button type="button" id="resetLanyardFitting" class="flex-1 border rounded-lg py-2">Clear</button>
+          </div>
+        </form>
+        <div id="lanyardFittingList" class="mt-4 space-y-2"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Submission Queue</h2>
+        <div class="flex gap-2 mb-3">
+          <select id="submissionStatusFilter" class="w-full border rounded-lg p-2 text-sm">
+            <option value="">All statuses</option>
+            <option value="new">New</option>
+            <option value="in_progress">In Progress</option>
+            <option value="quoted">Quoted</option>
+            <option value="closed">Closed</option>
+          </select>
+          <button id="refreshSubmissions" class="border rounded-lg px-3 text-sm">Refresh</button>
+        </div>
+        <div id="submissionList" class="space-y-2 max-h-[640px] overflow-auto"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- IMPORTS TAB -->
   <section id="tab-imports" class="hidden-section">
     <div class="grid lg:grid-cols-3 gap-6">
@@ -397,7 +460,10 @@ const state = {
   admins: [],
   audit: [],
   database: null,
-  backups: []
+  backups: [],
+  lanyardTypes: [],
+  lanyardFittings: [],
+  lanyardSubmissions: []
 };
 
 const API = '';
@@ -425,6 +491,15 @@ function isLowStock(variant) {
 
 function normalizeText(value) {
   return (value || '').toString().toLowerCase();
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function getFilteredVariants() {
@@ -499,7 +574,17 @@ async function loadAdmin() {
 
 async function loadAll() {
   await loadAdmin();
-  await Promise.all([loadCategories(), loadProducts(), loadVariants(), loadAdmins(), loadAudit(), loadDbStatus()]);
+  await Promise.all([
+    loadCategories(),
+    loadProducts(),
+    loadVariants(),
+    loadAdmins(),
+    loadAudit(),
+    loadDbStatus(),
+    loadLanyardTypes(),
+    loadLanyardFittings(),
+    loadLanyardSubmissions()
+  ]);
 }
 
 async function loadCategories() {
@@ -538,6 +623,26 @@ async function loadDbStatus() {
   state.database = data.database;
   state.backups = data.backups || [];
   renderDbStatus();
+}
+
+async function loadLanyardTypes() {
+  const data = await fetchJSON('/api/admin/lanyard/types');
+  state.lanyardTypes = data.types || [];
+  renderLanyardTypeList();
+}
+
+async function loadLanyardFittings() {
+  const data = await fetchJSON('/api/admin/lanyard/fittings');
+  state.lanyardFittings = data.fittings || [];
+  renderLanyardFittingList();
+}
+
+async function loadLanyardSubmissions() {
+  const status = document.getElementById('submissionStatusFilter')?.value || '';
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const data = await fetchJSON(`/api/admin/lanyard/submissions${query}`);
+  state.lanyardSubmissions = data.submissions || [];
+  renderSubmissionList();
 }
 
 function renderCategorySelects() {
@@ -722,6 +827,117 @@ function renderDbStatus() {
     `;
     backupList.appendChild(row);
   });
+}
+
+function renderLanyardTypeList() {
+  const container = document.getElementById('lanyardTypeList');
+  if (!container) return;
+  container.innerHTML = '';
+  state.lanyardTypes.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'border rounded-lg p-3';
+    const safeName = escapeHtml(item.name);
+    const safeSlug = escapeHtml(item.slug);
+    const safeDesc = escapeHtml(item.description || '');
+    row.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="font-semibold text-sm">${safeName}</p>
+          <p class="text-xs text-slate-500">${safeSlug} · sort ${item.sort_order || 0}</p>
+          <p class="text-xs text-slate-500 mt-1">${safeDesc}</p>
+        </div>
+        ${item.image ? `<img src="${escapeHtml(item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
+      </div>
+      <div class="mt-2 flex gap-3 text-xs">
+        <button class="text-emerald-700" onclick="editLanyardType(${item.id})">Edit</button>
+        <button class="text-red-600" onclick="deleteLanyardType(${item.id})">Delete</button>
+        <span class="${item.is_active ? 'text-emerald-700' : 'text-slate-400'}">${item.is_active ? 'Active' : 'Inactive'}</span>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderLanyardFittingList() {
+  const container = document.getElementById('lanyardFittingList');
+  if (!container) return;
+  container.innerHTML = '';
+  state.lanyardFittings.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'border rounded-lg p-3';
+    const safeName = escapeHtml(item.name);
+    const safeSlug = escapeHtml(item.slug);
+    const safeDesc = escapeHtml(item.description || '');
+    row.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="font-semibold text-sm">${safeName}</p>
+          <p class="text-xs text-slate-500">${safeSlug} · sort ${item.sort_order || 0}</p>
+          <p class="text-xs text-slate-500 mt-1">${safeDesc}</p>
+        </div>
+        ${item.image ? `<img src="${escapeHtml(item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
+      </div>
+      <div class="mt-2 flex gap-3 text-xs">
+        <button class="text-emerald-700" onclick="editLanyardFitting(${item.id})">Edit</button>
+        <button class="text-red-600" onclick="deleteLanyardFitting(${item.id})">Delete</button>
+        <span class="${item.is_active ? 'text-emerald-700' : 'text-slate-400'}">${item.is_active ? 'Active' : 'Inactive'}</span>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderSubmissionList() {
+  const container = document.getElementById('submissionList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!state.lanyardSubmissions.length) {
+    container.innerHTML = '<p class="text-sm text-slate-500">No submissions found.</p>';
+    return;
+  }
+
+  state.lanyardSubmissions.forEach(item => {
+    const status = item.status || 'new';
+    const safeName = escapeHtml(item.name || 'Unknown');
+    const safePhone = escapeHtml(item.phone || '-');
+    const safeEmail = escapeHtml(item.email || '-');
+    const safeCompany = escapeHtml(item.company || '-');
+    const safeTypeName = escapeHtml(item.lanyard_type_name || '-');
+    const safeQty = escapeHtml(item.quantity || '-');
+    const safeDesignText = escapeHtml(item.design_text || '-');
+    const safeNotes = escapeHtml(item.notes || '');
+    const row = document.createElement('div');
+    row.className = 'border rounded-lg p-3';
+    row.innerHTML = `
+      <p class="text-sm font-semibold">${safeName} · ${safePhone}</p>
+      <p class="text-xs text-slate-500">${safeEmail} · ${safeCompany}</p>
+      <p class="text-xs text-slate-500 mt-1">Type: ${safeTypeName} · Qty: ${safeQty}</p>
+      <p class="text-xs text-slate-500">Created: ${new Date(item.created_at).toLocaleString()}</p>
+      <p class="text-xs text-slate-500 mt-1">Text: ${safeDesignText}</p>
+      <div class="mt-2 grid grid-cols-1 gap-2">
+        <select data-submission-status="${item.id}" class="border rounded-lg p-2 text-xs">
+          <option value="new" ${status === 'new' ? 'selected' : ''}>New</option>
+          <option value="in_progress" ${status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+          <option value="quoted" ${status === 'quoted' ? 'selected' : ''}>Quoted</option>
+          <option value="closed" ${status === 'closed' ? 'selected' : ''}>Closed</option>
+        </select>
+        <input data-submission-notes="${item.id}" type="text" class="border rounded-lg p-2 text-xs" placeholder="Notes" value="${safeNotes}">
+        <button class="text-xs bg-slate-800 text-white py-2 rounded-lg" onclick="updateSubmission(${item.id})">Save</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function resetLanyardTypeForm() {
+  document.getElementById('lanyardTypeForm').reset();
+  document.getElementById('lanyardTypeId').value = '';
+}
+
+function resetLanyardFittingForm() {
+  document.getElementById('lanyardFittingForm').reset();
+  document.getElementById('lanyardFittingId').value = '';
 }
 
 function addPricingTierRow(tier = {}) {
@@ -920,6 +1136,67 @@ async function createDbBackup() {
   }
 }
 
+async function editLanyardType(id) {
+  const item = state.lanyardTypes.find(x => String(x.id) === String(id));
+  if (!item) return;
+  document.getElementById('lanyardTypeId').value = item.id;
+  document.getElementById('lanyardTypeName').value = item.name || '';
+  document.getElementById('lanyardTypeSlug').value = item.slug || '';
+  document.getElementById('lanyardTypeSort').value = item.sort_order || 0;
+  document.getElementById('lanyardTypeDesc').value = item.description || '';
+  document.getElementById('lanyardTypeActive').value = item.is_active ? '1' : '0';
+}
+
+async function editLanyardFitting(id) {
+  const item = state.lanyardFittings.find(x => String(x.id) === String(id));
+  if (!item) return;
+  document.getElementById('lanyardFittingId').value = item.id;
+  document.getElementById('lanyardFittingName').value = item.name || '';
+  document.getElementById('lanyardFittingSlug').value = item.slug || '';
+  document.getElementById('lanyardFittingSort').value = item.sort_order || 0;
+  document.getElementById('lanyardFittingDesc').value = item.description || '';
+  document.getElementById('lanyardFittingActive').value = item.is_active ? '1' : '0';
+}
+
+async function deleteLanyardType(id) {
+  if (!confirm('Delete this lanyard type?')) return;
+  try {
+    await fetchJSON(`/api/admin/lanyard/types/${id}`, { method: 'DELETE' });
+    showMessage('Lanyard type deleted');
+    await loadLanyardTypes();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+}
+
+async function deleteLanyardFitting(id) {
+  if (!confirm('Delete this lanyard fitting?')) return;
+  try {
+    await fetchJSON(`/api/admin/lanyard/fittings/${id}`, { method: 'DELETE' });
+    showMessage('Lanyard fitting deleted');
+    await loadLanyardFittings();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+}
+
+async function updateSubmission(id) {
+  const statusEl = document.querySelector(`[data-submission-status="${id}"]`);
+  const notesEl = document.querySelector(`[data-submission-notes="${id}"]`);
+  if (!statusEl || !notesEl) return;
+  try {
+    await fetchJSON(`/api/admin/lanyard/submissions/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: statusEl.value, notes: notesEl.value })
+    });
+    showMessage('Submission updated');
+    await loadLanyardSubmissions();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+}
+
 // Event bindings
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -1090,6 +1367,8 @@ document.getElementById('downloadLiveDbBtn').addEventListener('click', () => {
   window.location.href = '/api/admin/db/download';
 });
 document.getElementById('refreshDbBtn').addEventListener('click', loadDbStatus);
+document.getElementById('refreshSubmissions').addEventListener('click', loadLanyardSubmissions);
+document.getElementById('submissionStatusFilter').addEventListener('change', loadLanyardSubmissions);
 
 // Admin form
 
@@ -1114,6 +1393,63 @@ document.getElementById('adminForm').addEventListener('submit', async (e) => {
 
 document.getElementById('applyStock').addEventListener('click', applyStock);
 document.getElementById('closeStock').addEventListener('click', closeStockModal);
+
+document.getElementById('lanyardTypeForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('lanyardTypeId').value;
+  const formData = new FormData();
+  formData.append('name', document.getElementById('lanyardTypeName').value.trim());
+  formData.append('slug', document.getElementById('lanyardTypeSlug').value.trim());
+  formData.append('description', document.getElementById('lanyardTypeDesc').value.trim());
+  formData.append('sort_order', document.getElementById('lanyardTypeSort').value);
+  formData.append('is_active', document.getElementById('lanyardTypeActive').value);
+  const file = document.getElementById('lanyardTypeImage').files[0];
+  if (file) formData.append('image', file);
+
+  try {
+    if (id) {
+      await fetchJSON(`/api/admin/lanyard/types/${id}`, { method: 'PUT', body: formData });
+      showMessage('Lanyard type updated');
+    } else {
+      await fetchJSON('/api/admin/lanyard/types', { method: 'POST', body: formData });
+      showMessage('Lanyard type created');
+    }
+    resetLanyardTypeForm();
+    await loadLanyardTypes();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+});
+
+document.getElementById('lanyardFittingForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('lanyardFittingId').value;
+  const formData = new FormData();
+  formData.append('name', document.getElementById('lanyardFittingName').value.trim());
+  formData.append('slug', document.getElementById('lanyardFittingSlug').value.trim());
+  formData.append('description', document.getElementById('lanyardFittingDesc').value.trim());
+  formData.append('sort_order', document.getElementById('lanyardFittingSort').value);
+  formData.append('is_active', document.getElementById('lanyardFittingActive').value);
+  const file = document.getElementById('lanyardFittingImage').files[0];
+  if (file) formData.append('image', file);
+
+  try {
+    if (id) {
+      await fetchJSON(`/api/admin/lanyard/fittings/${id}`, { method: 'PUT', body: formData });
+      showMessage('Lanyard fitting updated');
+    } else {
+      await fetchJSON('/api/admin/lanyard/fittings', { method: 'POST', body: formData });
+      showMessage('Lanyard fitting created');
+    }
+    resetLanyardFittingForm();
+    await loadLanyardFittings();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+});
+
+document.getElementById('resetLanyardType').addEventListener('click', resetLanyardTypeForm);
+document.getElementById('resetLanyardFitting').addEventListener('click', resetLanyardFittingForm);
 
 // Init
 addPricingTierRow();

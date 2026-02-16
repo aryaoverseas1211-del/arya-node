@@ -211,11 +211,62 @@ function migrate(db) {
       FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
     );
 
+    CREATE TABLE IF NOT EXISTS lanyard_types (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      slug TEXT NOT NULL UNIQUE,
+      description TEXT,
+      image TEXT,
+      is_active INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS lanyard_fittings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      slug TEXT NOT NULL UNIQUE,
+      description TEXT,
+      image TEXT,
+      is_active INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS design_submissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      phone TEXT,
+      email TEXT,
+      company TEXT,
+      quantity INTEGER,
+      lanyard_type_id INTEGER,
+      fitting_ids_json TEXT,
+      width_mm INTEGER,
+      length_inch INTEGER,
+      quality TEXT,
+      printing_style TEXT,
+      bg_color TEXT,
+      design_text TEXT,
+      text_color TEXT,
+      logo_data TEXT,
+      status TEXT DEFAULT 'new',
+      source_page TEXT,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (lanyard_type_id) REFERENCES lanyard_types(id) ON DELETE SET NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
     CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
     CREATE INDEX IF NOT EXISTS idx_variants_product ON variants(product_id);
     CREATE INDEX IF NOT EXISTS idx_inventory_variant ON inventory_adjustments(variant_id);
     CREATE INDEX IF NOT EXISTS idx_audit_admin ON audit_log(admin_id);
+    CREATE INDEX IF NOT EXISTS idx_lanyard_types_active ON lanyard_types(is_active, sort_order);
+    CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_active ON lanyard_fittings(is_active, sort_order);
+    CREATE INDEX IF NOT EXISTS idx_design_submissions_status ON design_submissions(status, created_at);
   `);
 }
 
@@ -247,6 +298,49 @@ function seedCategories(db) {
       insert.run(item.name, item.slug, now, now, index + 1);
     });
   });
+  tx();
+}
+
+function seedLanyardCatalog(db) {
+  const typeCount = db.prepare('SELECT COUNT(*) as count FROM lanyard_types').get();
+  const fittingCount = db.prepare('SELECT COUNT(*) as count FROM lanyard_fittings').get();
+  if ((typeCount && typeCount.count > 0) && (fittingCount && fittingCount.count > 0)) return;
+
+  const now = new Date().toISOString();
+  const types = [
+    { name: 'Full Color Sublimation', slug: 'full-color-sublimation' },
+    { name: 'Polyester', slug: 'polyester' },
+    { name: 'Nylon', slug: 'nylon' },
+    { name: 'Woven', slug: 'woven' }
+  ];
+
+  const fittings = [
+    { name: 'Metal Hook', slug: 'metal-hook' },
+    { name: 'Lobster Hook', slug: 'lobster-hook' },
+    { name: 'Bulldog Clip', slug: 'bulldog-clip' },
+    { name: 'Safety Breakaway', slug: 'safety-breakaway' },
+    { name: 'Buckle Release', slug: 'buckle-release' },
+    { name: 'Badge Reel', slug: 'badge-reel' }
+  ];
+
+  const tx = db.transaction(() => {
+    if (!typeCount || typeCount.count === 0) {
+      const insertType = db.prepare(`
+        INSERT INTO lanyard_types (name, slug, description, is_active, sort_order, created_at, updated_at)
+        VALUES (?, ?, '', 1, ?, ?, ?)
+      `);
+      types.forEach((item, index) => insertType.run(item.name, item.slug, index + 1, now, now));
+    }
+
+    if (!fittingCount || fittingCount.count === 0) {
+      const insertFitting = db.prepare(`
+        INSERT INTO lanyard_fittings (name, slug, description, is_active, sort_order, created_at, updated_at)
+        VALUES (?, ?, '', 1, ?, ?, ?)
+      `);
+      fittings.forEach((item, index) => insertFitting.run(item.name, item.slug, index + 1, now, now));
+    }
+  });
+
   tx();
 }
 
@@ -282,6 +376,7 @@ async function initDb() {
   adapter.pragma('foreign_keys = ON');
   migrate(adapter);
   seedCategories(adapter);
+  seedLanyardCatalog(adapter);
   dbInstance = adapter;
   return dbInstance;
 }

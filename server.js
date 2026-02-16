@@ -21,6 +21,7 @@ const persistRoot = process.env.PERSIST_DIR || path.join(os.homedir(), 'aryaover
 const uploadsDir = process.env.UPLOADS_DIR || path.join(persistRoot, 'uploads');
 const dataDir = path.join(APP_ROOT, 'data');
 const backupDir = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups');
+const sheetsWebhookUrl = (process.env.GOOGLE_SHEETS_WEBHOOK_URL || '').trim();
 
 // Middleware
 app.use(cors());
@@ -210,6 +211,19 @@ function logAudit(adminId, action, entity, entityId, details) {
     );
   } catch (err) {
     console.error('Audit log error:', err);
+  }
+}
+
+async function pushSubmissionToSheets(submission) {
+  if (!sheetsWebhookUrl) return;
+  try {
+    await fetch(sheetsWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(submission)
+    });
+  } catch (err) {
+    console.error('Google Sheets webhook sync failed:', err.message);
   }
 }
 
@@ -440,8 +454,283 @@ app.get('/api/products/:id', (req, res) => {
   res.json({ success: true, product });
 });
 
+app.get('/api/lanyard/catalog', (req, res) => {
+  const types = db.prepare(`
+    SELECT id, name, slug, description, image, sort_order
+    FROM lanyard_types
+    WHERE is_active = 1
+    ORDER BY sort_order, name
+  `).all();
+
+  const fittings = db.prepare(`
+    SELECT id, name, slug, description, image, sort_order
+    FROM lanyard_fittings
+    WHERE is_active = 1
+    ORDER BY sort_order, name
+  `).all();
+
+  res.json({ success: true, types, fittings });
+});
+
+app.post('/api/lanyard/submissions', async (req, res) => {
+  const payload = req.body || {};
+  const name = (payload.name || '').trim();
+  const phone = (payload.phone || '').trim();
+
+  if (!name || !phone) {
+    return res.status(400).json({ success: false, message: 'Name and phone are required.' });
+  }
+
+  const quantity = payload.quantity ? Number(payload.quantity) : null;
+  const lanyardTypeId = payload.lanyardTypeId ? Number(payload.lanyardTypeId) : null;
+  const fittingIds = Array.isArray(payload.fittingIds) ? payload.fittingIds.map(Number).filter(Boolean) : [];
+  const now = new Date().toISOString();
+
+  const info = db.prepare(`
+    INSERT INTO design_submissions (
+      name, phone, email, company, quantity, lanyard_type_id, fitting_ids_json, width_mm,
+      length_inch, quality, printing_style, bg_color, design_text, text_color, logo_data,
+      status, source_page, notes, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?)
+  `).run(
+    name,
+    phone,
+    (payload.email || '').trim(),
+    (payload.company || '').trim(),
+    Number.isFinite(quantity) ? quantity : null,
+    Number.isFinite(lanyardTypeId) ? lanyardTypeId : null,
+    JSON.stringify(fittingIds),
+    payload.widthMm ? Number(payload.widthMm) : null,
+    payload.lengthInch ? Number(payload.lengthInch) : null,
+    payload.quality || '',
+    payload.printingStyle || '',
+    payload.bgColor || '',
+    payload.designText || '',
+    payload.textColor || '',
+    payload.logoData || '',
+    payload.sourcePage || '/product/custom-lanyard.html',
+    payload.notes || '',
+    now
+  );
+
+  const submissionId = info.lastInsertRowid;
+  const submissionRow = db.prepare(`
+    SELECT ds.*, lt.name AS lanyard_type_name
+    FROM design_submissions ds
+    LEFT JOIN lanyard_types lt ON lt.id = ds.lanyard_type_id
+    WHERE ds.id = ?
+  `).get(submissionId);
+
+  pushSubmissionToSheets({
+    id: submissionRow.id,
+    name: submissionRow.name,
+    phone: submissionRow.phone,
+    email: submissionRow.email,
+    company: submissionRow.company,
+    quantity: submissionRow.quantity,
+    lanyardType: submissionRow.lanyard_type_name || null,
+    fittingIds: safeJsonParse(submissionRow.fitting_ids_json, []),
+    widthMm: submissionRow.width_mm,
+    lengthInch: submissionRow.length_inch,
+    quality: submissionRow.quality,
+    printingStyle: submissionRow.printing_style,
+    bgColor: submissionRow.bg_color,
+    designText: submissionRow.design_text,
+    textColor: submissionRow.text_color,
+    sourcePage: submissionRow.source_page,
+    status: submissionRow.status,
+    createdAt: submissionRow.created_at
+  });
+
+  res.json({ success: true, submissionId });
+});
+
 // Admin API routes
 app.use('/api/admin', requireAdmin);
+
+app.get('/api/admin/lanyard/types', (req, res) => {
+  const types = db.prepare('SELECT * FROM lanyard_types ORDER BY sort_order, name').all();
+  res.json({ success: true, types });
+});
+
+app.post('/api/admin/lanyard/types', upload.single('image'), (req, res) => {
+  const payload = req.body || {};
+  const name = (payload.name || '').trim();
+  if (!name) {
+    return res.status(400).json({ success: false, message: 'Type name is required.' });
+  }
+  const now = new Date().toISOString();
+  try {
+    const info = db.prepare(`
+      INSERT INTO lanyard_types (name, slug, description, image, is_active, sort_order, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      name,
+      payload.slug ? slugify(payload.slug) : slugify(name),
+      payload.description || '',
+      req.file ? `/uploads/${req.file.filename}` : (payload.image || ''),
+      payload.is_active === '0' || payload.is_active === 'false' ? 0 : 1,
+      Number(payload.sort_order) || 0,
+      now,
+      now
+    );
+    logAudit(req.admin.id, 'create', 'lanyard_type', info.lastInsertRowid, { name });
+    res.json({ success: true, id: info.lastInsertRowid });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+app.put('/api/admin/lanyard/types/:id', upload.single('image'), (req, res) => {
+  const id = req.params.id;
+  const current = db.prepare('SELECT * FROM lanyard_types WHERE id = ?').get(id);
+  if (!current) {
+    return res.status(404).json({ success: false, message: 'Type not found.' });
+  }
+  const payload = req.body || {};
+  const name = payload.name ? payload.name.trim() : current.name;
+  const now = new Date().toISOString();
+  const image = req.file ? `/uploads/${req.file.filename}` : current.image;
+  try {
+    db.prepare(`
+      UPDATE lanyard_types
+      SET name = ?, slug = ?, description = ?, image = ?, is_active = ?, sort_order = ?, updated_at = ?
+      WHERE id = ?
+    `).run(
+      name,
+      payload.slug ? slugify(payload.slug) : current.slug,
+      payload.description ?? current.description,
+      image,
+      payload.is_active === '0' || payload.is_active === 'false' ? 0 : 1,
+      payload.sort_order !== undefined ? Number(payload.sort_order) : current.sort_order,
+      now,
+      id
+    );
+    logAudit(req.admin.id, 'update', 'lanyard_type', id, { name });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/admin/lanyard/types/:id', (req, res) => {
+  const id = req.params.id;
+  const current = db.prepare('SELECT * FROM lanyard_types WHERE id = ?').get(id);
+  if (!current) {
+    return res.status(404).json({ success: false, message: 'Type not found.' });
+  }
+  db.prepare('DELETE FROM lanyard_types WHERE id = ?').run(id);
+  logAudit(req.admin.id, 'delete', 'lanyard_type', id, { name: current.name });
+  res.json({ success: true });
+});
+
+app.get('/api/admin/lanyard/fittings', (req, res) => {
+  const fittings = db.prepare('SELECT * FROM lanyard_fittings ORDER BY sort_order, name').all();
+  res.json({ success: true, fittings });
+});
+
+app.post('/api/admin/lanyard/fittings', upload.single('image'), (req, res) => {
+  const payload = req.body || {};
+  const name = (payload.name || '').trim();
+  if (!name) {
+    return res.status(400).json({ success: false, message: 'Fitting name is required.' });
+  }
+  const now = new Date().toISOString();
+  try {
+    const info = db.prepare(`
+      INSERT INTO lanyard_fittings (name, slug, description, image, is_active, sort_order, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      name,
+      payload.slug ? slugify(payload.slug) : slugify(name),
+      payload.description || '',
+      req.file ? `/uploads/${req.file.filename}` : (payload.image || ''),
+      payload.is_active === '0' || payload.is_active === 'false' ? 0 : 1,
+      Number(payload.sort_order) || 0,
+      now,
+      now
+    );
+    logAudit(req.admin.id, 'create', 'lanyard_fitting', info.lastInsertRowid, { name });
+    res.json({ success: true, id: info.lastInsertRowid });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+app.put('/api/admin/lanyard/fittings/:id', upload.single('image'), (req, res) => {
+  const id = req.params.id;
+  const current = db.prepare('SELECT * FROM lanyard_fittings WHERE id = ?').get(id);
+  if (!current) {
+    return res.status(404).json({ success: false, message: 'Fitting not found.' });
+  }
+  const payload = req.body || {};
+  const name = payload.name ? payload.name.trim() : current.name;
+  const now = new Date().toISOString();
+  const image = req.file ? `/uploads/${req.file.filename}` : current.image;
+  try {
+    db.prepare(`
+      UPDATE lanyard_fittings
+      SET name = ?, slug = ?, description = ?, image = ?, is_active = ?, sort_order = ?, updated_at = ?
+      WHERE id = ?
+    `).run(
+      name,
+      payload.slug ? slugify(payload.slug) : current.slug,
+      payload.description ?? current.description,
+      image,
+      payload.is_active === '0' || payload.is_active === 'false' ? 0 : 1,
+      payload.sort_order !== undefined ? Number(payload.sort_order) : current.sort_order,
+      now,
+      id
+    );
+    logAudit(req.admin.id, 'update', 'lanyard_fitting', id, { name });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/admin/lanyard/fittings/:id', (req, res) => {
+  const id = req.params.id;
+  const current = db.prepare('SELECT * FROM lanyard_fittings WHERE id = ?').get(id);
+  if (!current) {
+    return res.status(404).json({ success: false, message: 'Fitting not found.' });
+  }
+  db.prepare('DELETE FROM lanyard_fittings WHERE id = ?').run(id);
+  logAudit(req.admin.id, 'delete', 'lanyard_fitting', id, { name: current.name });
+  res.json({ success: true });
+});
+
+app.get('/api/admin/lanyard/submissions', (req, res) => {
+  const status = (req.query.status || '').trim();
+  const rows = db.prepare(`
+    SELECT ds.*, lt.name AS lanyard_type_name
+    FROM design_submissions ds
+    LEFT JOIN lanyard_types lt ON lt.id = ds.lanyard_type_id
+    ${status ? 'WHERE ds.status = ?' : ''}
+    ORDER BY ds.created_at DESC
+    LIMIT 500
+  `).all(...(status ? [status] : []));
+
+  const submissions = rows.map(row => ({
+    ...row,
+    fitting_ids: safeJsonParse(row.fitting_ids_json, [])
+  }));
+  res.json({ success: true, submissions });
+});
+
+app.put('/api/admin/lanyard/submissions/:id', (req, res) => {
+  const id = req.params.id;
+  const payload = req.body || {};
+  const current = db.prepare('SELECT * FROM design_submissions WHERE id = ?').get(id);
+  if (!current) {
+    return res.status(404).json({ success: false, message: 'Submission not found.' });
+  }
+  const status = (payload.status || current.status || 'new').trim();
+  const notes = payload.notes !== undefined ? String(payload.notes) : (current.notes || '');
+  db.prepare('UPDATE design_submissions SET status = ?, notes = ? WHERE id = ?').run(status, notes, id);
+  logAudit(req.admin.id, 'update', 'design_submission', id, { status });
+  res.json({ success: true });
+});
 
 app.get('/api/admin/categories', (req, res) => {
   const categories = db.prepare(`

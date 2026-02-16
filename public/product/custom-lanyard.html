@@ -161,30 +161,20 @@
       <div class="grid md:grid-cols-2 gap-6">
         <div>
           <p class="font-medium mb-3">Lanyard Style</p>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="option-tile">
-              <input type="radio" name="style" value="Full Color Sublimation" class="hidden" checked>
-              <span class="block border rounded-xl px-3 py-2 text-sm font-semibold">Full Color Sublimation</span>
-            </label>
-            <label class="option-tile">
-              <input type="radio" name="style" value="Polyester" class="hidden">
-              <span class="block border rounded-xl px-3 py-2 text-sm font-semibold">Polyester</span>
-            </label>
-            <label class="option-tile">
-              <input type="radio" name="style" value="Nylon" class="hidden">
-              <span class="block border rounded-xl px-3 py-2 text-sm font-semibold">Nylon</span>
-            </label>
-            <label class="option-tile">
-              <input type="radio" name="style" value="Woven" class="hidden">
-              <span class="block border rounded-xl px-3 py-2 text-sm font-semibold">Woven</span>
-            </label>
-          </div>
+          <div id="styleOptions" class="grid grid-cols-2 gap-3"></div>
+          <p class="text-xs text-slate-500 mt-2">Managed from CMS → Lanyards.</p>
         </div>
 
         <div>
-          <p class="font-medium mb-3">Brand Base Color</p>
-          <input type="color" id="bgColor" value="#ffffff" class="w-full h-12 border rounded-lg">
+          <p class="font-medium mb-3">Fittings</p>
+          <div id="fittingOptions" class="grid grid-cols-2 gap-2"></div>
+          <p class="text-xs text-slate-500 mt-2">Choose one or more fittings.</p>
         </div>
+      </div>
+
+      <div class="mt-6">
+        <p class="font-medium mb-3">Brand Base Color</p>
+        <input type="color" id="bgColor" value="#ffffff" class="w-full h-12 border rounded-lg">
       </div>
 
       <div class="grid md:grid-cols-4 gap-6 mt-6">
@@ -290,16 +280,30 @@
     <div class="step hidden" id="step4">
       <div class="flex items-center gap-3 mb-6">
         <span class="step-pill text-sm font-semibold px-3 py-1 rounded-full">Step 4</span>
-        <h2 class="text-2xl font-semibold">Send on WhatsApp</h2>
+        <h2 class="text-2xl font-semibold">Submit Design Request</h2>
       </div>
 
-      <input type="number" id="qty" placeholder="Quantity"
-             class="w-full border rounded-lg p-3 mb-4">
+      <div class="grid md:grid-cols-2 gap-3 mb-3">
+        <input type="text" id="customerName" placeholder="Your name *" class="w-full border rounded-lg p-3">
+        <input type="text" id="customerPhone" placeholder="Phone *" class="w-full border rounded-lg p-3">
+      </div>
+      <div class="grid md:grid-cols-2 gap-3 mb-3">
+        <input type="email" id="customerEmail" placeholder="Email" class="w-full border rounded-lg p-3">
+        <input type="text" id="customerCompany" placeholder="Company" class="w-full border rounded-lg p-3">
+      </div>
+      <input type="number" id="qty" placeholder="Quantity" class="w-full border rounded-lg p-3 mb-4">
 
-      <button onclick="sendWhatsApp()"
-              class="bg-green-600 text-white w-full py-4 rounded-full text-lg font-semibold">
-        Send Order on WhatsApp
-      </button>
+      <div class="grid md:grid-cols-2 gap-3">
+        <button onclick="submitDesignRequest()"
+                class="bg-blue-800 text-white w-full py-4 rounded-full text-lg font-semibold">
+          Save Request
+        </button>
+        <button onclick="sendWhatsApp()"
+                class="bg-green-600 text-white w-full py-4 rounded-full text-lg font-semibold">
+          Send on WhatsApp
+        </button>
+      </div>
+      <p id="submitMessage" class="text-sm text-slate-500 mt-3"></p>
     </div>
   </div>
 </section>
@@ -384,6 +388,7 @@
 <script>
 let step = 1;
 let logoData = null;
+let catalog = { types: [], fittings: [] };
 
 document.getElementById("logoUpload").addEventListener("change", e => {
   const file = e.target.files[0];
@@ -412,6 +417,41 @@ function prevStep(){
     step--;
     showStep(step);
   }
+}
+
+function selectedStyleInput() {
+  return document.querySelector("input[name='style']:checked");
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function selectedStyle() {
+  const node = selectedStyleInput();
+  return node ? node.value : '';
+}
+
+function selectedStyleId() {
+  const node = selectedStyleInput();
+  return node ? Number(node.dataset.id || 0) : null;
+}
+
+function selectedFittingIds() {
+  return Array.from(document.querySelectorAll("input[name='fitting']:checked"))
+    .map(node => Number(node.dataset.id || 0))
+    .filter(Boolean);
+}
+
+function selectedFittingNames() {
+  return Array.from(document.querySelectorAll("input[name='fitting']:checked"))
+    .map(node => node.value)
+    .filter(Boolean);
 }
 
 function updatePreview(){
@@ -482,7 +522,8 @@ function downloadPDF(){
 }
 
 function sendWhatsApp(){
-  const style = document.querySelector("input[name='style']:checked").value;
+  const style = selectedStyle();
+  const fittings = selectedFittingNames();
   const width = document.getElementById("width").value;
   const length = document.getElementById("length").value;
   const quality = document.getElementById("quality").value;
@@ -495,6 +536,7 @@ function sendWhatsApp(){
 
   const msg = `Custom Lanyard Order\n` +
     `Style: ${style}\n` +
+    `Fittings: ${fittings.length ? fittings.join(", ") : "-"}\n` +
     `Width: ${width}mm\n` +
     `Length: ${length} inch\n` +
     `Quality: ${quality}\n` +
@@ -508,6 +550,100 @@ function sendWhatsApp(){
 
   window.location.href = `https://wa.me/919667371899?text=${encodeURIComponent(msg)}`;
 }
+
+async function loadCatalog() {
+  try {
+    const response = await fetch('/api/lanyard/catalog');
+    const data = await response.json();
+    if (!data.success) throw new Error(data.message || 'Failed to load catalog');
+    catalog = {
+      types: data.types || [],
+      fittings: data.fittings || []
+    };
+    renderCatalog();
+  } catch (err) {
+    document.getElementById('styleOptions').innerHTML = '<p class="text-sm text-red-600 col-span-2">Unable to load styles.</p>';
+    document.getElementById('fittingOptions').innerHTML = '<p class="text-sm text-red-600 col-span-2">Unable to load fittings.</p>';
+  }
+}
+
+function renderCatalog() {
+  const styleWrap = document.getElementById('styleOptions');
+  const fittingWrap = document.getElementById('fittingOptions');
+  styleWrap.innerHTML = '';
+  fittingWrap.innerHTML = '';
+
+  (catalog.types || []).forEach((type, index) => {
+    const safeName = escapeHtml(type.name);
+    const label = document.createElement('label');
+    label.className = 'option-tile';
+    label.innerHTML = `
+      <input type="radio" name="style" value="${safeName}" data-id="${type.id}" class="hidden" ${index === 0 ? 'checked' : ''}>
+      <span class="block border rounded-xl px-3 py-2 text-sm font-semibold">${safeName}</span>
+    `;
+    styleWrap.appendChild(label);
+  });
+
+  (catalog.fittings || []).forEach((fitting) => {
+    const safeName = escapeHtml(fitting.name);
+    const label = document.createElement('label');
+    label.className = 'option-tile';
+    label.innerHTML = `
+      <input type="checkbox" name="fitting" value="${safeName}" data-id="${fitting.id}" class="hidden">
+      <span class="block border rounded-xl px-3 py-2 text-sm">${safeName}</span>
+    `;
+    fittingWrap.appendChild(label);
+  });
+}
+
+async function submitDesignRequest() {
+  const name = document.getElementById('customerName').value.trim();
+  const phone = document.getElementById('customerPhone').value.trim();
+  const email = document.getElementById('customerEmail').value.trim();
+  const company = document.getElementById('customerCompany').value.trim();
+  const qty = document.getElementById('qty').value;
+
+  if (!name || !phone) {
+    document.getElementById('submitMessage').textContent = 'Name and phone are required.';
+    return;
+  }
+
+  const payload = {
+    name,
+    phone,
+    email,
+    company,
+    quantity: qty ? Number(qty) : null,
+    lanyardTypeId: selectedStyleId(),
+    fittingIds: selectedFittingIds(),
+    widthMm: Number(document.getElementById('width').value),
+    lengthInch: Number(document.getElementById('length').value),
+    quality: document.getElementById('quality').value,
+    printingStyle: document.getElementById('printing').value,
+    bgColor: document.getElementById('bgColor').value,
+    designText: document.getElementById('designText').value,
+    textColor: document.getElementById('textColor').value,
+    logoData: logoData || '',
+    sourcePage: '/product/custom-lanyard.html',
+    notes: ''
+  };
+
+  try {
+    const response = await fetch('/api/lanyard/submissions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.message || 'Failed to submit request');
+    document.getElementById('submitMessage').textContent = `Request saved successfully. ID: ${data.submissionId}`;
+  } catch (err) {
+    document.getElementById('submitMessage').textContent = err.message || 'Failed to submit request.';
+  }
+}
+
+showStep(1);
+loadCatalog();
 </script>
 
 </body>
