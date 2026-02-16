@@ -272,7 +272,6 @@ function migrate(db) {
     CREATE INDEX IF NOT EXISTS idx_audit_admin ON audit_log(admin_id);
     CREATE INDEX IF NOT EXISTS idx_lanyard_types_active ON lanyard_types(is_active, sort_order);
     CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_active ON lanyard_fittings(is_active, sort_order);
-    CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_kind ON lanyard_fittings(fitting_kind, is_active, sort_order);
     CREATE INDEX IF NOT EXISTS idx_design_submissions_status ON design_submissions(status, created_at);
   `);
 }
@@ -299,6 +298,7 @@ function evolveSchema(db) {
   addColumnIfMissing(db, 'design_submissions', 'line_items_json', 'TEXT');
   db.exec(`UPDATE lanyard_fittings SET fitting_kind = 'main' WHERE fitting_kind IS NULL OR fitting_kind = ''`);
   db.exec(`UPDATE lanyard_types SET is_breakaway_supported = 1 WHERE is_breakaway_supported IS NULL`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_kind ON lanyard_fittings(fitting_kind, is_active, sort_order)`);
 }
 
 function seedCategories(db) {
