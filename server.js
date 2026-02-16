@@ -104,7 +104,9 @@ function resolveUploadPath(urlPath) {
   const clean = (urlPath || '').replace(/^\/+/, '');
   if (clean.startsWith('uploads/')) {
     const filename = clean.replace(/^uploads\//, '');
-    return path.join(uploadsDir, filename);
+    const primary = path.join(uploadsDir, filename);
+    if (fs.existsSync(primary)) return primary;
+    return path.join(legacyUploadsDir, filename);
   }
   return path.join(APP_ROOT, clean);
 }
@@ -375,6 +377,7 @@ app.get('/product/product_cms.html', requireAdmin, (req, res) => {
 // Serve static files
 app.use(express.static(PUBLIC_DIR));
 app.use('/uploads', express.static(uploadsDir));
+app.use('/uploads', express.static(legacyUploadsDir));
 
 // Public API routes
 app.get('/api/categories', (req, res) => {
