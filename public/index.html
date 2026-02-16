@@ -323,6 +323,181 @@ header.scrolled {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* Category ticker */
+@keyframes categoryTicker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.category-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: categoryTicker 45s linear infinite;
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--brand-900);
+  border: 1px solid rgba(27, 106, 90, 0.22);
+  border-radius: 999px;
+  padding: 8px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(15, 61, 58, 0.08);
+}
+
+.category-ticker-wrap:hover .category-ticker-track {
+  animation-play-state: paused;
+}
+
+.category-flow-wrap {
+  border-top: 1px solid rgba(30, 64, 175, 0.14);
+  border-bottom: 1px solid rgba(30, 64, 175, 0.14);
+  padding: 10px 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.category-flow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: max-content;
+  white-space: nowrap;
+}
+
+.category-flow-link {
+  position: relative;
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-bottom: 2px;
+  transition: color 0.2s ease;
+}
+
+.category-flow-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, #1d4ed8 0%, #60a5fa 100%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.25s ease;
+}
+
+.category-flow-link:hover {
+  color: #1d4ed8;
+}
+
+.category-flow-link:hover::after {
+  transform: scaleX(1);
+}
+
+.category-flow-sep {
+  color: rgba(30, 64, 175, 0.3);
+  font-size: 11px;
+  user-select: none;
+}
+
+.b2b-board {
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.b2b-board-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.b2b-row {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px dashed rgba(30, 64, 175, 0.18);
+}
+
+.b2b-row:last-child {
+  border-bottom: 0;
+}
+
+.b2b-code {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.b2b-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.b2b-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.b2b-link {
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.b2b-link:hover {
+  color: #1d4ed8;
+  border-color: rgba(29, 78, 216, 0.45);
+}
+
+.b2b-divider {
+  color: rgba(30, 64, 175, 0.25);
+  font-size: 11px;
+}
+
+@media (max-width: 768px) {
+  .category-ticker-track {
+    animation-duration: 60s;
+  }
+
+  body {
+    padding-bottom: 84px;
+  }
+
+  .b2b-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .category-flow-wrap {
+    overflow: hidden;
+  }
+}
 </style>
 
 <script type="application/ld+json">
@@ -358,17 +533,17 @@ header.scrolled {
     </a>
 
     <nav class="hidden md:flex items-center gap-8 font-medium">
-      <a href="#categories" class="relative group hover:text-emerald-700 transition-colors">
+      <a href="#categories" class="relative group hover:text-blue-700 transition-colors">
         Categories
-        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-700 group-hover:w-full transition-all duration-300"></span>
+        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
       </a>
-      <a href="#products" class="relative group hover:text-emerald-700 transition-colors">
+      <a href="#products" class="relative group hover:text-blue-700 transition-colors">
         Products
-        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-700 group-hover:w-full transition-all duration-300"></span>
+        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
       </a>
-      <a href="/login/index.html" class="hover:text-emerald-700 transition-colors">Dealer Login</a>
+      <a href="/login/index.html" class="hover:text-blue-700 transition-colors">Dealer Login</a>
       <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
-         class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
+         class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
@@ -377,7 +552,7 @@ header.scrolled {
     </nav>
 
     <!-- Mobile menu button -->
-    <button id="mobileMenuBtn" class="md:hidden text-gray-700 hover:text-emerald-700 transition-colors">
+    <button id="mobileMenuBtn" class="md:hidden text-gray-700 hover:text-blue-700 transition-colors">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
@@ -387,11 +562,11 @@ header.scrolled {
   <!-- Mobile menu -->
   <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
     <div class="px-4 py-3 space-y-2">
-      <a href="#categories" class="block py-2 hover:text-emerald-700 transition-colors">Categories</a>
-      <a href="#products" class="block py-2 hover:text-emerald-700 transition-colors">Products</a>
-      <a href="/login/index.html" class="block py-2 hover:text-emerald-700 transition-colors">Dealer Login</a>
+      <a href="#categories" class="block py-2 hover:text-blue-700 transition-colors">Categories</a>
+      <a href="#products" class="block py-2 hover:text-blue-700 transition-colors">Products</a>
+      <a href="/login/index.html" class="block py-2 hover:text-blue-700 transition-colors">Dealer Login</a>
       <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
-         class="block bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2 rounded-full text-center font-semibold hover:from-green-600 hover:to-green-700 transition-all">
+         class="block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2 rounded-full text-center font-semibold hover:from-blue-600 hover:to-blue-700 transition-all">
         WhatsApp
       </a>
     </div>
@@ -399,11 +574,11 @@ header.scrolled {
 </header>
 
 <!-- HERO SECTION -->
-<section class="animated-bg text-white relative overflow-hidden min-h-[90vh] flex items-center">
+<section class="animated-bg text-white relative overflow-hidden min-h-[75vh] md:min-h-[90vh] flex items-center">
   <!-- Animated Background Elements -->
   <div class="absolute inset-0 overflow-hidden">
     <div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full mix-blend-soft-light filter blur-2xl opacity-30 animate-blob"></div>
-    <div class="absolute top-40 right-10 w-72 h-72 bg-emerald-200/20 rounded-full mix-blend-soft-light filter blur-2xl opacity-30 animate-blob animation-delay-2000"></div>
+    <div class="absolute top-40 right-10 w-72 h-72 bg-blue-200/20 rounded-full mix-blend-soft-light filter blur-2xl opacity-30 animate-blob animation-delay-2000"></div>
     <div class="absolute -bottom-8 left-1/2 w-72 h-72 bg-amber-200/20 rounded-full mix-blend-soft-light filter blur-2xl opacity-30 animate-blob animation-delay-4000"></div>
   </div>
   <div class="hero-overlay"></div>
@@ -413,24 +588,24 @@ header.scrolled {
       <div class="inline-block mb-4 px-4 py-2 bg-white/15 backdrop-blur-md rounded-full text-sm font-semibold border border-white/20">
         ✨ Trusted by 1000+ Businesses
       </div>
-      <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
+      <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold leading-tight mb-6">
         Complete Stationery Solutions
         <span class="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400 mt-2">
           For Your Business
         </span>
       </h1>
 
-      <p class="text-xl md:text-2xl text-white/85 mb-8 leading-relaxed">
+      <p class="text-lg sm:text-xl md:text-2xl text-white/85 mb-6 md:mb-8 leading-relaxed">
         Importer & Wholesaler | Since 2020 | Backed by <span class="font-semibold text-amber-200">30+ Years</span> of Industry Expertise
       </p>
 
-      <p class="text-lg md:text-xl text-white/75 mb-10 leading-relaxed max-w-3xl mx-auto">
+      <p class="text-base sm:text-lg md:text-xl text-white/75 mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto">
         At Arya Overseas, we offer a complete stationery solution designed for businesses, institutions, and retailers. With over 30 years of industry experience, we are a trusted name in the import and wholesale market, committed to quality, variety, and value.
       </p>
 
-      <div class="flex flex-wrap justify-center gap-4 mb-12">
+      <div class="flex flex-wrap justify-center gap-4 mb-10 md:mb-12">
         <a href="#categories"
-           class="btn-primary bg-white/95 text-emerald-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-white transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2">
+           class="btn-primary bg-white/95 text-blue-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-white transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2 w-full sm:w-auto justify-center">
           <span>Explore Categories</span>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -438,7 +613,7 @@ header.scrolled {
         </a>
 
         <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
-           class="bg-transparent border-3 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-emerald-900 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2">
+           class="bg-transparent border-3 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-900 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2 w-full sm:w-auto justify-center">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
           </svg>
@@ -447,7 +622,7 @@ header.scrolled {
       </div>
 
       <!-- Stats -->
-      <div class="grid grid-cols-3 gap-8 mt-12">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mt-10 md:mt-12">
         <div class="text-center">
           <div class="stat-number text-4xl font-extrabold mb-1">30+</div>
           <div class="text-sm text-white/70">Years Experience</div>
@@ -473,26 +648,26 @@ header.scrolled {
 </section>
 
 <!-- CATEGORIES SECTION -->
-<section id="categories" class="py-20 bg-white">
+  <section id="categories" class="py-16 md:py-20 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16 slide-in-up">
-      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
-        Our <span class="gradient-text">Product Categories</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4">
+        Explore <span class="gradient-text">Product Categories</span>
       </h2>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+      <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
         Explore our wide range of stationery and office supply categories
       </p>
     </div>
 
-    <div class="mb-10 rounded-3xl overflow-hidden border border-emerald-200 shadow-xl bg-gradient-to-r from-emerald-700 via-teal-600 to-amber-500 text-white">
+    <div class="mb-10 rounded-3xl overflow-hidden border border-blue-200 shadow-xl bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white">
       <div class="p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
-          <p class="text-sm uppercase tracking-widest text-emerald-100 mb-2">Custom Lanyards</p>
+          <p class="text-sm uppercase tracking-widest text-blue-100 mb-2">Custom Lanyards</p>
           <h3 class="text-3xl md:text-4xl font-bold mb-2">Design Your Own Lanyard in Minutes</h3>
-          <p class="text-emerald-50 max-w-2xl">Choose width, colors, text, and logo. Download the preview and request a quote instantly.</p>
+          <p class="text-blue-50 max-w-2xl">Choose width, colors, text, and logo. Download the preview and request a quote instantly.</p>
         </div>
         <a href="/product/custom-lanyard.html"
-           class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold px-6 py-3 rounded-full shadow-lg hover:opacity-90 transition">
+           class="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold px-6 py-3 rounded-full shadow-lg hover:opacity-90 transition">
           Start Designing
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -501,163 +676,119 @@ header.scrolled {
       </div>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-      <!-- Category 1: Lamination -->
-      <a href="/categories/lamination.html" class="category-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg border-2 border-blue-200 stagger-item" style="animation-delay: 0.1s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Lamination</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Materials & Machines for all your lamination needs</p>
-        <span class="text-blue-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
+    <div class="category-ticker-wrap mb-10 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-blue-50 p-3">
+      <div class="category-ticker-track gap-3 pr-3">
+        <a href="/categories/lamination.html" class="category-pill">Lamination</a>
+        <a href="/categories/binding.html" class="category-pill">Binding Solutions</a>
+        <a href="/categories/files-folders.html" class="category-pill">Files & Folders</a>
+        <a href="/categories/id-cards-lanyards.html" class="category-pill">ID Cards & Lanyards</a>
+        <a href="/categories/photo-media-inks.html" class="category-pill">Photo Media & Inks</a>
+        <a href="/categories/sublimation.html" class="category-pill">Sublimation</a>
+        <a href="/categories/printing-supplies.html" class="category-pill">Printing Supplies</a>
+        <a href="/categories/school-stationery.html" class="category-pill">School Stationery</a>
+        <a href="/categories/note-counting.html" class="category-pill">Note Counting</a>
+        <a href="/categories/corporate-gifting.html" class="category-pill">Corporate Gifting</a>
+        <a href="/categories/lamination.html" class="category-pill">Lamination</a>
+        <a href="/categories/binding.html" class="category-pill">Binding Solutions</a>
+        <a href="/categories/files-folders.html" class="category-pill">Files & Folders</a>
+        <a href="/categories/id-cards-lanyards.html" class="category-pill">ID Cards & Lanyards</a>
+        <a href="/categories/photo-media-inks.html" class="category-pill">Photo Media & Inks</a>
+        <a href="/categories/sublimation.html" class="category-pill">Sublimation</a>
+        <a href="/categories/printing-supplies.html" class="category-pill">Printing Supplies</a>
+        <a href="/categories/school-stationery.html" class="category-pill">School Stationery</a>
+        <a href="/categories/note-counting.html" class="category-pill">Note Counting</a>
+        <a href="/categories/corporate-gifting.html" class="category-pill">Corporate Gifting</a>
+      </div>
+    </div>
 
-      <!-- Category 2: Binding Solutions -->
-      <a href="/categories/binding.html" class="category-card bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl shadow-lg border-2 border-purple-200 stagger-item" style="animation-delay: 0.2s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-          </svg>
+    <div class="b2b-board">
+      <div class="b2b-board-head">
+        <div>
+          <h3 class="text-xl md:text-2xl font-bold text-blue-950">Built for B2B procurement cycles</h3>
         </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Binding Solutions</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Complete binding equipment and supplies</p>
-        <span class="text-purple-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
+        <a href="#products" class="text-sm font-semibold text-blue-700 hover:text-blue-800">Jump to featured SKUs →</a>
+      </div>
 
-      <!-- Category 3: Files & Folders -->
-      <a href="/categories/files-folders.html" class="category-card bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl shadow-lg border-2 border-green-200 stagger-item" style="animation-delay: 0.3s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-          </svg>
+      <div class="b2b-row">
+        <p class="b2b-label">Office Essentials</p>
+        <div class="b2b-links">
+          <a href="/categories/files-folders.html" class="b2b-link">Files & Folders</a><span class="b2b-divider">•</span>
+          <a href="/categories/lamination.html" class="b2b-link">Lamination</a><span class="b2b-divider">•</span>
+          <a href="/categories/binding.html" class="b2b-link">Binding Solutions</a><span class="b2b-divider">•</span>
+          <a href="/categories/printing-supplies.html" class="b2b-link">Printing Supplies</a><span class="b2b-divider">•</span>
+          <a href="/categories/note-counting.html" class="b2b-link">Note Counting & Shredders</a>
         </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Files & Folders</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Available in all sizes & colors</p>
-        <span class="text-green-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
+      </div>
 
-      <!-- Category 4: ID Card Holders & Lanyards -->
-      <a href="/categories/id-cards-lanyards.html" class="category-card bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-2xl shadow-lg border-2 border-orange-200 stagger-item" style="animation-delay: 0.4s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
-          </svg>
+      <div class="b2b-row">
+        <p class="b2b-label">Institution Supply</p>
+        <div class="b2b-links">
+          <a href="/categories/school-stationery.html" class="b2b-link">School Stationery</a><span class="b2b-divider">•</span>
+          <a href="/categories/id-cards-lanyards.html" class="b2b-link">ID Cards & Lanyards</a><span class="b2b-divider">•</span>
+          <a href="/product/custom-lanyard.html" class="b2b-link">Custom Lanyard Studio</a>
         </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">ID Cards & Lanyards</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">ID Card Holders & Lanyards</p>
-        <span class="text-orange-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
+      </div>
 
-      <!-- Category 5: Photo Media & Inks -->
-      <a href="/categories/photo-media-inks.html" class="category-card bg-gradient-to-br from-pink-50 to-pink-100 p-8 rounded-2xl shadow-lg border-2 border-pink-200 stagger-item" style="animation-delay: 0.5s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
+      <div class="b2b-row">
+        <p class="b2b-label">Print & Media Ops</p>
+        <div class="b2b-links">
+          <a href="/categories/photo-media-inks.html" class="b2b-link">Photo Media & Inks</a><span class="b2b-divider">•</span>
+          <a href="/categories/sublimation.html" class="b2b-link">Sublimation</a><span class="b2b-divider">•</span>
+          <a href="/categories/printing-supplies.html" class="b2b-link">Printing Supplies</a>
         </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Photo Media & Inks</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">High-quality photo media and printing inks</p>
-        <span class="text-pink-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
+      </div>
 
-      <!-- Category 6: Sublimation Products -->
-      <a href="/categories/sublimation.html" class="category-card bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl shadow-lg border-2 border-indigo-200 stagger-item" style="animation-delay: 0.6s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-          </svg>
+      <div class="b2b-row">
+        <p class="b2b-label">Corporate Programs</p>
+        <div class="b2b-links">
+          <a href="/categories/corporate-gifting.html" class="b2b-link">Corporate Gifting</a><span class="b2b-divider">•</span>
+          <a href="/categories/id-cards-lanyards.html" class="b2b-link">Branding Accessories</a><span class="b2b-divider">•</span>
+          <a href="/product/custom-lanyard.html" class="b2b-link">Custom Lanyard Studio</a>
         </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Sublimation Products</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Sublimation Products & Equipment</p>
-        <span class="text-indigo-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
-
-      <!-- Category 7: Printing Supplies -->
-      <a href="/categories/printing-supplies.html" class="category-card bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-2xl shadow-lg border-2 border-red-200 stagger-item" style="animation-delay: 0.7s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Printing Supplies</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Complete range of printing supplies</p>
-        <span class="text-red-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
-
-      <!-- Category 8: School Stationery -->
-      <a href="/categories/school-stationery.html" class="category-card bg-gradient-to-br from-yellow-50 to-yellow-100 p-8 rounded-2xl shadow-lg border-2 border-yellow-200 stagger-item" style="animation-delay: 0.8s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">School Stationery</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Complete school stationery solutions</p>
-        <span class="text-yellow-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
-
-      <!-- Category 9: Note Counting Machines -->
-      <a href="/categories/note-counting.html" class="category-card bg-gradient-to-br from-teal-50 to-teal-100 p-8 rounded-2xl shadow-lg border-2 border-teal-200 stagger-item" style="animation-delay: 0.9s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Note Counting & Shredders</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Note Counting Machines & Shredders</p>
-        <span class="text-teal-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
-
-      <!-- Category 10: Corporate Gifting -->
-      <a href="/categories/corporate-gifting.html" class="category-card bg-gradient-to-br from-rose-50 to-rose-100 p-8 rounded-2xl shadow-lg border-2 border-rose-200 stagger-item" style="animation-delay: 1s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold mb-3 text-gray-900">Corporate Gifting</h3>
-        <p class="text-gray-600 leading-relaxed mb-4">Fully Customized Corporate Gifting Options</p>
-        <span class="text-rose-600 font-semibold inline-flex items-center gap-2">
-          Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </span>
-      </a>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- PRODUCTS SECTION -->
-<section id="products" class="py-20 bg-gradient-to-b from-gray-50 to-white">
+<section id="products" class="py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16 slide-in-up">
-      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4">
         Featured <span class="gradient-text">Products</span>
       </h2>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+      <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
         Discover our premium products and custom solutions tailored to your needs
       </p>
     </div>
 
-    <div id="productGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="mb-8 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold text-blue-900">Shop smarter</p>
+          <p class="text-xs text-slate-500">Browse categories or open any product for price tiers and instant quote.</p>
+        </div>
+        <div class="w-full md:w-auto md:min-w-[62%]">
+          <div class="category-flow-wrap">
+            <div class="category-flow">
+              <a href="/categories/id-cards-lanyards.html" class="category-flow-link">ID Cards & Lanyards</a>
+              <span class="category-flow-sep">•</span>
+              <a href="/categories/school-stationery.html" class="category-flow-link">School Stationery</a>
+              <span class="category-flow-sep">•</span>
+              <a href="/categories/corporate-gifting.html" class="category-flow-link">Corporate Gifting</a>
+              <span class="category-flow-sep">•</span>
+              <a href="/categories/printing-supplies.html" class="category-flow-link">Printing Supplies</a>
+              <span class="category-flow-sep">•</span>
+              <a href="/categories/lamination.html" class="category-flow-link">Lamination</a>
+              <span class="category-flow-sep">•</span>
+              <a href="/categories/sublimation.html" class="category-flow-link">Sublimation</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <div id="loadingSpinner" class="col-span-full">
         <div class="loading-spinner"></div>
         <p class="text-center text-gray-600 mt-4 text-lg">Loading products...</p>
@@ -668,25 +799,25 @@ header.scrolled {
       <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
       </svg>
-      <p class="text-gray-500 text-xl mb-2">No products available at the moment.</p>
+      <p class="text-gray-500 text-lg sm:text-xl mb-2">No products available at the moment.</p>
       <p class="text-gray-400">Check back soon for our latest offerings.</p>
     </div>
   </div>
 </section>
 
 <!-- WHY CHOOSE US SECTION -->
-<section class="py-20 bg-white">
+<section class="py-16 md:py-20 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16 slide-in-up">
-      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4">
         Why Choose <span class="gradient-text">Arya Overseas?</span>
       </h2>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+      <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
         We deliver excellence with every product, backed by decades of expertise
       </p>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <div class="feature-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg border border-blue-200 stagger-item" style="animation-delay: 0.1s;">
         <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -707,8 +838,8 @@ header.scrolled {
         <p class="text-gray-600 leading-relaxed">Competitive pricing with flexible MOQ-based pricing to suit businesses of all sizes.</p>
       </div>
 
-      <div class="feature-card bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl shadow-lg border border-green-200 stagger-item" style="animation-delay: 0.3s;">
-        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
+      <div class="feature-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg border border-blue-200 stagger-item" style="animation-delay: 0.3s;">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
           </svg>
@@ -721,25 +852,25 @@ header.scrolled {
 </section>
 
 <!-- CTA SECTION -->
-<section class="py-20 bg-gradient-to-r from-emerald-900 via-emerald-700 to-amber-500 text-white relative overflow-hidden">
+<section class="py-16 md:py-20 bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white relative overflow-hidden">
   <div class="absolute inset-0 bg-black/25"></div>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-    <h2 class="text-4xl md:text-5xl font-extrabold mb-6">
+    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6">
       Partner with Arya Overseas
     </h2>
-    <p class="text-xl text-white/85 mb-10 max-w-2xl mx-auto">
+    <p class="text-base sm:text-lg md:text-xl text-white/85 mb-8 md:mb-10 max-w-2xl mx-auto">
       Your one-stop solution for all stationery and office supply needs. Best rates and premium quality guaranteed!
     </p>
     <div class="flex flex-wrap justify-center gap-4">
       <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
-         class="bg-white text-emerald-900 px-10 py-5 rounded-full text-lg font-bold hover:bg-white/90 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-3 pulse-glow">
+         class="bg-white text-blue-900 px-10 py-5 rounded-full text-lg font-bold hover:bg-white/90 transition-all shadow-2xl transform hover:scale-105 flex items-center gap-3 pulse-glow">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
         Chat on WhatsApp
       </a>
       <a href="#categories"
-         class="bg-transparent border-3 border-white text-white px-10 py-5 rounded-full text-lg font-bold hover:bg-white hover:text-emerald-900 transition-all shadow-2xl transform hover:scale-105">
+         class="bg-transparent border-3 border-white text-white px-10 py-5 rounded-full text-lg font-bold hover:bg-white hover:text-blue-900 transition-all shadow-2xl transform hover:scale-105">
         Browse Categories
       </a>
     </div>
@@ -781,7 +912,7 @@ header.scrolled {
       <div>
         <h3 class="text-white font-bold mb-4">Follow Us</h3>
         <div class="flex gap-4">
-          <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+          <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
             </svg>
@@ -794,6 +925,13 @@ header.scrolled {
     </div>
   </div>
 </footer>
+
+<div class="fixed bottom-3 left-3 right-3 z-40 md:hidden">
+  <div class="grid grid-cols-2 gap-2 rounded-2xl bg-white/95 backdrop-blur border border-blue-100 p-2 shadow-xl">
+    <a href="#categories" class="text-center bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold">Shop Categories</a>
+    <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="text-center border border-blue-200 text-blue-800 py-2.5 rounded-xl text-sm font-semibold">Quick Quote</a>
+  </div>
+</div>
 
 <script>
 // Mobile menu toggle
@@ -845,21 +983,27 @@ async function loadProducts() {
         }
         const startingPrice = minPrice !== null ? `Starting from ₹${Number(minPrice).toFixed(2)}` : '';
         
-        const productCard = document.createElement('a');
-        productCard.href = detailLink;
+        const productCard = document.createElement('article');
         productCard.className = 'product-card bg-white rounded-3xl shadow-lg overflow-hidden stagger-item';
         productCard.style.animationDelay = `${index * 0.15}s`;
         
         productCard.innerHTML = `
           <div class="relative overflow-hidden h-64">
-            <img src="${imageSrc}" alt="${p.title}" 
+            <a href="${detailLink}" class="block h-full">
+              <img src="${imageSrc}" alt="${p.title}" 
                  class="w-full h-full object-cover transition-transform duration-500"
                  loading="lazy"
                  onerror="this.src='/assets/veom-logo.png'">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-            <div class="absolute bottom-4 left-4 right-4 transform translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-              <span class="inline-block bg-white text-blue-700 px-4 py-2 rounded-full text-sm font-bold">
-                View Details →
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+              <div class="absolute bottom-4 left-4 right-4 transform translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                <span class="inline-block bg-white text-blue-700 px-4 py-2 rounded-full text-sm font-bold">
+                  View Details →
+                </span>
+              </div>
+            </a>
+            <div class="absolute top-4 left-4">
+              <span class="inline-flex items-center rounded-full bg-white/95 text-blue-700 px-3 py-1 text-xs font-bold border border-blue-100">
+                In Stock
               </span>
             </div>
           </div>
@@ -888,6 +1032,14 @@ async function loadProducts() {
                 </span>
               </div>
             `}
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <a href="${detailLink}" class="text-center bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-800 transition-colors">
+                View Product
+              </a>
+              <a href="https://wa.me/919667371899?text=${encodeURIComponent(`Hi, I want a quote for ${p.title}`)}" target="_blank" rel="noopener noreferrer" class="text-center border border-blue-200 text-blue-800 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
+                Get Quote
+              </a>
+            </div>
           </div>
         `;
         

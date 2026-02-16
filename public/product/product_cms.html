@@ -218,28 +218,69 @@
 
   <!-- INVENTORY TAB -->
   <section id="tab-inventory" class="hidden-section">
-    <div class="bg-white rounded-2xl shadow p-6">
-      <h2 class="text-xl font-bold mb-4">Inventory</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-left text-slate-500">
-              <th class="p-2">Product</th>
-              <th class="p-2">SKU</th>
-              <th class="p-2">Attributes</th>
-              <th class="p-2">Stock</th>
-              <th class="p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="inventoryTable"></tbody>
-        </table>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Products</p>
+        <p id="statProducts" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">SKUs</p>
+        <p id="statSkus" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Stock On Hand</p>
+        <p id="statStock" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Low Stock</p>
+        <p id="statLowStock" class="text-2xl font-bold mt-1 text-red-600">0</p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+          <div class="flex flex-wrap gap-2 items-center">
+            <input id="inventorySearch" type="text" placeholder="Search product, SKU, attribute..." class="border rounded-lg p-2 text-sm w-full sm:w-64">
+            <select id="inventoryCategory" class="border rounded-lg p-2 text-sm w-full sm:w-56"></select>
+            <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+              <input id="inventoryLowOnly" type="checkbox" class="rounded border-slate-300">
+              Low stock only
+            </label>
+          </div>
+          <div id="inventoryCount" class="text-sm text-slate-500"></div>
+        </div>
+
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-slate-500">
+                <th class="p-2">Product</th>
+                <th class="p-2">Category</th>
+                <th class="p-2">SKU</th>
+                <th class="p-2">Attributes</th>
+                <th class="p-2">Stock</th>
+                <th class="p-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+          </table>
+        </div>
+
+        <div id="inventoryCards" class="grid gap-3 md:hidden"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h3 class="text-lg font-bold mb-3">Low Stock Alerts</h3>
+        <div id="lowStockList" class="space-y-2"></div>
+        <p class="text-xs text-slate-500 mt-4">Set thresholds on each product to surface alerts here.</p>
       </div>
     </div>
   </section>
 
   <!-- IMPORTS TAB -->
   <section id="tab-imports" class="hidden-section">
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid lg:grid-cols-3 gap-6">
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-xl font-bold mb-4">Export</h2>
         <div class="space-y-3">
@@ -261,6 +302,32 @@
           <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg">Import</button>
           <p class="text-xs text-slate-500">CSV import supports products only. JSON import supports full export file.</p>
         </form>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Database Management</h2>
+        <div class="space-y-2 text-sm mb-4">
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-slate-500">Database file</span>
+            <span id="dbPath" class="font-medium text-right break-all">-</span>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-slate-500">Current size</span>
+            <span id="dbSize" class="font-medium">-</span>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-slate-500">Last update</span>
+            <span id="dbUpdated" class="font-medium">-</span>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <button id="createBackupBtn" class="w-full bg-emerald-600 text-white py-2 rounded-lg">Create DB Backup</button>
+          <button id="downloadLiveDbBtn" class="w-full border py-2 rounded-lg">Download Live DB</button>
+          <button id="refreshDbBtn" class="w-full border py-2 rounded-lg">Refresh DB Status</button>
+        </div>
+        <div class="mt-5">
+          <h3 class="text-sm font-semibold mb-2">Recent Backups</h3>
+          <div id="dbBackups" class="space-y-2 text-sm"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -328,7 +395,9 @@ const state = {
   products: [],
   variants: [],
   admins: [],
-  audit: []
+  audit: [],
+  database: null,
+  backups: []
 };
 
 const API = '';
@@ -350,6 +419,74 @@ async function fetchJSON(url, options) {
   return data;
 }
 
+function isLowStock(variant) {
+  return variant.lowStockThreshold !== null && variant.lowStockThreshold !== undefined && variant.stockQty <= variant.lowStockThreshold;
+}
+
+function normalizeText(value) {
+  return (value || '').toString().toLowerCase();
+}
+
+function getFilteredVariants() {
+  const query = normalizeText(document.getElementById('inventorySearch')?.value);
+  const categoryFilter = document.getElementById('inventoryCategory')?.value;
+  const lowOnly = document.getElementById('inventoryLowOnly')?.checked;
+
+  return state.variants.filter(variant => {
+    if (categoryFilter && String(variant.categoryId) !== String(categoryFilter)) return false;
+    if (lowOnly && !isLowStock(variant)) return false;
+    if (!query) return true;
+
+    const haystack = [
+      variant.productTitle,
+      variant.sku,
+      variant.categoryName,
+      Object.entries(variant.attributes || {}).map(([k, v]) => `${k}:${v}`).join(' ')
+    ].join(' ');
+
+    return normalizeText(haystack).includes(query);
+  });
+}
+
+function renderInventorySummary() {
+  const totalSkus = state.variants.length;
+  const totalStock = state.variants.reduce((sum, v) => sum + (Number(v.stockQty) || 0), 0);
+  const lowStockCount = state.variants.filter(isLowStock).length;
+  const productCount = new Set(state.variants.map(v => v.productId)).size;
+
+  document.getElementById('statProducts').textContent = productCount;
+  document.getElementById('statSkus').textContent = totalSkus;
+  document.getElementById('statStock').textContent = totalStock;
+  document.getElementById('statLowStock').textContent = lowStockCount;
+}
+
+function renderLowStockList() {
+  const list = document.getElementById('lowStockList');
+  if (!list) return;
+  const lowStockItems = state.variants
+    .filter(isLowStock)
+    .sort((a, b) => (a.stockQty || 0) - (b.stockQty || 0))
+    .slice(0, 10);
+
+  list.innerHTML = '';
+  if (!lowStockItems.length) {
+    list.innerHTML = '<p class="text-sm text-slate-500">No low stock alerts right now.</p>';
+    return;
+  }
+
+  lowStockItems.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'border rounded-lg p-3';
+    el.innerHTML = `
+      <div class="text-sm font-semibold">${item.productTitle}</div>
+      <div class="text-xs text-slate-500">${item.categoryName || 'Uncategorized'} · ${item.sku || 'No SKU'}</div>
+      <div class="text-sm text-red-600 font-semibold mt-1">Stock: ${item.stockQty}</div>
+      <button class="text-emerald-600 text-xs mt-2" onclick="openStockModal(${item.id})">Adjust stock</button>
+    `;
+    list.appendChild(el);
+  });
+}
+
 async function loadAdmin() {
   const res = await fetch('/api/admin/me');
   if (res.status === 401) {
@@ -362,7 +499,7 @@ async function loadAdmin() {
 
 async function loadAll() {
   await loadAdmin();
-  await Promise.all([loadCategories(), loadProducts(), loadVariants(), loadAdmins(), loadAudit()]);
+  await Promise.all([loadCategories(), loadProducts(), loadVariants(), loadAdmins(), loadAudit(), loadDbStatus()]);
 }
 
 async function loadCategories() {
@@ -396,15 +533,25 @@ async function loadAudit() {
   renderAuditTable();
 }
 
+async function loadDbStatus() {
+  const data = await fetchJSON('/api/admin/db/status');
+  state.database = data.database;
+  state.backups = data.backups || [];
+  renderDbStatus();
+}
+
 function renderCategorySelects() {
   const select = document.getElementById('categoryId');
   const filter = document.getElementById('filterCategory');
+  const inventoryFilter = document.getElementById('inventoryCategory');
   select.innerHTML = '<option value="">Uncategorized</option>';
   filter.innerHTML = '<option value="">All Categories</option>';
+  if (inventoryFilter) inventoryFilter.innerHTML = '<option value="">All Categories</option>';
   state.categories.forEach(cat => {
     const option = `<option value="${cat.id}">${cat.name}</option>`;
     select.insertAdjacentHTML('beforeend', option);
     filter.insertAdjacentHTML('beforeend', option);
+    if (inventoryFilter) inventoryFilter.insertAdjacentHTML('beforeend', option);
   });
 }
 
@@ -461,14 +608,27 @@ function renderProductTable() {
 
 function renderInventoryTable() {
   const tbody = document.getElementById('inventoryTable');
+  const cardContainer = document.getElementById('inventoryCards');
+  const countLabel = document.getElementById('inventoryCount');
+  const filtered = getFilteredVariants();
+
+  renderInventorySummary();
+  renderLowStockList();
+
+  if (countLabel) {
+    countLabel.textContent = `Showing ${filtered.length} of ${state.variants.length} variants`;
+  }
+
   tbody.innerHTML = '';
-  state.variants.forEach(v => {
+  if (cardContainer) cardContainer.innerHTML = '';
+  filtered.forEach(v => {
     const attrText = Object.entries(v.attributes || {}).map(([k,val]) => `${k}: ${val}`).join(', ');
-    const lowStock = v.lowStockThreshold !== null && v.lowStockThreshold !== undefined && v.stockQty <= v.lowStockThreshold;
+    const lowStock = isLowStock(v);
     const row = document.createElement('tr');
     row.className = 'table-row';
     row.innerHTML = `
       <td class="p-2">${v.productTitle}</td>
+      <td class="p-2 text-slate-500">${v.categoryName || '-'}</td>
       <td class="p-2">${v.sku || '-'}</td>
       <td class="p-2 text-slate-500">${attrText || '-'}</td>
       <td class="p-2 ${lowStock ? 'text-red-600 font-semibold' : ''}">${v.stockQty}</td>
@@ -477,6 +637,29 @@ function renderInventoryTable() {
       </td>
     `;
     tbody.appendChild(row);
+
+    if (cardContainer) {
+      const card = document.createElement('div');
+      card.className = 'border rounded-xl p-4 bg-white shadow-sm';
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-sm font-semibold">${v.productTitle}</p>
+            <p class="text-xs text-slate-500">${v.categoryName || 'Uncategorized'}</p>
+          </div>
+          <span class="text-xs px-2 py-1 rounded-full ${lowStock ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
+            ${lowStock ? 'Low stock' : 'Healthy'}
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">SKU: ${v.sku || '-'}</p>
+        <p class="text-xs text-slate-500">Attributes: ${attrText || '-'}</p>
+        <div class="flex items-center justify-between mt-3">
+          <span class="text-sm font-semibold">Stock: ${v.stockQty}</span>
+          <button class="text-emerald-600 text-xs" onclick="openStockModal(${v.id})">Adjust</button>
+        </div>
+      `;
+      cardContainer.appendChild(card);
+    }
   });
 }
 
@@ -514,10 +697,37 @@ function renderAdminList() {
   });
 }
 
+function renderDbStatus() {
+  const db = state.database || {};
+  const backupList = document.getElementById('dbBackups');
+  document.getElementById('dbPath').textContent = db.path || '-';
+  document.getElementById('dbSize').textContent = db.sizeLabel || '-';
+  document.getElementById('dbUpdated').textContent = db.updatedAt ? new Date(db.updatedAt).toLocaleString() : '-';
+
+  backupList.innerHTML = '';
+  if (!state.backups.length) {
+    backupList.innerHTML = '<p class="text-slate-500">No backups created yet.</p>';
+    return;
+  }
+
+  state.backups.slice(0, 8).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'border rounded-lg p-2 flex items-center justify-between gap-2';
+    row.innerHTML = `
+      <div>
+        <p class="font-medium">${item.name}</p>
+        <p class="text-xs text-slate-500">${item.sizeLabel} · ${new Date(item.updatedAt).toLocaleString()}</p>
+      </div>
+      <a class="text-emerald-700 text-xs font-semibold" href="/api/admin/db/download?name=${encodeURIComponent(item.name)}">Download</a>
+    `;
+    backupList.appendChild(row);
+  });
+}
+
 function addPricingTierRow(tier = {}) {
   const container = document.getElementById('pricingTiers');
   const row = document.createElement('div');
-  row.className = 'grid grid-cols-3 gap-2';
+  row.className = 'grid grid-cols-1 sm:grid-cols-3 gap-2';
   row.innerHTML = `
     <input type="number" class="border rounded-lg p-2 tier-min" placeholder="Min" value="${tier.min || ''}">
     <input type="number" class="border rounded-lg p-2 tier-max" placeholder="Max" value="${tier.max || ''}">
@@ -532,7 +742,7 @@ function addPricingTierRow(tier = {}) {
 function addVariantRow(variant = {}) {
   const container = document.getElementById('variantList');
   const row = document.createElement('div');
-  row.className = 'grid grid-cols-2 gap-2 items-start border rounded-lg p-2';
+  row.className = 'grid grid-cols-1 lg:grid-cols-2 gap-2 items-start border rounded-lg p-2';
   row.innerHTML = `
     <div class="space-y-2">
       <input type="text" class="border rounded-lg p-2 variant-sku" placeholder="SKU" value="${variant.sku || ''}">
@@ -700,6 +910,16 @@ async function exportData(format, type) {
   window.location.href = `/api/admin/export?format=${format}&type=${type}`;
 }
 
+async function createDbBackup() {
+  try {
+    const data = await fetchJSON('/api/admin/db/backup', { method: 'POST' });
+    showMessage(`Backup created: ${data.backup.name}`);
+    await loadDbStatus();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+}
+
 // Event bindings
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -841,6 +1061,9 @@ async function bulkDeleteProducts() {
 
 document.getElementById('searchProducts').addEventListener('input', renderProductTable);
 document.getElementById('filterCategory').addEventListener('change', renderProductTable);
+document.getElementById('inventorySearch').addEventListener('input', renderInventoryTable);
+document.getElementById('inventoryCategory').addEventListener('change', renderInventoryTable);
+document.getElementById('inventoryLowOnly').addEventListener('change', renderInventoryTable);
 
 // Import
 
@@ -861,6 +1084,12 @@ document.getElementById('importForm').addEventListener('submit', async (e) => {
     showMessage(err.message, 'error');
   }
 });
+
+document.getElementById('createBackupBtn').addEventListener('click', createDbBackup);
+document.getElementById('downloadLiveDbBtn').addEventListener('click', () => {
+  window.location.href = '/api/admin/db/download';
+});
+document.getElementById('refreshDbBtn').addEventListener('click', loadDbStatus);
 
 // Admin form
 

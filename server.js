@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const Papa = require('papaparse');
-const { initDb } = require('./db');
+const { initDb, DB_PATH } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +17,7 @@ const APP_ROOT = process.env.APP_ROOT || __dirname;
 const PUBLIC_DIR = path.join(APP_ROOT, 'public');
 const uploadsDir = path.join(APP_ROOT, 'uploads');
 const dataDir = path.join(APP_ROOT, 'data');
+const backupDir = path.join(dataDir, 'backups');
 
 // Middleware
 app.use(cors());
@@ -45,6 +46,7 @@ app.use(session({
 try {
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
 } catch (err) {
   console.error('Failed to create data/uploads directories:', err);
 }
@@ -105,6 +107,34 @@ function slugify(value) {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+function formatFileSize(bytes) {
+  if (!bytes || bytes < 1024) return `${bytes || 0} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function listDbBackups() {
+  if (!fs.existsSync(backupDir)) return [];
+  return fs.readdirSync(backupDir)
+    .filter(file => file.endsWith('.db'))
+    .map(file => {
+      const fullPath = path.join(backupDir, file);
+      const stat = fs.statSync(fullPath);
+      return {
+        name: file,
+        sizeBytes: stat.size,
+        sizeLabel: formatFileSize(stat.size),
+        updatedAt: stat.mtime.toISOString()
+      };
+    })
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+}
+
+function timestampForFileName(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
 
 function toProductResponse(row) {
@@ -695,15 +725,18 @@ app.delete('/api/admin/products/:id', (req, res) => {
 
 app.get('/api/admin/variants', (req, res) => {
   const rows = db.prepare(`
-    SELECT v.*, p.title AS product_title, p.low_stock_threshold
+    SELECT v.*, p.title AS product_title, p.low_stock_threshold, p.category_id, c.name AS category_name
     FROM variants v
     JOIN products p ON v.product_id = p.id
+    LEFT JOIN categories c ON p.category_id = c.id
     ORDER BY p.title, v.id
   `).all();
   const variants = rows.map(row => ({
     ...toVariantResponse(row),
     productTitle: row.product_title,
-    lowStockThreshold: row.low_stock_threshold
+    lowStockThreshold: row.low_stock_threshold,
+    categoryId: row.category_id || null,
+    categoryName: row.category_name || null
   }));
   res.json({ success: true, variants });
 });
@@ -858,6 +891,78 @@ app.delete('/api/admin/admins/:id', (req, res) => {
   db.prepare('DELETE FROM admins WHERE id = ?').run(id);
   logAudit(req.admin.id, 'delete', 'admin', id, null);
   res.json({ success: true });
+});
+
+app.get('/api/admin/db/status', (req, res) => {
+  try {
+    const exists = fs.existsSync(DB_PATH);
+    const stat = exists ? fs.statSync(DB_PATH) : null;
+    const backups = listDbBackups();
+    res.json({
+      success: true,
+      database: {
+        path: DB_PATH,
+        exists,
+        sizeBytes: stat ? stat.size : 0,
+        sizeLabel: stat ? formatFileSize(stat.size) : '0 B',
+        updatedAt: stat ? stat.mtime.toISOString() : null
+      },
+      backups
+    });
+  } catch (err) {
+    console.error('DB status error:', err);
+    res.status(500).json({ success: false, message: 'Unable to read database status.' });
+  }
+});
+
+app.post('/api/admin/db/backup', (req, res) => {
+  try {
+    if (!fs.existsSync(DB_PATH)) {
+      return res.status(400).json({ success: false, message: 'Database file not found.' });
+    }
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    const filename = `backup-${timestampForFileName()}.db`;
+    const destination = path.join(backupDir, filename);
+    fs.copyFileSync(DB_PATH, destination);
+    const stat = fs.statSync(destination);
+    logAudit(req.admin.id, 'backup', 'database', filename, { sizeBytes: stat.size });
+    res.json({
+      success: true,
+      backup: {
+        name: filename,
+        sizeBytes: stat.size,
+        sizeLabel: formatFileSize(stat.size),
+        updatedAt: stat.mtime.toISOString()
+      }
+    });
+  } catch (err) {
+    console.error('DB backup error:', err);
+    res.status(500).json({ success: false, message: 'Failed to create database backup.' });
+  }
+});
+
+app.get('/api/admin/db/download', (req, res) => {
+  try {
+    const requested = req.query.name ? path.basename(String(req.query.name)) : '';
+    let filePath = DB_PATH;
+    let fileName = `live-${path.basename(DB_PATH)}`;
+
+    if (requested) {
+      if (!requested.endsWith('.db')) {
+        return res.status(400).json({ success: false, message: 'Invalid backup file name.' });
+      }
+      filePath = path.join(backupDir, requested);
+      fileName = requested;
+    }
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: 'File not found.' });
+    }
+    return res.download(filePath, fileName);
+  } catch (err) {
+    console.error('DB download error:', err);
+    res.status(500).json({ success: false, message: 'Failed to download database file.' });
+  }
 });
 
 app.get('/api/admin/export', (req, res) => {
