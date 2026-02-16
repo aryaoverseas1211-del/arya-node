@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -15,9 +16,11 @@ const PORT = process.env.PORT || 3000;
 // App root is the deploy root; static assets live in /public
 const APP_ROOT = process.env.APP_ROOT || __dirname;
 const PUBLIC_DIR = path.join(APP_ROOT, 'public');
-const uploadsDir = path.join(APP_ROOT, 'uploads');
+const legacyUploadsDir = path.join(APP_ROOT, 'uploads');
+const persistRoot = process.env.PERSIST_DIR || path.join(os.homedir(), 'aryaoverseas-storage');
+const uploadsDir = process.env.UPLOADS_DIR || path.join(persistRoot, 'uploads');
 const dataDir = path.join(APP_ROOT, 'data');
-const backupDir = path.join(dataDir, 'backups');
+const backupDir = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups');
 
 // Middleware
 app.use(cors());
@@ -47,6 +50,18 @@ try {
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
   if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+
+  // One-time migration: copy old deploy-local uploads into persistent uploads storage.
+  if (legacyUploadsDir !== uploadsDir && fs.existsSync(legacyUploadsDir)) {
+    const legacyFiles = fs.readdirSync(legacyUploadsDir);
+    legacyFiles.forEach((file) => {
+      const src = path.join(legacyUploadsDir, file);
+      const dest = path.join(uploadsDir, file);
+      if (fs.statSync(src).isFile() && !fs.existsSync(dest)) {
+        fs.copyFileSync(src, dest);
+      }
+    });
+  }
 } catch (err) {
   console.error('Failed to create data/uploads directories:', err);
 }
@@ -87,6 +102,10 @@ const importUpload = multer({
 
 function resolveUploadPath(urlPath) {
   const clean = (urlPath || '').replace(/^\/+/, '');
+  if (clean.startsWith('uploads/')) {
+    const filename = clean.replace(/^uploads\//, '');
+    return path.join(uploadsDir, filename);
+  }
   return path.join(APP_ROOT, clean);
 }
 
