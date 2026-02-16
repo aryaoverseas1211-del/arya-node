@@ -349,7 +349,7 @@ let catalog = { types: [], mainAccessories: [], addonAccessories: [] };
 let designCart = [];
 
 const canvas = document.getElementById('livePreviewCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 const imageCache = new Map();
 
 const typeSelect = document.getElementById('typeSelect');
@@ -445,6 +445,7 @@ function drawRepeatedStrip(text, y, widthPx, logoImg, color, bg) {
 }
 
 async function renderLivePreview() {
+  if (!ctx || !canvas) return;
   const line = currentLineItem();
   const type = findById(catalog.types, line.lanyardTypeId);
   const main = findById(catalog.mainAccessories, line.mainAccessoryId);
@@ -579,6 +580,36 @@ function validateCurrentDesign(line) {
   return '';
 }
 
+function getRequiredElements() {
+  return [
+    ['typeSelect', typeSelect],
+    ['mainAccessorySelect', mainAccessorySelect],
+    ['addonAccessorySelect', addonAccessorySelect],
+    ['frontText', frontTextInput],
+    ['backText', backTextInput],
+    ['width', widthInput],
+    ['lengthMm', lengthMmInput],
+    ['textColor', textColorInput],
+    ['bgColor', bgColorInput],
+    ['lineQty', lineQtyInput],
+    ['quality', qualityInput],
+    ['printing', printingInput]
+  ];
+}
+
+function verifyPageBindings() {
+  const missing = getRequiredElements().filter(([, el]) => !el).map(([name]) => name);
+  if (!canvas || !ctx) missing.push('livePreviewCanvas');
+  if (missing.length) {
+    const msg = `Lanyard studio could not initialize. Missing: ${missing.join(', ')}`;
+    const submitMsg = document.getElementById('submitMessage');
+    if (submitMsg) submitMsg.textContent = msg;
+    console.error(msg);
+    return false;
+  }
+  return true;
+}
+
 async function submitDesignRequest() {
   const name = document.getElementById('customerName').value.trim();
   const phone = document.getElementById('customerPhone').value.trim();
@@ -629,46 +660,58 @@ function sendWhatsApp() {
   window.location.href = `https://wa.me/919667371899?text=${encodeURIComponent(msg)}`;
 }
 
-document.getElementById('logoUpload').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    logoData = reader.result;
-    renderLivePreview();
-  };
-  reader.readAsDataURL(file);
-});
+if (verifyPageBindings()) {
+  document.getElementById('logoUpload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      logoData = reader.result;
+      renderLivePreview();
+    };
+    reader.readAsDataURL(file);
+  });
 
-[typeSelect, mainAccessorySelect, addonAccessorySelect, frontTextInput, backTextInput, widthInput, lengthMmInput, textColorInput, bgColorInput, lineQtyInput, qualityInput, printingInput]
-  .forEach((el) => el.addEventListener('input', renderLivePreview));
+  [typeSelect, mainAccessorySelect, addonAccessorySelect, frontTextInput, backTextInput, widthInput, lengthMmInput, textColorInput, bgColorInput, lineQtyInput, qualityInput, printingInput]
+    .forEach((el) => {
+      if (el) el.addEventListener('input', renderLivePreview);
+    });
 
-document.getElementById('addToCartBtn').addEventListener('click', () => {
-  const line = currentLineItem();
-  const error = validateCurrentDesign(line);
-  if (error) {
-    document.getElementById('designMessage').textContent = error;
-    return;
+  const addBtn = document.getElementById('addToCartBtn');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const line = currentLineItem();
+      const error = validateCurrentDesign(line);
+      if (error) {
+        document.getElementById('designMessage').textContent = error;
+        return;
+      }
+      designCart.push(line);
+      document.getElementById('designMessage').textContent = 'Design added to cart.';
+      renderCart();
+    });
   }
-  designCart.push(line);
-  document.getElementById('designMessage').textContent = 'Design added to cart.';
+
+  const clearBtn = document.getElementById('clearDesignBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      frontTextInput.value = '';
+      backTextInput.value = '';
+      lineQtyInput.value = 100;
+      logoData = null;
+      document.getElementById('logoUpload').value = '';
+      renderLivePreview();
+    });
+  }
+
+  const submitBtn = document.getElementById('submitRequestBtn');
+  if (submitBtn) submitBtn.addEventListener('click', submitDesignRequest);
+  const waBtn = document.getElementById('sendWhatsappBtn');
+  if (waBtn) waBtn.addEventListener('click', sendWhatsApp);
+
   renderCart();
-});
-
-document.getElementById('clearDesignBtn').addEventListener('click', () => {
-  frontTextInput.value = '';
-  backTextInput.value = '';
-  lineQtyInput.value = 100;
-  logoData = null;
-  document.getElementById('logoUpload').value = '';
-  renderLivePreview();
-});
-
-document.getElementById('submitRequestBtn').addEventListener('click', submitDesignRequest);
-document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsApp);
-
-renderCart();
-loadCatalog();
+  loadCatalog();
+}
 </script>
 
 </body>
