@@ -788,7 +788,7 @@ header.scrolled {
       </div>
     </div>
 
-    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div id="loadingSpinner" class="col-span-full">
         <div class="loading-spinner"></div>
         <p class="text-center text-gray-600 mt-4 text-lg">Loading products...</p>
@@ -962,6 +962,13 @@ async function loadProducts() {
   const grid = document.getElementById('productGrid');
   const loadingSpinner = document.getElementById('loadingSpinner');
   const noProducts = document.getElementById('noProducts');
+
+  function resolveImageSrc(rawImage) {
+    if (!rawImage) return '/assets/veom-logo.png';
+    if (/^https?:\/\//i.test(rawImage)) return rawImage;
+    if (rawImage.startsWith('/')) return `${API_BASE}${rawImage}`;
+    return `${API_BASE}/${rawImage}`;
+  }
   
   try {
     const response = await fetch(`${API_BASE}/api/products`);
@@ -972,7 +979,7 @@ async function loadProducts() {
     if (data.success && data.products && data.products.length > 0) {
       grid.innerHTML = '';
       data.products.forEach((p, index) => {
-        const imageSrc = p.image ? `${API_BASE}${p.image}` : '/assets/veom-logo.png';
+        const imageSrc = resolveImageSrc(p.image);
         const detailLink = `/product/${p.id}`;
         const pricingTiers = Array.isArray(p.pricing) ? p.pricing : [];
         let minPrice = null;
@@ -1002,22 +1009,22 @@ async function loadProducts() {
               </div>
             </a>
             <div class="absolute top-4 left-4">
-              <span class="inline-flex items-center rounded-full bg-white/95 text-blue-700 px-3 py-1 text-xs font-bold border border-blue-100">
+              <span class="inline-flex items-center rounded-full bg-green-50 text-green-700 px-3 py-1 text-xs font-bold border border-green-200">
                 In Stock
               </span>
             </div>
           </div>
-          <div class="p-6">
-            <h3 class="text-2xl font-bold mb-3 text-gray-900 group-hover:text-blue-700 transition-colors">${p.title}</h3>
-            <p class="text-gray-600 mb-4 line-clamp-2 leading-relaxed">${p.shortDesc || p.description?.substring(0, 120) || ''}</p>
+          <div class="p-5">
+            <h3 class="text-xl font-bold mb-2 text-gray-900 group-hover:text-blue-700 transition-colors">${p.title}</h3>
+            <p class="text-gray-600 mb-3 line-clamp-2 leading-relaxed text-sm">${p.shortDesc || p.description?.substring(0, 120) || ''}</p>
             ${startingPrice ? `
-              <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div>
                   <p class="text-xs text-gray-500 mb-1">Starting Price</p>
-                  <p class="text-2xl font-extrabold text-blue-600">${startingPrice}</p>
+                  <p class="text-lg font-extrabold text-blue-600">${startingPrice}</p>
                 </div>
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                   </svg>
                 </div>
@@ -1032,11 +1039,11 @@ async function loadProducts() {
                 </span>
               </div>
             `}
-            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <a href="${detailLink}" class="text-center bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-800 transition-colors">
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <a href="${detailLink}" class="text-center bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-blue-800 transition-colors">
                 View Product
               </a>
-              <a href="https://wa.me/919667371899?text=${encodeURIComponent(`Hi, I want a quote for ${p.title}`)}" target="_blank" rel="noopener noreferrer" class="text-center border border-blue-200 text-blue-800 px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
+              <a href="https://wa.me/919667371899?text=${encodeURIComponent(`Hi, I want a quote for ${p.title}`)}" target="_blank" rel="noopener noreferrer" class="text-center border border-blue-200 text-blue-800 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors">
                 Get Quote
               </a>
             </div>
