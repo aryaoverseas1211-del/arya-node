@@ -545,6 +545,13 @@ function populateCatalogSelects() {
   mainAccessorySelect.innerHTML = '';
   addonAccessorySelect.innerHTML = '<option value="">No add-on</option>';
 
+  if (!catalog.types.length) {
+    typeSelect.insertAdjacentHTML('beforeend', '<option value="">No types found</option>');
+  }
+  if (!catalog.mainAccessories.length) {
+    mainAccessorySelect.insertAdjacentHTML('beforeend', '<option value="">No main accessories found</option>');
+  }
+
   catalog.types.forEach((type) => {
     typeSelect.insertAdjacentHTML('beforeend', `<option value="${type.id}">${escapeHtml(type.name)}</option>`);
   });
@@ -561,12 +568,26 @@ async function loadCatalog() {
     const response = await fetch('/api/lanyard/catalog');
     const data = await response.json();
     if (!data.success) throw new Error(data.message || 'Failed to load catalog');
+
+    const legacyFittings = Array.isArray(data.fittings) ? data.fittings : [];
+    const normalizedMain = Array.isArray(data.mainAccessories) && data.mainAccessories.length
+      ? data.mainAccessories
+      : legacyFittings.filter((item) => (item.fitting_kind || 'main') !== 'addon');
+    const normalizedAddon = Array.isArray(data.addonAccessories) && data.addonAccessories.length
+      ? data.addonAccessories
+      : legacyFittings.filter((item) => (item.fitting_kind || 'main') === 'addon');
+
     catalog = {
       types: data.types || [],
-      mainAccessories: data.mainAccessories || [],
-      addonAccessories: data.addonAccessories || []
+      mainAccessories: normalizedMain,
+      addonAccessories: normalizedAddon
     };
     populateCatalogSelects();
+    if (!catalog.types.length || !catalog.mainAccessories.length) {
+      document.getElementById('designMessage').textContent = 'Catalog is incomplete. Add active lanyard types and main accessories in CMS.';
+    } else {
+      document.getElementById('designMessage').textContent = '';
+    }
     renderLivePreview();
   } catch (err) {
     document.getElementById('designMessage').textContent = 'Unable to load lanyard catalog. Please try again.';
@@ -672,9 +693,13 @@ if (verifyPageBindings()) {
     reader.readAsDataURL(file);
   });
 
-  [typeSelect, mainAccessorySelect, addonAccessorySelect, frontTextInput, backTextInput, widthInput, lengthMmInput, textColorInput, bgColorInput, lineQtyInput, qualityInput, printingInput]
+  [frontTextInput, backTextInput, textColorInput, bgColorInput, lineQtyInput]
     .forEach((el) => {
       if (el) el.addEventListener('input', renderLivePreview);
+    });
+  [typeSelect, mainAccessorySelect, addonAccessorySelect, widthInput, lengthMmInput, qualityInput, printingInput]
+    .forEach((el) => {
+      if (el) el.addEventListener('change', renderLivePreview);
     });
 
   const addBtn = document.getElementById('addToCartBtn');
