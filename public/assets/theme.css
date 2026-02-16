@@ -6,6 +6,11 @@
   --brand-600: #2563eb;
   --brand-500: #3b82f6;
   --brand-400: #60a5fa;
+  /* Keep legacy accent vars mapped to blue for existing gradients */
+  --accent-700: #1e40af;
+  --accent-600: #2563eb;
+  --accent-500: #3b82f6;
+  --accent-400: #93c5fd;
   --line-100: #dbe7ff;
   --line-200: #c7d9ff;
   --surface-50: #f8faff;
