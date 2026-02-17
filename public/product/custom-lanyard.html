@@ -33,6 +33,63 @@
     background: rgba(15, 61, 58, 0.08);
     color: var(--brand-800);
   }
+
+  .studio-card {
+    border: 1px solid #dbe3f3;
+    border-radius: 14px;
+    background: #f8fbff;
+    padding: 8px;
+    display: grid;
+    grid-template-rows: 56px auto;
+    gap: 6px;
+    align-items: center;
+    justify-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .studio-card:hover {
+    border-color: #9db8e7;
+    transform: translateY(-1px);
+  }
+
+  .studio-card.active {
+    border-color: #1d4ed8;
+    background: #eaf1ff;
+    box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.2);
+  }
+
+  .studio-card-thumb {
+    width: 100%;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: contain;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+  }
+
+  .studio-card-placeholder {
+    width: 100%;
+    height: 56px;
+    border-radius: 10px;
+    border: 1px dashed #cbd5e1;
+    background: linear-gradient(135deg, #eff6ff, #f8fafc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .studio-card-label {
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+    color: #0f172a;
+    min-height: 26px;
+  }
 </style>
 </head>
 
@@ -161,14 +218,17 @@
           <div>
             <label class="font-medium">Lanyard Type</label>
             <select id="typeSelect" class="w-full border rounded-lg p-3"></select>
+            <div id="typeCardDeck" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
           </div>
           <div>
             <label class="font-medium">Main Accessory</label>
             <select id="mainAccessorySelect" class="w-full border rounded-lg p-3"></select>
+            <div id="mainAccessoryCardDeck" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
           </div>
           <div>
             <label class="font-medium">Add-on Accessory (Optional)</label>
             <select id="addonAccessorySelect" class="w-full border rounded-lg p-3"></select>
+            <div id="addonAccessoryCardDeck" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
           </div>
           <div>
             <label class="font-medium">Qty for this design</label>
@@ -238,6 +298,7 @@
           <button id="addToCartBtn" class="bg-blue-800 text-white px-5 py-2 rounded-full font-semibold">Add Design to Cart</button>
           <button id="clearDesignBtn" class="border px-5 py-2 rounded-full">Clear Current</button>
         </div>
+        <p id="visualCatalogMessage" class="text-xs text-slate-500 mt-3"></p>
         <p id="designMessage" class="text-xs text-slate-500 mt-3"></p>
       </div>
 
@@ -383,6 +444,7 @@ const bgColorInput = document.getElementById('bgColor');
 const lineQtyInput = document.getElementById('lineQty');
 const qualityInput = document.getElementById('quality');
 const printingInput = document.getElementById('printing');
+let requestRender = () => renderLivePreview();
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -391,6 +453,7 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
 
 function findById(list, id) {
   return list.find((item) => String(item.id) === String(id));
@@ -594,6 +657,73 @@ function renderCart() {
   });
 }
 
+function getCardImage(item, kind) {
+  if (!item) return '';
+  if (kind === 'type') return item.preview_base_image || item.image || '';
+  return item.preview_image || item.image || '';
+}
+
+function cardPlaceholder(label) {
+  const token = (label || 'Item').replace(/[^A-Za-z0-9 ]/g, '').trim().slice(0, 8) || 'Item';
+  return `<div class="studio-card-placeholder">${escapeHtml(token)}</div>`;
+}
+
+function renderDeck(containerId, items, selectedId, selectId, kind, includeNone) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const cards = [];
+
+  if (includeNone) {
+    cards.push(`
+      <button type="button" class="studio-card ${selectedId ? '' : 'active'}" data-target="${selectId}" data-id="">
+        <div class="studio-card-placeholder">None</div>
+        <p class="studio-card-label">No add-on</p>
+      </button>
+    `);
+  }
+
+  (items || []).forEach((item) => {
+    const id = String(item.id);
+    const isActive = String(selectedId || '') === id;
+    const image = getCardImage(item, kind);
+    cards.push(`
+      <button type="button" class="studio-card ${isActive ? 'active' : ''}" data-target="${selectId}" data-id="${id}">
+        ${image ? `<img class="studio-card-thumb" src="${escapeHtml(image)}" alt="${escapeHtml(item.name || 'Option')}" loading="lazy">` : cardPlaceholder(item.name)}
+        <p class="studio-card-label">${escapeHtml(item.name || '-')}</p>
+      </button>
+    `);
+  });
+
+  if (!cards.length) {
+    container.innerHTML = '<p class="text-xs text-slate-400">No options available.</p>';
+    return;
+  }
+  container.innerHTML = cards.join('');
+  container.querySelectorAll('button[data-target]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.getAttribute('data-target'));
+      if (!target) return;
+      target.value = btn.getAttribute('data-id');
+      syncVisualPickers();
+      requestRender();
+    });
+  });
+}
+
+function syncVisualPickers() {
+  renderDeck('typeCardDeck', catalog.types, typeSelect.value, 'typeSelect', 'type', false);
+  renderDeck('mainAccessoryCardDeck', catalog.mainAccessories, mainAccessorySelect.value, 'mainAccessorySelect', 'main', false);
+  renderDeck('addonAccessoryCardDeck', catalog.addonAccessories, addonAccessorySelect.value, 'addonAccessorySelect', 'addon', true);
+
+  const visualMessage = document.getElementById('visualCatalogMessage');
+  if (!visualMessage) return;
+  const warnings = [];
+  if (!catalog.types.length) warnings.push('No lanyard types available.');
+  if (!catalog.mainAccessories.length) warnings.push('No main accessories available.');
+  if (!catalog.addonAccessories.length) warnings.push('Add-on accessories are not configured yet.');
+  visualMessage.textContent = warnings.join(' ');
+}
+
 function populateCatalogSelects() {
   typeSelect.innerHTML = '';
   mainAccessorySelect.innerHTML = '';
@@ -615,6 +745,9 @@ function populateCatalogSelects() {
   catalog.addonAccessories.forEach((item) => {
     addonAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
   });
+  if (catalog.types.length && !typeSelect.value) typeSelect.value = String(catalog.types[0].id);
+  if (catalog.mainAccessories.length && !mainAccessorySelect.value) mainAccessorySelect.value = String(catalog.mainAccessories[0].id);
+  syncVisualPickers();
 }
 
 async function loadCatalog() {
@@ -739,6 +872,7 @@ if (verifyPageBindings()) {
   const renderLivePreviewDebounced = debounce(() => {
     renderLivePreview();
   }, 80);
+  requestRender = renderLivePreviewDebounced;
 
   document.getElementById('logoUpload').addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -753,11 +887,14 @@ if (verifyPageBindings()) {
 
   [frontTextInput, backTextInput, textColorInput, bgColorInput, lineQtyInput]
     .forEach((el) => {
-      if (el) el.addEventListener('input', renderLivePreviewDebounced);
+      if (el) el.addEventListener('input', requestRender);
     });
   [typeSelect, mainAccessorySelect, addonAccessorySelect, widthInput, lengthMmInput, qualityInput, printingInput]
     .forEach((el) => {
-      if (el) el.addEventListener('change', renderLivePreviewDebounced);
+      if (el) el.addEventListener('change', () => {
+        syncVisualPickers();
+        requestRender();
+      });
     });
 
   const addBtn = document.getElementById('addToCartBtn');
@@ -783,7 +920,7 @@ if (verifyPageBindings()) {
       lineQtyInput.value = 100;
       logoData = null;
       document.getElementById('logoUpload').value = '';
-      renderLivePreviewDebounced();
+      requestRender();
     });
   }
 
