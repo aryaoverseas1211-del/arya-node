@@ -111,6 +111,11 @@ const importUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }
 });
 
+const lanyardTypeUpload = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'preview_base_image_file', maxCount: 1 }
+]);
+
 function resolveUploadPath(urlPath) {
   const clean = (urlPath || '').replace(/^\/+/, '');
   if (clean.startsWith('uploads/')) {
@@ -648,13 +653,20 @@ app.get('/api/admin/lanyard/types', (req, res) => {
   res.json({ success: true, types });
 });
 
-app.post('/api/admin/lanyard/types', upload.single('image'), (req, res) => {
+app.post('/api/admin/lanyard/types', lanyardTypeUpload, (req, res) => {
   const payload = req.body || {};
   const name = (payload.name || '').trim();
   if (!name) {
     return res.status(400).json({ success: false, message: 'Type name is required.' });
   }
   const now = new Date().toISOString();
+  const typeImageFile = req.files && req.files.image && req.files.image[0] ? req.files.image[0] : null;
+  const previewBaseFile = req.files && req.files.preview_base_image_file && req.files.preview_base_image_file[0]
+    ? req.files.preview_base_image_file[0]
+    : null;
+  const resolvedImage = typeImageFile ? `/uploads/${typeImageFile.filename}` : (payload.image || '');
+  const resolvedBasePreview = (payload.preview_base_image || '').trim() || (previewBaseFile ? `/uploads/${previewBaseFile.filename}` : '');
+
   try {
     const info = db.prepare(`
       INSERT INTO lanyard_types (name, slug, description, image, preview_base_image, is_breakaway_supported, is_active, sort_order, created_at, updated_at)
@@ -663,8 +675,8 @@ app.post('/api/admin/lanyard/types', upload.single('image'), (req, res) => {
       name,
       payload.slug ? slugify(payload.slug) : slugify(name),
       payload.description || '',
-      req.file ? `/uploads/${req.file.filename}` : (payload.image || ''),
-      payload.preview_base_image || '',
+      resolvedImage,
+      resolvedBasePreview,
       toBooleanFlag(payload.is_breakaway_supported, true) ? 1 : 0,
       toBooleanFlag(payload.is_active, true) ? 1 : 0,
       Number(payload.sort_order) || 0,
@@ -678,7 +690,7 @@ app.post('/api/admin/lanyard/types', upload.single('image'), (req, res) => {
   }
 });
 
-app.put('/api/admin/lanyard/types/:id', upload.single('image'), (req, res) => {
+app.put('/api/admin/lanyard/types/:id', lanyardTypeUpload, (req, res) => {
   const id = req.params.id;
   const current = db.prepare('SELECT * FROM lanyard_types WHERE id = ?').get(id);
   if (!current) {
@@ -687,8 +699,18 @@ app.put('/api/admin/lanyard/types/:id', upload.single('image'), (req, res) => {
   const payload = req.body || {};
   const name = payload.name ? payload.name.trim() : current.name;
   const now = new Date().toISOString();
-  const image = req.file ? `/uploads/${req.file.filename}` : current.image;
-  const previewBaseImage = payload.preview_base_image !== undefined ? payload.preview_base_image : current.preview_base_image;
+  const typeImageFile = req.files && req.files.image && req.files.image[0] ? req.files.image[0] : null;
+  const previewBaseFile = req.files && req.files.preview_base_image_file && req.files.preview_base_image_file[0]
+    ? req.files.preview_base_image_file[0]
+    : null;
+  const image = typeImageFile ? `/uploads/${typeImageFile.filename}` : current.image;
+  let previewBaseImage = current.preview_base_image;
+  if (payload.preview_base_image !== undefined) {
+    previewBaseImage = (payload.preview_base_image || '').trim();
+  }
+  if (!previewBaseImage && previewBaseFile) {
+    previewBaseImage = `/uploads/${previewBaseFile.filename}`;
+  }
   try {
     db.prepare(`
       UPDATE lanyard_types

@@ -292,7 +292,9 @@
           <input id="lanyardTypeSort" type="number" placeholder="Sort order" class="w-full border rounded-lg p-2">
           <textarea id="lanyardTypeDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
           <input id="lanyardTypeImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
+          <input id="lanyardTypeBaseImageFile" type="file" accept="image/*" class="w-full border rounded-lg p-2">
           <input id="lanyardTypeBaseImage" type="text" placeholder="Preview base image URL (/uploads/...)" class="w-full border rounded-lg p-2">
+          <p class="text-xs text-slate-500">Upload a base preview image or provide URL. If URL is filled, it is used first.</p>
           <div class="grid grid-cols-2 gap-3">
             <select id="lanyardTypeBreakaway" class="w-full border rounded-lg p-2">
               <option value="1">Breakaway supported</option>
@@ -1493,6 +1495,8 @@ document.getElementById('lanyardTypeForm').addEventListener('submit', async (e) 
   formData.append('is_active', document.getElementById('lanyardTypeActive').value);
   const file = document.getElementById('lanyardTypeImage').files[0];
   if (file) formData.append('image', file);
+  const basePreviewFile = document.getElementById('lanyardTypeBaseImageFile').files[0];
+  if (basePreviewFile) formData.append('preview_base_image_file', basePreviewFile);
 
   try {
     if (id) {
