@@ -19,6 +19,7 @@ function resolveDbPath() {
 }
 
 const DB_PATH = resolveDbPath();
+const SCHEMA_VERSION = 2;
 
 let dbInstance;
 let sqlInstance;
@@ -137,6 +138,11 @@ function createAdapter(db) {
 
 function migrate(db) {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS schema_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
@@ -276,6 +282,25 @@ function migrate(db) {
   `);
 }
 
+function readSchemaVersion(db) {
+  try {
+    const row = db.prepare(`SELECT value FROM schema_meta WHERE key = 'schema_version'`).get();
+    const parsed = row ? Number(row.value) : 0;
+    return Number.isFinite(parsed) ? parsed : 0;
+  } catch (err) {
+    return 0;
+  }
+}
+
+function writeSchemaVersion(db, version) {
+  const exists = db.prepare(`SELECT key FROM schema_meta WHERE key = 'schema_version'`).get();
+  if (exists) {
+    db.prepare(`UPDATE schema_meta SET value = ? WHERE key = 'schema_version'`).run(String(version));
+    return;
+  }
+  db.prepare(`INSERT INTO schema_meta (key, value) VALUES ('schema_version', ?)`).run(String(version));
+}
+
 function hasColumn(db, table, column) {
   const cols = db.prepare(`PRAGMA table_info(${table})`).all();
   return cols.some((col) => col.name === column);
@@ -288,6 +313,11 @@ function addColumnIfMissing(db, table, column, definition) {
 }
 
 function evolveSchema(db) {
+  const currentVersion = readSchemaVersion(db);
+  if (currentVersion >= SCHEMA_VERSION) {
+    return;
+  }
+
   addColumnIfMissing(db, 'lanyard_types', 'preview_base_image', 'TEXT');
   addColumnIfMissing(db, 'lanyard_types', 'is_breakaway_supported', 'INTEGER DEFAULT 1');
 
@@ -299,6 +329,7 @@ function evolveSchema(db) {
   db.exec(`UPDATE lanyard_fittings SET fitting_kind = 'main' WHERE fitting_kind IS NULL OR fitting_kind = ''`);
   db.exec(`UPDATE lanyard_types SET is_breakaway_supported = 1 WHERE is_breakaway_supported IS NULL`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_kind ON lanyard_fittings(fitting_kind, is_active, sort_order)`);
+  writeSchemaVersion(db, SCHEMA_VERSION);
 }
 
 function seedCategories(db) {
@@ -407,10 +438,13 @@ async function initDb() {
   }
   const adapter = createAdapter(db);
   adapter.pragma('foreign_keys = ON');
-  migrate(adapter);
-  evolveSchema(adapter);
-  seedCategories(adapter);
-  seedLanyardCatalog(adapter);
+  const bootstrap = adapter.transaction(() => {
+    migrate(adapter);
+    evolveSchema(adapter);
+    seedCategories(adapter);
+    seedLanyardCatalog(adapter);
+  });
+  bootstrap();
   dbInstance = adapter;
   return dbInstance;
 }

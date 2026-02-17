@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -30,13 +31,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Sessions
 const isProduction = process.env.NODE_ENV === 'production';
-if (!process.env.SESSION_SECRET) {
-  console.warn('SESSION_SECRET is not set. Set it in Hostinger environment variables.');
+const strictSessionSecret = process.env.STRICT_SESSION_SECRET === '1';
+const startupStatus = { ok: true, reason: '' };
+let sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  if (isProduction && strictSessionSecret) {
+    startupStatus.ok = false;
+    startupStatus.reason = 'SESSION_SECRET is required in production when STRICT_SESSION_SECRET=1.';
+  } else {
+    sessionSecret = crypto.randomBytes(32).toString('hex');
+    console.warn('SESSION_SECRET is not set. Using temporary runtime secret for this process.');
+  }
 }
 // Trust proxy so secure cookies work behind Hostinger/LSWS proxy
 app.set('trust proxy', 1);
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -296,6 +306,9 @@ function ensureBootstrapAdmin() {
 
 async function startServer() {
   try {
+    if (!startupStatus.ok) {
+      throw new Error(startupStatus.reason);
+    }
     db = await initDb();
     ensureBootstrapAdmin();
     app.listen(PORT, '0.0.0.0', () => {
@@ -391,6 +404,9 @@ app.get('/api/admin/env-check', (req, res) => {
   res.json({
     success: true,
     hasSessionSecret: Boolean(process.env.SESSION_SECRET),
+    strictSessionSecret,
+    startupOk: startupStatus.ok,
+    startupReason: startupStatus.reason || null,
     adminEmail: envEmail || null,
     hasAdminPassword: Boolean(envPassword),
     adminCount
@@ -605,6 +621,23 @@ app.post('/api/lanyard/submissions', async (req, res) => {
   });
 
   res.json({ success: true, submissionId });
+});
+
+// Phase 2 contract placeholders
+app.post('/api/lanyard/export/svg', (req, res) => {
+  res.status(501).json({
+    success: false,
+    phase: 2,
+    message: 'SVG export is planned for Phase 2. Use submission/WhatsApp flow for now.'
+  });
+});
+
+app.post('/api/lanyard/export/pdf', (req, res) => {
+  res.status(501).json({
+    success: false,
+    phase: 2,
+    message: 'PDF export is planned for Phase 2. Use submission/WhatsApp flow for now.'
+  });
 });
 
 // Admin API routes
@@ -1600,6 +1633,9 @@ app.get('/product/:id', (req, res) => {
 
 // Basic health check
 app.get('/health', (req, res) => {
+  if (!startupStatus.ok) {
+    return res.status(503).json({ ok: false, reason: startupStatus.reason, time: new Date().toISOString() });
+  }
   res.json({ ok: true, time: new Date().toISOString() });
 });
 

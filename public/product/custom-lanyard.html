@@ -141,8 +141,8 @@
   </div>
 </section>
 
-<section id="configurator" class="max-w-6xl mx-auto px-6 pb-12">
-  <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
+<section id="configurator" class="max-w-7xl mx-auto px-6 pb-12">
+  <div class="grid lg:grid-cols-[1.05fr_0.95fr_0.5fr] gap-6">
     <div class="bg-white shadow rounded-2xl p-6 lg:sticky lg:top-24 h-fit">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-xl font-semibold">Live Lanyard Preview</h2>
@@ -263,6 +263,25 @@
         <p id="submitMessage" class="text-sm text-slate-500 mt-3"></p>
       </div>
     </div>
+
+    <aside class="bg-white shadow rounded-2xl p-6 lg:sticky lg:top-24 h-fit">
+      <h3 class="text-lg font-semibold mb-4">Summary</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Length</span><span id="summaryLength" class="font-semibold">900 mm</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Width</span><span id="summaryWidth" class="font-semibold">20 mm</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Type</span><span id="summaryType" class="font-semibold">-</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Main</span><span id="summaryMain" class="font-semibold">-</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Add-on</span><span id="summaryAddon" class="font-semibold">None</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Print</span><span id="summaryPrinting" class="font-semibold">Sublimation</span></div>
+        <div class="flex items-center justify-between"><span class="text-slate-600">Qty</span><span id="summaryQty" class="font-semibold">100</span></div>
+      </div>
+      <div class="mt-6">
+        <p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Export (Phase 2)</p>
+        <button id="exportSvgBtn" disabled class="w-full rounded-lg border border-slate-200 bg-slate-100 text-slate-500 py-2 text-sm font-semibold cursor-not-allowed">SVG (Print Ready) - Coming Soon</button>
+        <button id="exportPdfBtn" disabled class="w-full rounded-lg border border-slate-200 bg-slate-100 text-slate-500 py-2 text-sm font-semibold mt-2 cursor-not-allowed">PDF (Customer Proof) - Coming Soon</button>
+      </div>
+      <p class="text-xs text-slate-500 mt-4">Phase 1 includes live rendering + submission workflow.</p>
+    </aside>
   </div>
 </section>
 
@@ -377,6 +396,14 @@ function findById(list, id) {
   return list.find((item) => String(item.id) === String(id));
 }
 
+function debounce(fn, wait) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
+}
+
 async function getImage(src) {
   if (!src) return null;
   if (imageCache.has(src)) return imageCache.get(src);
@@ -411,10 +438,10 @@ function currentLineItem() {
   };
 }
 
-function drawRepeatedStrip(text, y, widthPx, logoImg, color, bg) {
+function drawRepeatedStrip(text, y, widthPx, logoImg, color, bg, lengthMm) {
   const stripHeight = Math.max(14, widthPx);
   const startX = 90;
-  const stripWidth = 920;
+  const stripWidth = Math.max(560, Math.min(920, Math.round((Number(lengthMm) || 900) * 0.95)));
   ctx.fillStyle = bg;
   ctx.fillRect(startX, y, stripWidth, stripHeight);
   ctx.strokeStyle = 'rgba(0,0,0,0.15)';
@@ -444,6 +471,35 @@ function drawRepeatedStrip(text, y, widthPx, logoImg, color, bg) {
   }
 }
 
+function drawAccessory(image, baseX, baseY, anchor, defaultSize) {
+  if (!image) return;
+  const scale = Number(anchor.scale) || 1;
+  const width = defaultSize * scale;
+  const height = defaultSize * scale;
+  const x = baseX + (Number(anchor.x) || 0);
+  const y = baseY + (Number(anchor.y) || 0);
+  const rotation = (Number(anchor.rotation) || 0) * (Math.PI / 180);
+  ctx.save();
+  ctx.translate(x + (width / 2), y + (height / 2));
+  ctx.rotate(rotation);
+  ctx.drawImage(image, -(width / 2), -(height / 2), width, height);
+  ctx.restore();
+}
+
+function updateSummary(line, type, main, addon) {
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+  setText('summaryLength', `${line.lengthMm} mm`);
+  setText('summaryWidth', `${line.widthMm} mm`);
+  setText('summaryType', type ? type.name : '-');
+  setText('summaryMain', main ? main.name : '-');
+  setText('summaryAddon', addon ? addon.name : 'None');
+  setText('summaryPrinting', line.printingStyle || '-');
+  setText('summaryQty', String(line.quantity || '-'));
+}
+
 async function renderLivePreview() {
   if (!ctx || !canvas) return;
   const line = currentLineItem();
@@ -466,12 +522,12 @@ async function renderLivePreview() {
 
   const stripPx = Math.max(18, Math.min(42, Math.round(line.widthMm * 1.4)));
   const logoImg = line.logoData ? await getImage(line.logoData) : null;
-  drawRepeatedStrip(line.frontText, 140, stripPx, logoImg, line.textColor, line.bgColor);
+  drawRepeatedStrip(line.frontText, 140, stripPx, logoImg, line.textColor, line.bgColor, line.lengthMm);
   ctx.fillStyle = '#0f172a';
   ctx.font = '16px Manrope';
   ctx.fillText('Front', 40, 160);
 
-  drawRepeatedStrip(line.backText, 220, stripPx, logoImg, line.textColor, line.bgColor);
+  drawRepeatedStrip(line.backText, 220, stripPx, logoImg, line.textColor, line.bgColor, line.lengthMm);
   ctx.fillStyle = '#0f172a';
   ctx.fillText('Back', 40, 240);
 
@@ -487,17 +543,13 @@ async function renderLivePreview() {
   const addonAnchor = addon && addon.preview_anchor ? addon.preview_anchor : { x: 4, y: -14, scale: 1, rotation: 0 };
 
   if (mainImage) {
-    const mw = 52 * (Number(mainAnchor.scale) || 1);
-    const mh = 52 * (Number(mainAnchor.scale) || 1);
-    ctx.drawImage(mainImage, 130 + (Number(mainAnchor.x) || 0), baseY + (Number(mainAnchor.y) || 0), mw, mh);
+    drawAccessory(mainImage, 130, baseY, mainAnchor, 52);
   } else {
     ctx.fillStyle = '#111827';
     ctx.fillRect(95, baseY - 10, 40, 24);
   }
   if (addonImage) {
-    const aw = 40 * (Number(addonAnchor.scale) || 1);
-    const ah = 40 * (Number(addonAnchor.scale) || 1);
-    ctx.drawImage(addonImage, 910 + (Number(addonAnchor.x) || 0), baseY + (Number(addonAnchor.y) || 0), aw, ah);
+    drawAccessory(addonImage, 910, baseY, addonAnchor, 40);
   } else if (addon) {
     ctx.fillStyle = '#6b7280';
     ctx.fillRect(920, baseY - 2, 24, 24);
@@ -509,6 +561,8 @@ async function renderLivePreview() {
     ctx.drawImage(baseImg, 680, 100, 360, 220);
     ctx.globalAlpha = 1;
   }
+
+  updateSummary(line, type, main, addon);
 }
 
 function renderCart() {
@@ -682,24 +736,28 @@ function sendWhatsApp() {
 }
 
 if (verifyPageBindings()) {
+  const renderLivePreviewDebounced = debounce(() => {
+    renderLivePreview();
+  }, 80);
+
   document.getElementById('logoUpload').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       logoData = reader.result;
-      renderLivePreview();
+      renderLivePreviewDebounced();
     };
     reader.readAsDataURL(file);
   });
 
   [frontTextInput, backTextInput, textColorInput, bgColorInput, lineQtyInput]
     .forEach((el) => {
-      if (el) el.addEventListener('input', renderLivePreview);
+      if (el) el.addEventListener('input', renderLivePreviewDebounced);
     });
   [typeSelect, mainAccessorySelect, addonAccessorySelect, widthInput, lengthMmInput, qualityInput, printingInput]
     .forEach((el) => {
-      if (el) el.addEventListener('change', renderLivePreview);
+      if (el) el.addEventListener('change', renderLivePreviewDebounced);
     });
 
   const addBtn = document.getElementById('addToCartBtn');
@@ -725,7 +783,7 @@ if (verifyPageBindings()) {
       lineQtyInput.value = 100;
       logoData = null;
       document.getElementById('logoUpload').value = '';
-      renderLivePreview();
+      renderLivePreviewDebounced();
     });
   }
 
