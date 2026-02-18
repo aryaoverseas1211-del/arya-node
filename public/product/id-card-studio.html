@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ID Card Studio | Arya Overseas</title>
+<link rel="icon" type="image/png" href="/assets/veom-logo.png">
+<link rel="apple-touch-icon" href="/assets/veom-logo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+  body { background: linear-gradient(180deg, #f4f8ff, #eef2f7); }
+  .panel { background: #fff; border: 1px solid #dbe7f7; border-radius: 16px; box-shadow: 0 12px 26px rgba(15, 40, 85, 0.08); }
+  .input { width: 100%; border: 1px solid #c7d6ee; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+  .label { font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
+  .btn { border-radius: 10px; font-weight: 700; font-size: 14px; padding: 10px 12px; }
+  .btn-primary { background: #1d4ed8; color: #fff; }
+  .btn-subtle { background: #f1f5f9; color: #0f172a; border: 1px solid #dbe7f7; }
+  .canvas-wrap { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
+</style>
+</head>
+<body class="text-slate-900">
+<header class="bg-blue-900 text-white">
+  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-semibold">
+      <img src="/assets/veom-logo.png" alt="Arya Overseas" class="h-8 w-8 rounded-full">
+      <span>Arya Overseas</span>
+    </a>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/product/custom-lanyard.html" class="text-white/85 hover:text-white">Lanyard Studio</a>
+      <a href="/admin" class="text-white/85 hover:text-white">CMS</a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-5 py-8">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-blue-900">ID Card Software Suite</h1>
+    <p class="text-slate-600 mt-1">Create records, design cards, and export printable A4/A3 sheets.</p>
+  </div>
+
+  <div class="grid xl:grid-cols-[1.1fr_1fr] gap-6">
+    <section class="panel p-5">
+      <h2 class="text-lg font-bold mb-4">Card Configuration</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Template</label>
+          <select id="template" class="input">
+            <option value="corporate">Corporate</option>
+            <option value="student">Student</option>
+            <option value="visitor">Visitor</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Quantity</label>
+          <input id="quantity" class="input" type="number" min="1" value="24">
+        </div>
+        <div>
+          <label class="label">Card Width (mm)</label>
+          <input id="cardWidth" class="input" type="number" min="50" max="120" step="0.1" value="85.6">
+        </div>
+        <div>
+          <label class="label">Card Height (mm)</label>
+          <input id="cardHeight" class="input" type="number" min="30" max="90" step="0.1" value="54">
+        </div>
+        <div>
+          <label class="label">Paper Orientation</label>
+          <select id="paperOrientation" class="input">
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <label class="inline-flex items-center gap-2 text-sm">
+            <input id="includeBackSheet" type="checkbox" checked>
+            Include back side page
+          </label>
+        </div>
+      </div>
+
+      <h3 class="text-base font-bold mt-6 mb-3">Card Data</h3>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Name</label>
+          <input id="name" class="input" value="Employee Name">
+        </div>
+        <div>
+          <label class="label">ID Number</label>
+          <input id="idNumber" class="input" value="AO-2026-001">
+        </div>
+        <div>
+          <label class="label">Designation</label>
+          <input id="designation" class="input" value="Sales Manager">
+        </div>
+        <div>
+          <label class="label">Department</label>
+          <input id="department" class="input" value="Business Development">
+        </div>
+        <div>
+          <label class="label">Company</label>
+          <input id="company" class="input" value="Arya Overseas">
+        </div>
+        <div>
+          <label class="label">Valid Till</label>
+          <input id="validTill" class="input" type="date">
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="label">Photo Upload</label>
+          <input id="photoUpload" class="input" type="file" accept="image/*" capture="user">
+        </div>
+        <div>
+          <label class="label">Logo Upload</label>
+          <input id="logoUpload" class="input" type="file" accept="image/*">
+        </div>
+        <div>
+          <label class="label">Primary Color</label>
+          <input id="primaryColor" class="input h-11 p-1" type="color" value="#1d4ed8">
+        </div>
+        <div>
+          <label class="label">Text Color</label>
+          <input id="textColor" class="input h-11 p-1" type="color" value="#ffffff">
+        </div>
+      </div>
+
+      <div class="mt-5 grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <button id="saveRecordBtn" class="btn btn-subtle">Save Record</button>
+        <button id="downloadPngBtn" class="btn btn-subtle">Download PNG</button>
+        <button id="exportA4Btn" class="btn btn-primary">Export A4 PDF</button>
+        <button id="exportA3Btn" class="btn btn-primary">Export A3 PDF</button>
+      </div>
+      <p id="statusMsg" class="text-xs text-slate-500 mt-3"></p>
+    </section>
+
+    <section class="space-y-6">
+      <div class="panel p-5">
+        <h2 class="text-lg font-bold mb-3">Live Preview</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="canvas-wrap">
+            <p class="text-xs font-semibold text-slate-500 mb-2">Front</p>
+            <canvas id="frontCanvas" width="860" height="540" class="w-full rounded-lg bg-white"></canvas>
+          </div>
+          <div class="canvas-wrap">
+            <p class="text-xs font-semibold text-slate-500 mb-2">Back</p>
+            <canvas id="backCanvas" width="860" height="540" class="w-full rounded-lg bg-white"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel p-5">
+        <h2 class="text-lg font-bold mb-3">Saved Records</h2>
+        <div id="recordsList" class="space-y-2 max-h-[260px] overflow-auto"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+const STORAGE_KEY = 'id-card-studio-records-v1';
+const frontCanvas = document.getElementById('frontCanvas');
+const backCanvas = document.getElementById('backCanvas');
+const fctx = frontCanvas.getContext('2d');
+const bctx = backCanvas.getContext('2d');
+let photoData = '';
+let logoData = '';
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function value(id) {
+  return byId(id).value;
+}
+
+function setStatus(msg, isError) {
+  const el = byId('statusMsg');
+  el.textContent = msg || '';
+  el.style.color = isError ? '#b91c1c' : '#475569';
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function drawCard(ctx, side) {
+  const primary = value('primaryColor');
+  const textColor = value('textColor');
+  const template = value('template');
+  const name = value('name');
+  const idNumber = value('idNumber');
+  const designation = value('designation');
+  const department = value('department');
+  const company = value('company');
+  const validTill = value('validTill');
+
+  const w = ctx.canvas.width;
+  const h = ctx.canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#d1d5db';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(4, 4, w - 8, h - 8);
+
+  ctx.fillStyle = primary;
+  ctx.fillRect(0, 0, w, 104);
+  ctx.fillStyle = textColor;
+  ctx.font = 'bold 44px Arial';
+  ctx.fillText(company || 'Arya Overseas', 24, 66);
+
+  if (template === 'student') {
+    ctx.fillStyle = '#e0f2fe';
+    ctx.fillRect(0, h - 96, w, 96);
+  } else if (template === 'visitor') {
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(0, h - 96, w, 96);
+  }
+
+  if (side === 'front') {
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 42px Arial';
+    ctx.fillText(name || 'Employee Name', 232, 230);
+    ctx.font = '28px Arial';
+    ctx.fillStyle = '#334155';
+    ctx.fillText(designation || 'Designation', 232, 274);
+    ctx.fillText(department || 'Department', 232, 312);
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 32px Arial';
+    ctx.fillText(`ID: ${idNumber || '-'}`, 232, 366);
+    ctx.font = '24px Arial';
+    ctx.fillText(`Valid: ${validTill || 'N/A'}`, 232, 406);
+
+    if (photoData) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 32, 150, 170, 220);
+      };
+      img.src = photoData;
+    } else {
+      ctx.strokeStyle = '#94a3b8';
+      ctx.setLineDash([8, 6]);
+      ctx.strokeRect(32, 150, 170, 220);
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#64748b';
+      ctx.font = '20px Arial';
+      ctx.fillText('PHOTO', 82, 266);
+    }
+  } else {
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 36px Arial';
+    ctx.fillText('Back Side', 26, 168);
+    ctx.font = '24px Arial';
+    ctx.fillStyle = '#334155';
+    ctx.fillText('If found, return to Arya Overseas.', 26, 220);
+    ctx.fillText('Email: support@aryaoverseas.in', 26, 260);
+    ctx.fillText('Phone: +91 96673 71899', 26, 300);
+    ctx.fillText('This card is property of company.', 26, 340);
+    ctx.fillText('Misuse is prohibited.', 26, 380);
+  }
+
+  if (logoData) {
+    const logo = new Image();
+    logo.onload = () => {
+      ctx.drawImage(logo, w - 126, 18, 100, 68);
+    };
+    logo.src = logoData;
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.82)';
+    ctx.fillRect(w - 130, 16, 102, 70);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('LOGO', w - 98, 58);
+  }
+}
+
+function renderPreview() {
+  drawCard(fctx, 'front');
+  drawCard(bctx, 'back');
+}
+
+function getFormData() {
+  return {
+    id: `rec-${Date.now()}`,
+    template: value('template'),
+    quantity: Number(value('quantity') || 1),
+    cardWidth: Number(value('cardWidth') || 85.6),
+    cardHeight: Number(value('cardHeight') || 54),
+    paperOrientation: value('paperOrientation'),
+    includeBackSheet: byId('includeBackSheet').checked,
+    name: value('name'),
+    idNumber: value('idNumber'),
+    designation: value('designation'),
+    department: value('department'),
+    company: value('company'),
+    validTill: value('validTill'),
+    primaryColor: value('primaryColor'),
+    textColor: value('textColor'),
+    photoData,
+    logoData,
+    createdAt: new Date().toISOString()
+  };
+}
+
+function applyFormData(data) {
+  byId('template').value = data.template || 'corporate';
+  byId('quantity').value = data.quantity || 24;
+  byId('cardWidth').value = data.cardWidth || 85.6;
+  byId('cardHeight').value = data.cardHeight || 54;
+  byId('paperOrientation').value = data.paperOrientation || 'portrait';
+  byId('includeBackSheet').checked = data.includeBackSheet !== false;
+  byId('name').value = data.name || '';
+  byId('idNumber').value = data.idNumber || '';
+  byId('designation').value = data.designation || '';
+  byId('department').value = data.department || '';
+  byId('company').value = data.company || '';
+  byId('validTill').value = data.validTill || '';
+  byId('primaryColor').value = data.primaryColor || '#1d4ed8';
+  byId('textColor').value = data.textColor || '#ffffff';
+  photoData = data.photoData || '';
+  logoData = data.logoData || '';
+  renderPreview();
+}
+
+function loadRecords() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch (err) {
+    return [];
+  }
+}
+
+function saveRecords(records) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function renderRecords() {
+  const records = loadRecords();
+  const box = byId('recordsList');
+  if (!records.length) {
+    box.innerHTML = '<p class="text-sm text-slate-500">No saved records.</p>';
+    return;
+  }
+  box.innerHTML = records.map((item) => `
+    <div class="border rounded-lg p-3 flex items-center justify-between gap-3">
+      <div>
+        <p class="font-semibold text-sm">${item.name || 'Unnamed'} · ${item.idNumber || '-'}</p>
+        <p class="text-xs text-slate-500">${item.company || '-'} · Qty ${item.quantity || '-'}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button data-load="${item.id}" class="btn btn-subtle !py-1 !px-2 text-xs">Load</button>
+        <button data-del="${item.id}" class="btn btn-subtle !py-1 !px-2 text-xs text-red-700">Delete</button>
+      </div>
+    </div>
+  `).join('');
+
+  box.querySelectorAll('[data-load]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const rec = records.find((r) => r.id === btn.getAttribute('data-load'));
+      if (rec) {
+        applyFormData(rec);
+        setStatus('Record loaded.', false);
+      }
+    });
+  });
+
+  box.querySelectorAll('[data-del]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-del');
+      saveRecords(records.filter((r) => r.id !== id));
+      renderRecords();
+      setStatus('Record deleted.', false);
+    });
+  });
+}
+
+function exportPdf(format) {
+  const { jsPDF } = window.jspdf;
+  const quantity = Number(value('quantity') || 1);
+  const cardW = Number(value('cardWidth') || 85.6);
+  const cardH = Number(value('cardHeight') || 54);
+  const orientation = value('paperOrientation') || 'portrait';
+  const includeBack = byId('includeBackSheet').checked;
+  if (quantity < 1 || cardW <= 0 || cardH <= 0) {
+    setStatus('Invalid quantity/card size.', true);
+    return;
+  }
+
+  renderPreview();
+  const doc = new jsPDF({ unit: 'mm', format, orientation });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 8;
+  const gap = 3;
+  const cols = Math.max(1, Math.floor((pageW - (margin * 2) + gap) / (cardW + gap)));
+  const rows = Math.max(1, Math.floor((pageH - (margin * 2) + gap) / (cardH + gap)));
+  const perPage = cols * rows;
+  const frontImage = frontCanvas.toDataURL('image/png');
+  const backImage = backCanvas.toDataURL('image/png');
+
+  let placed = 0;
+  while (placed < quantity) {
+    if (placed > 0 && placed % perPage === 0) doc.addPage();
+    const indexOnPage = placed % perPage;
+    const row = Math.floor(indexOnPage / cols);
+    const col = indexOnPage % cols;
+    const x = margin + (col * (cardW + gap));
+    const y = margin + (row * (cardH + gap));
+    doc.addImage(frontImage, 'PNG', x, y, cardW, cardH);
+    placed += 1;
+  }
+
+  if (includeBack) {
+    doc.addPage();
+    placed = 0;
+    while (placed < quantity) {
+      if (placed > 0 && placed % perPage === 0) doc.addPage();
+      const indexOnPage = placed % perPage;
+      const row = Math.floor(indexOnPage / cols);
+      const col = indexOnPage % cols;
+      const x = margin + (col * (cardW + gap));
+      const y = margin + (row * (cardH + gap));
+      doc.addImage(backImage, 'PNG', x, y, cardW, cardH);
+      placed += 1;
+    }
+  }
+
+  doc.save(`id-cards-${format}-${Date.now()}.pdf`);
+  setStatus(`${format.toUpperCase()} PDF exported.`, false);
+}
+
+function bind() {
+  const watchIds = [
+    'template', 'quantity', 'cardWidth', 'cardHeight', 'paperOrientation', 'includeBackSheet',
+    'name', 'idNumber', 'designation', 'department', 'company', 'validTill', 'primaryColor', 'textColor'
+  ];
+  watchIds.forEach((id) => {
+    const el = byId(id);
+    const ev = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input';
+    el.addEventListener(ev, renderPreview);
+  });
+
+  byId('photoUpload').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    photoData = await readFileAsDataUrl(file);
+    renderPreview();
+  });
+
+  byId('logoUpload').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    logoData = await readFileAsDataUrl(file);
+    renderPreview();
+  });
+
+  byId('saveRecordBtn').addEventListener('click', () => {
+    const record = getFormData();
+    const records = loadRecords();
+    records.unshift(record);
+    saveRecords(records.slice(0, 100));
+    renderRecords();
+    setStatus('Record saved.', false);
+  });
+
+  byId('downloadPngBtn').addEventListener('click', () => {
+    renderPreview();
+    const a = document.createElement('a');
+    a.href = frontCanvas.toDataURL('image/png');
+    a.download = `id-card-front-${Date.now()}.png`;
+    a.click();
+    setStatus('PNG downloaded.', false);
+  });
+
+  byId('exportA4Btn').addEventListener('click', () => exportPdf('a4'));
+  byId('exportA3Btn').addEventListener('click', () => exportPdf('a3'));
+}
+
+bind();
+renderPreview();
+renderRecords();
+</script>
+</body>
+</html>

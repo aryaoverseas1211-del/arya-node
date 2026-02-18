@@ -294,6 +294,21 @@
           <input type="file" id="logoUpload" accept="image/*" class="w-full border rounded-lg p-3">
         </div>
 
+        <div class="mt-4 border border-blue-100 rounded-xl p-3 bg-blue-50/40">
+          <label class="font-medium">AI Design Assist (Optional)</label>
+          <textarea id="aiPrompt" rows="2" class="w-full border rounded-lg p-3 mt-2" placeholder="Generate a premium lanyard motif, blue corporate style, clean icon pattern..."></textarea>
+          <div class="grid grid-cols-[1fr_auto] gap-2 mt-2">
+            <select id="aiSize" class="border rounded-lg p-2">
+              <option value="1024x1024">Square</option>
+              <option value="1024x1536">Portrait</option>
+              <option value="1536x1024">Landscape</option>
+            </select>
+            <button id="aiGenerateBtn" class="bg-blue-700 text-white px-4 rounded-lg font-semibold">Generate</button>
+          </div>
+          <p id="aiAssistMsg" class="text-xs text-slate-500 mt-2"></p>
+          <img id="aiPreviewImage" alt="AI generated lanyard concept" class="hidden mt-2 w-full max-h-44 object-contain border rounded-lg bg-white p-2">
+        </div>
+
         <div class="mt-5 flex flex-wrap gap-2">
           <button id="addToCartBtn" class="bg-blue-800 text-white px-5 py-2 rounded-full font-semibold">Add Design to Cart</button>
           <button id="clearDesignBtn" class="border px-5 py-2 rounded-full">Clear Current</button>
@@ -853,6 +868,50 @@ async function submitDesignRequest() {
   }
 }
 
+async function generateAiImage() {
+  const promptEl = document.getElementById('aiPrompt');
+  const sizeEl = document.getElementById('aiSize');
+  const btn = document.getElementById('aiGenerateBtn');
+  const msg = document.getElementById('aiAssistMsg');
+  const preview = document.getElementById('aiPreviewImage');
+  const prompt = promptEl ? promptEl.value.trim() : '';
+  if (!prompt || prompt.length < 8) {
+    if (msg) msg.textContent = 'Enter a more detailed prompt (minimum 8 characters).';
+    return;
+  }
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+    }
+    if (msg) msg.textContent = 'Generating AI concept image...';
+    const response = await fetch('/api/ai/lanyard-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, size: sizeEl ? sizeEl.value : '1024x1024' })
+    });
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.message || 'AI generation failed.');
+    }
+    logoData = data.imageUrl;
+    if (preview) {
+      preview.src = data.imageUrl;
+      preview.classList.remove('hidden');
+    }
+    if (msg) msg.textContent = 'AI image ready. Applied to live preview.';
+    requestRender();
+  } catch (err) {
+    if (msg) msg.textContent = err.message || 'AI generation failed.';
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Generate';
+    }
+  }
+}
+
 function sendWhatsApp() {
   if (!designCart.length) {
     document.getElementById('submitMessage').textContent = 'Add at least one design before sending to WhatsApp.';
@@ -928,6 +987,8 @@ if (verifyPageBindings()) {
   if (submitBtn) submitBtn.addEventListener('click', submitDesignRequest);
   const waBtn = document.getElementById('sendWhatsappBtn');
   if (waBtn) waBtn.addEventListener('click', sendWhatsApp);
+  const aiBtn = document.getElementById('aiGenerateBtn');
+  if (aiBtn) aiBtn.addEventListener('click', generateAiImage);
 
   renderCart();
   loadCatalog();

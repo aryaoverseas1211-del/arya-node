@@ -23,6 +23,10 @@ const uploadsDir = process.env.UPLOADS_DIR || path.join(persistRoot, 'uploads');
 const dataDir = path.join(APP_ROOT, 'data');
 const backupDir = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups');
 const sheetsWebhookUrl = (process.env.GOOGLE_SHEETS_WEBHOOK_URL || '').trim();
+const openAiKey = (process.env.OPENAI_API_KEY || '').trim();
+const aiRateWindowMs = 10 * 60 * 1000;
+const aiRateLimitPerIp = 12;
+const aiRequestBuckets = new Map();
 
 // Middleware
 app.use(cors());
@@ -162,6 +166,28 @@ function slugify(value) {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+function isAiRequestLimited(ip) {
+  const key = ip || 'unknown';
+  const now = Date.now();
+  const bucket = aiRequestBuckets.get(key) || [];
+  const recent = bucket.filter((ts) => now - ts < aiRateWindowMs);
+  if (recent.length >= aiRateLimitPerIp) {
+    aiRequestBuckets.set(key, recent);
+    return true;
+  }
+  recent.push(now);
+  aiRequestBuckets.set(key, recent);
+  return false;
+}
+
+function writeBase64ImageToUploads(base64Data, prefix) {
+  const safePrefix = (prefix || 'ai').replace(/[^a-z0-9-]/gi, '');
+  const fileName = `${safePrefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}.png`;
+  const fullPath = path.join(uploadsDir, fileName);
+  fs.writeFileSync(fullPath, Buffer.from(base64Data, 'base64'));
+  return `/uploads/${fileName}`;
 }
 
 function formatFileSize(bytes) {
@@ -626,6 +652,78 @@ app.post('/api/lanyard/submissions', async (req, res) => {
   });
 
   res.json({ success: true, submissionId });
+});
+
+app.post('/api/ai/lanyard-generate', async (req, res) => {
+  if (!openAiKey) {
+    return res.status(400).json({
+      success: false,
+      message: 'AI generation is disabled. Set OPENAI_API_KEY on server.'
+    });
+  }
+
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').toString().split(',')[0].trim();
+  if (isAiRequestLimited(ip)) {
+    return res.status(429).json({ success: false, message: 'Too many AI requests. Please retry in a few minutes.' });
+  }
+
+  const prompt = String((req.body && req.body.prompt) || '').trim();
+  const size = String((req.body && req.body.size) || '1024x1024').trim();
+  const allowedSizes = new Set(['1024x1024', '1024x1536', '1536x1024']);
+  const finalSize = allowedSizes.has(size) ? size : '1024x1024';
+
+  if (!prompt || prompt.length < 8) {
+    return res.status(400).json({ success: false, message: 'Prompt must be at least 8 characters.' });
+  }
+  if (prompt.length > 1500) {
+    return res.status(400).json({ success: false, message: 'Prompt is too long.' });
+  }
+
+  try {
+    const aiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-image-1',
+        prompt,
+        size: finalSize
+      })
+    });
+
+    const aiData = await aiResponse.json();
+    if (!aiResponse.ok) {
+      return res.status(502).json({
+        success: false,
+        message: aiData && aiData.error && aiData.error.message ? aiData.error.message : 'AI generation failed.'
+      });
+    }
+
+    const first = aiData && aiData.data && aiData.data[0] ? aiData.data[0] : null;
+    if (!first) {
+      return res.status(502).json({ success: false, message: 'AI response missing image data.' });
+    }
+
+    let imageUrl = '';
+    if (first.b64_json) {
+      imageUrl = writeBase64ImageToUploads(first.b64_json, 'ai-lanyard');
+    } else if (first.url) {
+      imageUrl = first.url;
+    } else {
+      return res.status(502).json({ success: false, message: 'AI response format is not supported.' });
+    }
+
+    res.json({
+      success: true,
+      imageUrl,
+      size: finalSize
+    });
+  } catch (err) {
+    console.error('AI lanyard generation failed:', err);
+    res.status(500).json({ success: false, message: 'AI generation failed. Try again.' });
+  }
 });
 
 // Phase 2 contract placeholders
@@ -1647,6 +1745,10 @@ app.post('/api/admin/import', importUpload.single('file'), (req, res) => {
 // Frontend routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
+
+app.get('/product/id-card-studio', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'product', 'id-card-studio.html'));
 });
 
 app.get('/product/:id', (req, res) => {

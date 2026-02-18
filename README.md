@@ -12,6 +12,8 @@ A modern, Node.js-based Product Content Management System with image uploads, MO
 - ✅ **Responsive Design**: Mobile-friendly UI with Tailwind CSS
 - ✅ **RESTful API**: Clean API endpoints for product management
 - ✅ **Admin Login**: Session-based CMS access with environment-configured admin
+- ✅ **ID Card Studio**: Browser-based ID card designer with A4/A3 PDF export
+- ✅ **AI Lanyard Assist (Optional)**: Generate concept artwork with `OPENAI_API_KEY`
 
 ## Prerequisites
 
@@ -38,6 +40,7 @@ A modern, Node.js-based Product Content Management System with image uploads, MO
 3. **Access the application:**
    - Homepage: http://localhost:3000
    - Admin Panel: http://localhost:3000/admin
+   - ID Card Studio: http://localhost:3000/product/id-card-studio
    - API Base: http://localhost:3000/api/products
 
 ## Project Structure
@@ -152,6 +155,17 @@ Or edit `server.js`:
 ```javascript
 const PORT = process.env.PORT || 3000;
 ```
+
+### Optional AI Configuration
+
+To enable AI-assisted lanyard concept generation:
+
+```bash
+OPENAI_API_KEY=your_key_here
+```
+
+Endpoint used by storefront:
+- `POST /api/ai/lanyard-generate`
 
 ## File Storage
 
