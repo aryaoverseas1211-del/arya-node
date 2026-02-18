@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studio Suite Pro | Arya Overseas</title>
+<title>Arya Studio | Unified Designer</title>
 <link rel="icon" type="image/png" href="/assets/veom-logo.png">
 <link rel="apple-touch-icon" href="/assets/veom-logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -11,12 +11,12 @@
 <style>
   body {
     background:
-      radial-gradient(1200px 700px at 10% 0%, rgba(29, 78, 216, 0.14), transparent 60%),
-      radial-gradient(900px 600px at 100% 20%, rgba(14, 165, 233, 0.12), transparent 62%),
+      radial-gradient(1200px 700px at 10% 0%, rgba(29, 78, 216, 0.12), transparent 60%),
+      radial-gradient(900px 600px at 100% 20%, rgba(14, 165, 233, 0.1), transparent 62%),
       #f6f8fc;
   }
   .glass {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(203, 213, 225, 0.7);
   }
@@ -35,71 +35,72 @@
     color: #fff;
     box-shadow: 0 8px 18px rgba(29, 78, 216, 0.25);
   }
+  .mode-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
   .workspace-frame {
     width: 100%;
-    min-height: 78vh;
+    min-height: 82vh;
     border: 1px solid #dbe3f3;
     border-radius: 18px;
     background: #fff;
   }
+  .module-card {
+    border: 1px solid #dbe3f3;
+    border-radius: 14px;
+    background: #fff;
+    padding: 14px;
+  }
 </style>
 </head>
 <body class="text-slate-900">
-<header class="glass sticky top-0 z-40">
-  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2 font-semibold text-blue-900">
-      <img src="/assets/veom-logo.png" alt="Arya Overseas" class="h-9 w-9 rounded-full">
-      <span class="text-lg">Arya Overseas Studio Suite</span>
-    </a>
-    <div class="text-sm text-slate-600">
-      Unified workspace for lanyards + ID cards
-    </div>
-  </div>
-</header>
-
-<main class="max-w-7xl mx-auto px-5 py-7">
+<main class="max-w-7xl mx-auto px-5 py-6">
   <section class="glass rounded-2xl p-5 mb-5">
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-blue-900">Creative Studio Pro</h1>
-        <p class="text-sm text-slate-600 mt-1">Canva-style workflow: pick a mode, design, preview, and export in one professional environment.</p>
+        <h1 class="text-2xl font-bold text-blue-900">Arya Studio</h1>
+        <p class="text-sm text-slate-600 mt-1">Unified enterprise workspace for design, bulk operations, and B2B production requests.</p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <button id="openLanyardMode" class="mode-btn active">Lanyard Studio</button>
-        <button id="openIdMode" class="mode-btn">ID Card Suite</button>
-      </div>
+      <a href="/admin" class="mode-btn">Open CMS</a>
     </div>
   </section>
 
-  <section class="grid lg:grid-cols-[260px_1fr] gap-5">
-    <aside class="glass rounded-2xl p-4 h-fit lg:sticky lg:top-24">
-      <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Workspace Guide</h2>
-      <ul class="mt-3 space-y-2 text-sm text-slate-600">
-        <li>1. Choose `Lanyard` or `ID Card` mode.</li>
-        <li>2. Configure styles and upload brand assets.</li>
-        <li>3. Use live preview before exporting.</li>
-        <li>4. For ID cards, upload CSV for bulk enterprise batches.</li>
-      </ul>
-      <div class="mt-5 border-t pt-4">
-        <p class="text-xs text-slate-500">Quick Access</p>
-        <div class="mt-2 flex flex-col gap-2">
-          <a href="/admin" class="text-sm text-blue-700 hover:text-blue-900">Open CMS</a>
-          <a href="/product/custom-lanyard.html" class="text-sm text-blue-700 hover:text-blue-900">Standalone Lanyard</a>
-          <a href="/product/id-card-studio" class="text-sm text-blue-700 hover:text-blue-900">Standalone ID Card</a>
-        </div>
-      </div>
-    </aside>
+  <section class="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <button id="openLanyardMode" class="module-card text-left">
+      <p class="text-sm font-semibold text-blue-900">Lanyard Studio</p>
+      <p class="text-xs text-slate-500 mt-1">Live preview + accessories + submission cart</p>
+    </button>
+    <button id="openIdMode" class="module-card text-left">
+      <p class="text-sm font-semibold text-blue-900">ID Card Suite</p>
+      <p class="text-xs text-slate-500 mt-1">School/enterprise bulk CSV + A4/A3 exports</p>
+    </button>
+    <button class="module-card text-left" disabled>
+      <p class="text-sm font-semibold text-slate-500">Magnet Designer</p>
+      <p class="text-xs text-slate-400 mt-1">Coming soon</p>
+    </button>
+    <button class="module-card text-left" disabled>
+      <p class="text-sm font-semibold text-slate-500">Pin Badge Designer</p>
+      <p class="text-xs text-slate-400 mt-1">Coming soon</p>
+    </button>
+  </section>
 
-    <div>
-      <iframe id="lanyardFrame" class="workspace-frame" src="/product/custom-lanyard.html" title="Lanyard Studio"></iframe>
-      <iframe id="idFrame" class="workspace-frame hidden" src="/product/id-card-studio" title="ID Card Suite"></iframe>
+  <section class="glass rounded-2xl p-4">
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button id="tabLanyard" class="mode-btn active">Lanyard Studio</button>
+      <button id="tabId" class="mode-btn">ID Card Suite</button>
     </div>
+
+    <iframe id="lanyardFrame" class="workspace-frame" src="/product/custom-lanyard.html?embed=1" title="Lanyard Studio"></iframe>
+    <iframe id="idFrame" class="workspace-frame hidden" src="/product/id-card-studio?embed=1" title="ID Card Suite"></iframe>
   </section>
 </main>
 
 <script>
 const lanyardFrame = document.getElementById('lanyardFrame');
 const idFrame = document.getElementById('idFrame');
+const tabLanyard = document.getElementById('tabLanyard');
+const tabId = document.getElementById('tabId');
 const openLanyardMode = document.getElementById('openLanyardMode');
 const openIdMode = document.getElementById('openIdMode');
 
@@ -107,16 +108,18 @@ function activate(mode) {
   if (mode === 'id') {
     lanyardFrame.classList.add('hidden');
     idFrame.classList.remove('hidden');
-    openLanyardMode.classList.remove('active');
-    openIdMode.classList.add('active');
+    tabLanyard.classList.remove('active');
+    tabId.classList.add('active');
     return;
   }
   idFrame.classList.add('hidden');
   lanyardFrame.classList.remove('hidden');
-  openIdMode.classList.remove('active');
-  openLanyardMode.classList.add('active');
+  tabId.classList.remove('active');
+  tabLanyard.classList.add('active');
 }
 
+tabLanyard.addEventListener('click', () => activate('lanyard'));
+tabId.addEventListener('click', () => activate('id'));
 openLanyardMode.addEventListener('click', () => activate('lanyard'));
 openIdMode.addEventListener('click', () => activate('id'));
 </script>

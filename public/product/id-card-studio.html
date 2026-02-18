@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ID Card Studio | Arya Overseas</title>
+<title>Arya Studio | ID Card Suite</title>
 <link rel="icon" type="image/png" href="/assets/veom-logo.png">
 <link rel="apple-touch-icon" href="/assets/veom-logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -24,23 +24,11 @@
 </style>
 </head>
 <body class="text-slate-900">
-<header class="bg-blue-900 text-white">
-  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2 font-semibold">
-      <img src="/assets/veom-logo.png" alt="Arya Overseas" class="h-8 w-8 rounded-full">
-      <span>Arya Overseas</span>
-    </a>
-    <div class="flex items-center gap-3 text-sm">
-      <a href="/product/studio-suite" class="text-white/85 hover:text-white">Lanyard Studio</a>
-      <a href="/admin" class="text-white/85 hover:text-white">CMS</a>
-    </div>
-  </div>
-</header>
 
 <main class="max-w-7xl mx-auto px-5 py-8">
   <div class="mb-6">
-    <h1 class="text-3xl font-bold text-blue-900">ID Card Software Suite</h1>
-    <p class="text-slate-600 mt-1">Create records, design cards, and export printable A4/A3 sheets.</p>
+    <h1 class="text-3xl font-bold text-blue-900">Arya Studio ID Card Suite</h1>
+    <p class="text-slate-600 mt-1">School and enterprise ID card production with bulk CSV, live preview, and print-ready sheets.</p>
   </div>
 
   <div class="grid xl:grid-cols-[1.1fr_1fr] gap-6">
@@ -102,7 +90,7 @@
         </div>
         <div>
           <label class="label">Company</label>
-          <input id="company" class="input" value="Arya Overseas">
+          <input id="company" class="input" value="School / Organization">
         </div>
         <div>
           <label class="label">Valid Till</label>
@@ -179,22 +167,22 @@
           </div>
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
-          <button id="downloadCsvTemplateBtn" class="btn btn-subtle">Download CSV Template</button>
+          <button id="downloadCsvTemplateBtn" class="btn btn-subtle">Download School CSV Template</button>
           <label class="btn btn-subtle cursor-pointer">
             Upload CSV
             <input id="bulkCsvUpload" type="file" accept=".csv,text/csv" class="hidden">
           </label>
         </div>
-        <p id="bulkMsg" class="text-xs text-slate-500 mt-2">Upload CSV with columns: name,idNumber,designation,department,company,validTill</p>
+        <p id="bulkMsg" class="text-xs text-slate-500 mt-2">Upload CSV with school fields: studentName,admissionNo,className,section,schoolName,validTill (or generic employee fields).</p>
         <div class="mt-3 border rounded-lg overflow-auto max-h-[220px]">
           <table class="w-full data-table">
             <thead>
               <tr>
                 <th>Name</th>
-                <th>ID</th>
-                <th>Designation</th>
-                <th>Department</th>
-                <th>Company</th>
+                <th>Admission/ID</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>School</th>
                 <th>Valid Till</th>
               </tr>
             </thead>
@@ -229,6 +217,7 @@ const sbctx = scratchBack.getContext('2d');
 let photoData = '';
 let logoData = '';
 let bulkRecords = [];
+let lastExportFormat = 'a4';
 
 function byId(id) {
   return document.getElementById(id);
@@ -303,7 +292,7 @@ function drawCard(ctx, side, data) {
   ctx.fillRect(0, 0, w, 104);
   ctx.fillStyle = textColor;
   ctx.font = 'bold 44px Arial';
-  ctx.fillText(company || 'Arya Overseas', 24, 66);
+  ctx.fillText(company || 'Arya Studio', 24, 66);
 
   if (template === 'student') {
     ctx.fillStyle = '#e0f2fe';
@@ -348,9 +337,9 @@ function drawCard(ctx, side, data) {
     ctx.fillText('Back Side', 26, 168);
     ctx.font = '24px Arial';
     ctx.fillStyle = '#334155';
-    ctx.fillText('If found, return to Arya Overseas.', 26, 220);
-    ctx.fillText('Email: support@aryaoverseas.in', 26, 260);
-    ctx.fillText('Phone: +91 96673 71899', 26, 300);
+    ctx.fillText('If found, return to issuing organization.', 26, 220);
+    ctx.fillText('Email: admin@school.org', 26, 260);
+    ctx.fillText('Phone: +91-XXXXXXXXXX', 26, 300);
     ctx.fillText('This card is property of company.', 26, 340);
     ctx.fillText('Misuse is prohibited.', 26, 380);
   }
@@ -472,12 +461,17 @@ function mapBulkRow(row) {
     }
     return '';
   };
+  const className = pick('classname', 'class', 'standard', 'grade');
+  const section = pick('section', 'sec', 'division');
+  const school = pick('schoolname', 'school', 'institution', 'company', 'organization', 'organisation');
+  const role = pick('designation', 'role');
+  const dept = pick('department', 'dept');
   return {
-    name: pick('name', 'fullname', 'employeename'),
-    idNumber: pick('idnumber', 'id', 'employeeid'),
-    designation: pick('designation', 'role'),
-    department: pick('department', 'dept'),
-    company: pick('company', 'organization', 'organisation'),
+    name: pick('studentname', 'name', 'fullname', 'employeename'),
+    idNumber: pick('admissionno', 'rollno', 'studentid', 'idnumber', 'id', 'employeeid'),
+    designation: className || role,
+    department: section || dept,
+    company: school || 'Arya Studio',
     validTill: pick('validtill', 'validto', 'expiry')
   };
 }
@@ -501,7 +495,12 @@ function renderBulkTable() {
 }
 
 function getCsvTemplate() {
-  return 'name,idNumber,designation,department,company,validTill\\nJohn Doe,EMP-001,Manager,Sales,Arya Overseas,2027-12-31\\nJane Smith,EMP-002,Executive,Operations,Arya Overseas,2027-12-31\\n';
+  return [
+    'studentName,admissionNo,className,section,schoolName,validTill',
+    'Aarav Sharma,STU-001,8,A,Sunrise Public School,2027-03-31',
+    'Ananya Verma,STU-002,8,B,Sunrise Public School,2027-03-31',
+    'Rohan Gupta,STU-003,9,A,Sunrise Public School,2027-03-31'
+  ].join('\\n');
 }
 
 function downloadCsvTemplate() {
@@ -564,9 +563,12 @@ function exportRecordsPdf(format, records) {
     return;
   }
 
-  const doc = new jsPDF({ unit: 'mm', format, orientation });
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
+  const paperMap = { a4: [210, 297], a3: [297, 420] };
+  const base = paperMap[String(format).toLowerCase()] || paperMap.a4;
+  const pageSize = orientation === 'landscape' ? [base[1], base[0]] : [base[0], base[1]];
+  const doc = new jsPDF({ unit: 'mm', format: pageSize });
+  const pageW = pageSize[0];
+  const pageH = pageSize[1];
   const margin = 8;
   const gap = 3;
   const cols = Math.max(1, Math.floor((pageW - (margin * 2) + gap) / (cardW + gap)));
@@ -598,8 +600,9 @@ function exportRecordsPdf(format, records) {
     });
   }
 
+  lastExportFormat = String(format).toLowerCase();
   doc.save(`id-cards-${format}-${Date.now()}.pdf`);
-  setStatus(`Exported ${records.length} cards on ${format.toUpperCase()} PDF.`, false);
+  setStatus(`Exported ${records.length} cards on ${format.toUpperCase()} (${orientation}) PDF.`, false);
 }
 
 async function saveBulkJobToServer() {
@@ -616,14 +619,14 @@ async function saveBulkJobToServer() {
         contactName: value('bulkContactName'),
         contactPhone: value('bulkContactPhone'),
         contactEmail: value('bulkContactEmail'),
-        paperSize: 'a4',
+        paperSize: lastExportFormat,
         orientation: value('paperOrientation'),
         cardWidthMm: Number(value('cardWidth') || 85.6),
         cardHeightMm: Number(value('cardHeight') || 54),
         includeBackSheet: byId('includeBackSheet').checked,
         templateName: value('template'),
         records: bulkRecords,
-        notes: 'Created from ID Card Studio'
+        notes: 'Created from Arya Studio ID Suite'
       })
     });
     const data = await response.json();
