@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Suite Pro | Arya Overseas</title>
+<link rel="icon" type="image/png" href="/assets/veom-logo.png">
+<link rel="apple-touch-icon" href="/assets/veom-logo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  body {
+    background:
+      radial-gradient(1200px 700px at 10% 0%, rgba(29, 78, 216, 0.14), transparent 60%),
+      radial-gradient(900px 600px at 100% 20%, rgba(14, 165, 233, 0.12), transparent 62%),
+      #f6f8fc;
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(203, 213, 225, 0.7);
+  }
+  .mode-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #1e293b;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .mode-btn.active {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(29, 78, 216, 0.25);
+  }
+  .workspace-frame {
+    width: 100%;
+    min-height: 78vh;
+    border: 1px solid #dbe3f3;
+    border-radius: 18px;
+    background: #fff;
+  }
+</style>
+</head>
+<body class="text-slate-900">
+<header class="glass sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-semibold text-blue-900">
+      <img src="/assets/veom-logo.png" alt="Arya Overseas" class="h-9 w-9 rounded-full">
+      <span class="text-lg">Arya Overseas Studio Suite</span>
+    </a>
+    <div class="text-sm text-slate-600">
+      Unified workspace for lanyards + ID cards
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-5 py-7">
+  <section class="glass rounded-2xl p-5 mb-5">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-blue-900">Creative Studio Pro</h1>
+        <p class="text-sm text-slate-600 mt-1">Canva-style workflow: pick a mode, design, preview, and export in one professional environment.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button id="openLanyardMode" class="mode-btn active">Lanyard Studio</button>
+        <button id="openIdMode" class="mode-btn">ID Card Suite</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid lg:grid-cols-[260px_1fr] gap-5">
+    <aside class="glass rounded-2xl p-4 h-fit lg:sticky lg:top-24">
+      <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Workspace Guide</h2>
+      <ul class="mt-3 space-y-2 text-sm text-slate-600">
+        <li>1. Choose `Lanyard` or `ID Card` mode.</li>
+        <li>2. Configure styles and upload brand assets.</li>
+        <li>3. Use live preview before exporting.</li>
+        <li>4. For ID cards, upload CSV for bulk enterprise batches.</li>
+      </ul>
+      <div class="mt-5 border-t pt-4">
+        <p class="text-xs text-slate-500">Quick Access</p>
+        <div class="mt-2 flex flex-col gap-2">
+          <a href="/admin" class="text-sm text-blue-700 hover:text-blue-900">Open CMS</a>
+          <a href="/product/custom-lanyard.html" class="text-sm text-blue-700 hover:text-blue-900">Standalone Lanyard</a>
+          <a href="/product/id-card-studio" class="text-sm text-blue-700 hover:text-blue-900">Standalone ID Card</a>
+        </div>
+      </div>
+    </aside>
+
+    <div>
+      <iframe id="lanyardFrame" class="workspace-frame" src="/product/custom-lanyard.html" title="Lanyard Studio"></iframe>
+      <iframe id="idFrame" class="workspace-frame hidden" src="/product/id-card-studio" title="ID Card Suite"></iframe>
+    </div>
+  </section>
+</main>
+
+<script>
+const lanyardFrame = document.getElementById('lanyardFrame');
+const idFrame = document.getElementById('idFrame');
+const openLanyardMode = document.getElementById('openLanyardMode');
+const openIdMode = document.getElementById('openIdMode');
+
+function activate(mode) {
+  if (mode === 'id') {
+    lanyardFrame.classList.add('hidden');
+    idFrame.classList.remove('hidden');
+    openLanyardMode.classList.remove('active');
+    openIdMode.classList.add('active');
+    return;
+  }
+  idFrame.classList.add('hidden');
+  lanyardFrame.classList.remove('hidden');
+  openIdMode.classList.remove('active');
+  openLanyardMode.classList.add('active');
+}
+
+openLanyardMode.addEventListener('click', () => activate('lanyard'));
+openIdMode.addEventListener('click', () => activate('id'));
+</script>
+</body>
+</html>

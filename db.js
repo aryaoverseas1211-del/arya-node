@@ -19,7 +19,7 @@ function resolveDbPath() {
 }
 
 const DB_PATH = resolveDbPath();
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 let dbInstance;
 let sqlInstance;
@@ -271,6 +271,25 @@ function migrate(db) {
       FOREIGN KEY (lanyard_type_id) REFERENCES lanyard_types(id) ON DELETE SET NULL
     );
 
+    CREATE TABLE IF NOT EXISTS id_card_jobs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_name TEXT,
+      contact_name TEXT,
+      contact_phone TEXT,
+      contact_email TEXT,
+      paper_size TEXT DEFAULT 'a4',
+      orientation TEXT DEFAULT 'portrait',
+      card_width_mm REAL DEFAULT 85.6,
+      card_height_mm REAL DEFAULT 54,
+      include_back_sheet INTEGER DEFAULT 1,
+      template_name TEXT DEFAULT 'corporate',
+      records_json TEXT NOT NULL,
+      status TEXT DEFAULT 'new',
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
     CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
     CREATE INDEX IF NOT EXISTS idx_variants_product ON variants(product_id);
@@ -279,6 +298,7 @@ function migrate(db) {
     CREATE INDEX IF NOT EXISTS idx_lanyard_types_active ON lanyard_types(is_active, sort_order);
     CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_active ON lanyard_fittings(is_active, sort_order);
     CREATE INDEX IF NOT EXISTS idx_design_submissions_status ON design_submissions(status, created_at);
+    CREATE INDEX IF NOT EXISTS idx_id_card_jobs_status ON id_card_jobs(status, created_at);
   `);
 }
 
@@ -313,11 +333,7 @@ function addColumnIfMissing(db, table, column, definition) {
 }
 
 function evolveSchema(db) {
-  const currentVersion = readSchemaVersion(db);
-  if (currentVersion >= SCHEMA_VERSION) {
-    return;
-  }
-
+  // Always run additive, idempotent guards so partially-migrated databases self-heal.
   addColumnIfMissing(db, 'lanyard_types', 'preview_base_image', 'TEXT');
   addColumnIfMissing(db, 'lanyard_types', 'is_breakaway_supported', 'INTEGER DEFAULT 1');
 
@@ -326,9 +342,27 @@ function evolveSchema(db) {
   addColumnIfMissing(db, 'lanyard_fittings', 'preview_anchor_json', 'TEXT');
 
   addColumnIfMissing(db, 'design_submissions', 'line_items_json', 'TEXT');
+
+  addColumnIfMissing(db, 'id_card_jobs', 'paper_size', "TEXT DEFAULT 'a4'");
+  addColumnIfMissing(db, 'id_card_jobs', 'orientation', "TEXT DEFAULT 'portrait'");
+  addColumnIfMissing(db, 'id_card_jobs', 'card_width_mm', 'REAL DEFAULT 85.6');
+  addColumnIfMissing(db, 'id_card_jobs', 'card_height_mm', 'REAL DEFAULT 54');
+  addColumnIfMissing(db, 'id_card_jobs', 'include_back_sheet', 'INTEGER DEFAULT 1');
+  addColumnIfMissing(db, 'id_card_jobs', 'template_name', "TEXT DEFAULT 'corporate'");
+  addColumnIfMissing(db, 'id_card_jobs', 'records_json', "TEXT DEFAULT '[]'");
+  addColumnIfMissing(db, 'id_card_jobs', 'updated_at', 'TEXT');
+
   db.exec(`UPDATE lanyard_fittings SET fitting_kind = 'main' WHERE fitting_kind IS NULL OR fitting_kind = ''`);
   db.exec(`UPDATE lanyard_types SET is_breakaway_supported = 1 WHERE is_breakaway_supported IS NULL`);
+  db.exec(`UPDATE lanyard_types SET preview_base_image = image WHERE (preview_base_image IS NULL OR preview_base_image = '') AND image IS NOT NULL AND image != ''`);
+  db.exec(`UPDATE lanyard_fittings SET preview_image = image WHERE (preview_image IS NULL OR preview_image = '') AND image IS NOT NULL AND image != ''`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_lanyard_fittings_kind ON lanyard_fittings(fitting_kind, is_active, sort_order)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_id_card_jobs_status ON id_card_jobs(status, created_at)`);
+
+  const currentVersion = readSchemaVersion(db);
+  if (currentVersion >= SCHEMA_VERSION) {
+    return;
+  }
   writeSchemaVersion(db, SCHEMA_VERSION);
 }
 

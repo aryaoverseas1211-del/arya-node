@@ -9,6 +9,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="/assets/theme.css">
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
   body { background: linear-gradient(180deg, #f4f8ff, #eef2f7); }
   .panel { background: #fff; border: 1px solid #dbe7f7; border-radius: 16px; box-shadow: 0 12px 26px rgba(15, 40, 85, 0.08); }
@@ -18,6 +19,8 @@
   .btn-primary { background: #1d4ed8; color: #fff; }
   .btn-subtle { background: #f1f5f9; color: #0f172a; border: 1px solid #dbe7f7; }
   .canvas-wrap { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
+  .data-table th, .data-table td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; font-size: 12px; text-align: left; }
+  .data-table th { font-weight: 700; color: #334155; background: #f8fafc; position: sticky; top: 0; }
 </style>
 </head>
 <body class="text-slate-900">
@@ -28,7 +31,7 @@
       <span>Arya Overseas</span>
     </a>
     <div class="flex items-center gap-3 text-sm">
-      <a href="/product/custom-lanyard.html" class="text-white/85 hover:text-white">Lanyard Studio</a>
+      <a href="/product/studio-suite" class="text-white/85 hover:text-white">Lanyard Studio</a>
       <a href="/admin" class="text-white/85 hover:text-white">CMS</a>
     </div>
   </div>
@@ -154,18 +157,78 @@
         <h2 class="text-lg font-bold mb-3">Saved Records</h2>
         <div id="recordsList" class="space-y-2 max-h-[260px] overflow-auto"></div>
       </div>
+
+      <div class="panel p-5">
+        <h2 class="text-lg font-bold mb-3">Enterprise Bulk Upload</h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <div>
+            <label class="label">Job Name</label>
+            <input id="bulkJobName" class="input" placeholder="March Employee Batch">
+          </div>
+          <div>
+            <label class="label">Contact Name</label>
+            <input id="bulkContactName" class="input" placeholder="HR Team">
+          </div>
+          <div>
+            <label class="label">Contact Phone</label>
+            <input id="bulkContactPhone" class="input" placeholder="+91...">
+          </div>
+          <div>
+            <label class="label">Contact Email</label>
+            <input id="bulkContactEmail" class="input" placeholder="ops@company.com">
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button id="downloadCsvTemplateBtn" class="btn btn-subtle">Download CSV Template</button>
+          <label class="btn btn-subtle cursor-pointer">
+            Upload CSV
+            <input id="bulkCsvUpload" type="file" accept=".csv,text/csv" class="hidden">
+          </label>
+        </div>
+        <p id="bulkMsg" class="text-xs text-slate-500 mt-2">Upload CSV with columns: name,idNumber,designation,department,company,validTill</p>
+        <div class="mt-3 border rounded-lg overflow-auto max-h-[220px]">
+          <table class="w-full data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>ID</th>
+                <th>Designation</th>
+                <th>Department</th>
+                <th>Company</th>
+                <th>Valid Till</th>
+              </tr>
+            </thead>
+            <tbody id="bulkRecordsTable"></tbody>
+          </table>
+        </div>
+        <div class="mt-3 grid sm:grid-cols-2 gap-2">
+          <button id="bulkExportA4Btn" class="btn btn-primary">Bulk Export A4 PDF</button>
+          <button id="bulkExportA3Btn" class="btn btn-primary">Bulk Export A3 PDF</button>
+          <button id="bulkSaveJobBtn" class="btn btn-subtle">Save Bulk Job (Server)</button>
+          <button id="bulkClearBtn" class="btn btn-subtle">Clear Bulk Data</button>
+        </div>
+      </div>
     </section>
   </div>
 </main>
 
 <script>
-const STORAGE_KEY = 'id-card-studio-records-v1';
+const STORAGE_KEY = 'id-card-studio-records-v2';
 const frontCanvas = document.getElementById('frontCanvas');
 const backCanvas = document.getElementById('backCanvas');
 const fctx = frontCanvas.getContext('2d');
 const bctx = backCanvas.getContext('2d');
+const scratchFront = document.createElement('canvas');
+const scratchBack = document.createElement('canvas');
+scratchFront.width = frontCanvas.width;
+scratchFront.height = frontCanvas.height;
+scratchBack.width = backCanvas.width;
+scratchBack.height = backCanvas.height;
+const sfctx = scratchFront.getContext('2d');
+const sbctx = scratchBack.getContext('2d');
 let photoData = '';
 let logoData = '';
+let bulkRecords = [];
 
 function byId(id) {
   return document.getElementById(id);
@@ -181,6 +244,12 @@ function setStatus(msg, isError) {
   el.style.color = isError ? '#b91c1c' : '#475569';
 }
 
+function setBulkMessage(msg, isError) {
+  const el = byId('bulkMsg');
+  el.textContent = msg || '';
+  el.style.color = isError ? '#b91c1c' : '#475569';
+}
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -190,16 +259,36 @@ function readFileAsDataUrl(file) {
   });
 }
 
-function drawCard(ctx, side) {
-  const primary = value('primaryColor');
-  const textColor = value('textColor');
-  const template = value('template');
-  const name = value('name');
-  const idNumber = value('idNumber');
-  const designation = value('designation');
-  const department = value('department');
-  const company = value('company');
-  const validTill = value('validTill');
+function currentDesignBase() {
+  return {
+    template: value('template'),
+    cardWidth: Number(value('cardWidth') || 85.6),
+    cardHeight: Number(value('cardHeight') || 54),
+    paperOrientation: value('paperOrientation'),
+    includeBackSheet: byId('includeBackSheet').checked,
+    name: value('name'),
+    idNumber: value('idNumber'),
+    designation: value('designation'),
+    department: value('department'),
+    company: value('company'),
+    validTill: value('validTill'),
+    primaryColor: value('primaryColor'),
+    textColor: value('textColor'),
+    photoData,
+    logoData
+  };
+}
+
+function drawCard(ctx, side, data) {
+  const primary = data.primaryColor || '#1d4ed8';
+  const textColor = data.textColor || '#ffffff';
+  const template = data.template || 'corporate';
+  const name = data.name || '';
+  const idNumber = data.idNumber || '';
+  const designation = data.designation || '';
+  const department = data.department || '';
+  const company = data.company || '';
+  const validTill = data.validTill || '';
 
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -238,12 +327,12 @@ function drawCard(ctx, side) {
     ctx.font = '24px Arial';
     ctx.fillText(`Valid: ${validTill || 'N/A'}`, 232, 406);
 
-    if (photoData) {
+    if (data.photoData) {
       const img = new Image();
       img.onload = () => {
         ctx.drawImage(img, 32, 150, 170, 220);
       };
-      img.src = photoData;
+      img.src = data.photoData;
     } else {
       ctx.strokeStyle = '#94a3b8';
       ctx.setLineDash([8, 6]);
@@ -266,12 +355,12 @@ function drawCard(ctx, side) {
     ctx.fillText('Misuse is prohibited.', 26, 380);
   }
 
-  if (logoData) {
+  if (data.logoData) {
     const logo = new Image();
     logo.onload = () => {
       ctx.drawImage(logo, w - 126, 18, 100, 68);
     };
-    logo.src = logoData;
+    logo.src = data.logoData;
   } else {
     ctx.fillStyle = 'rgba(255,255,255,0.82)';
     ctx.fillRect(w - 130, 16, 102, 70);
@@ -282,30 +371,17 @@ function drawCard(ctx, side) {
 }
 
 function renderPreview() {
-  drawCard(fctx, 'front');
-  drawCard(bctx, 'back');
+  const data = currentDesignBase();
+  drawCard(fctx, 'front', data);
+  drawCard(bctx, 'back', data);
 }
 
 function getFormData() {
   return {
     id: `rec-${Date.now()}`,
-    template: value('template'),
     quantity: Number(value('quantity') || 1),
-    cardWidth: Number(value('cardWidth') || 85.6),
-    cardHeight: Number(value('cardHeight') || 54),
-    paperOrientation: value('paperOrientation'),
-    includeBackSheet: byId('includeBackSheet').checked,
-    name: value('name'),
-    idNumber: value('idNumber'),
-    designation: value('designation'),
-    department: value('department'),
-    company: value('company'),
-    validTill: value('validTill'),
-    primaryColor: value('primaryColor'),
-    textColor: value('textColor'),
-    photoData,
-    logoData,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    ...currentDesignBase()
   };
 }
 
@@ -381,19 +457,113 @@ function renderRecords() {
   });
 }
 
-function exportPdf(format) {
+function mapBulkRow(row) {
+  const normalized = {};
+  Object.keys(row || {}).forEach((key) => {
+    const nk = String(key).toLowerCase().replace(/[\s_\-]/g, '');
+    normalized[nk] = row[key];
+  });
+  const pick = (...keys) => {
+    for (const k of keys) {
+      if (normalized[k] !== undefined && normalized[k] !== null) {
+        const text = String(normalized[k]).trim();
+        if (text) return text;
+      }
+    }
+    return '';
+  };
+  return {
+    name: pick('name', 'fullname', 'employeename'),
+    idNumber: pick('idnumber', 'id', 'employeeid'),
+    designation: pick('designation', 'role'),
+    department: pick('department', 'dept'),
+    company: pick('company', 'organization', 'organisation'),
+    validTill: pick('validtill', 'validto', 'expiry')
+  };
+}
+
+function renderBulkTable() {
+  const tbody = byId('bulkRecordsTable');
+  if (!bulkRecords.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-slate-500 text-xs py-3">No bulk records loaded.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = bulkRecords.slice(0, 500).map((record) => `
+    <tr>
+      <td>${record.name || '-'}</td>
+      <td>${record.idNumber || '-'}</td>
+      <td>${record.designation || '-'}</td>
+      <td>${record.department || '-'}</td>
+      <td>${record.company || '-'}</td>
+      <td>${record.validTill || '-'}</td>
+    </tr>
+  `).join('');
+}
+
+function getCsvTemplate() {
+  return 'name,idNumber,designation,department,company,validTill\\nJohn Doe,EMP-001,Manager,Sales,Arya Overseas,2027-12-31\\nJane Smith,EMP-002,Executive,Operations,Arya Overseas,2027-12-31\\n';
+}
+
+function downloadCsvTemplate() {
+  const blob = new Blob([getCsvTemplate()], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'id-card-bulk-template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function parseBulkCsv(file) {
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      if (results.errors && results.errors.length) {
+        setBulkMessage(`CSV error: ${results.errors[0].message}`, true);
+        return;
+      }
+      const rows = Array.isArray(results.data) ? results.data : [];
+      bulkRecords = rows.map(mapBulkRow).filter((record) => record.name || record.idNumber);
+      renderBulkTable();
+      setBulkMessage(`Loaded ${bulkRecords.length} records from CSV.`, false);
+    },
+    error: (err) => {
+      setBulkMessage(err.message || 'Failed to parse CSV.', true);
+    }
+  });
+}
+
+function renderRecordToImages(record) {
+  const merged = {
+    ...currentDesignBase(),
+    ...record,
+    photoData: currentDesignBase().photoData,
+    logoData: currentDesignBase().logoData
+  };
+  drawCard(sfctx, 'front', merged);
+  drawCard(sbctx, 'back', merged);
+  return {
+    front: scratchFront.toDataURL('image/png'),
+    back: scratchBack.toDataURL('image/png')
+  };
+}
+
+function exportRecordsPdf(format, records) {
+  if (!records.length) {
+    setStatus('No records available for export.', true);
+    return;
+  }
   const { jsPDF } = window.jspdf;
-  const quantity = Number(value('quantity') || 1);
   const cardW = Number(value('cardWidth') || 85.6);
   const cardH = Number(value('cardHeight') || 54);
   const orientation = value('paperOrientation') || 'portrait';
   const includeBack = byId('includeBackSheet').checked;
-  if (quantity < 1 || cardW <= 0 || cardH <= 0) {
-    setStatus('Invalid quantity/card size.', true);
+  if (cardW <= 0 || cardH <= 0) {
+    setStatus('Invalid card size values.', true);
     return;
   }
 
-  renderPreview();
   const doc = new jsPDF({ unit: 'mm', format, orientation });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -402,38 +572,68 @@ function exportPdf(format) {
   const cols = Math.max(1, Math.floor((pageW - (margin * 2) + gap) / (cardW + gap)));
   const rows = Math.max(1, Math.floor((pageH - (margin * 2) + gap) / (cardH + gap)));
   const perPage = cols * rows;
-  const frontImage = frontCanvas.toDataURL('image/png');
-  const backImage = backCanvas.toDataURL('image/png');
 
-  let placed = 0;
-  while (placed < quantity) {
-    if (placed > 0 && placed % perPage === 0) doc.addPage();
-    const indexOnPage = placed % perPage;
+  records.forEach((record, idx) => {
+    if (idx > 0 && idx % perPage === 0) doc.addPage();
+    const indexOnPage = idx % perPage;
     const row = Math.floor(indexOnPage / cols);
     const col = indexOnPage % cols;
     const x = margin + (col * (cardW + gap));
     const y = margin + (row * (cardH + gap));
-    doc.addImage(frontImage, 'PNG', x, y, cardW, cardH);
-    placed += 1;
-  }
+    const images = renderRecordToImages(record);
+    doc.addImage(images.front, 'PNG', x, y, cardW, cardH);
+  });
 
   if (includeBack) {
     doc.addPage();
-    placed = 0;
-    while (placed < quantity) {
-      if (placed > 0 && placed % perPage === 0) doc.addPage();
-      const indexOnPage = placed % perPage;
+    records.forEach((record, idx) => {
+      if (idx > 0 && idx % perPage === 0) doc.addPage();
+      const indexOnPage = idx % perPage;
       const row = Math.floor(indexOnPage / cols);
       const col = indexOnPage % cols;
       const x = margin + (col * (cardW + gap));
       const y = margin + (row * (cardH + gap));
-      doc.addImage(backImage, 'PNG', x, y, cardW, cardH);
-      placed += 1;
-    }
+      const images = renderRecordToImages(record);
+      doc.addImage(images.back, 'PNG', x, y, cardW, cardH);
+    });
   }
 
   doc.save(`id-cards-${format}-${Date.now()}.pdf`);
-  setStatus(`${format.toUpperCase()} PDF exported.`, false);
+  setStatus(`Exported ${records.length} cards on ${format.toUpperCase()} PDF.`, false);
+}
+
+async function saveBulkJobToServer() {
+  if (!bulkRecords.length) {
+    setBulkMessage('Upload CSV first.', true);
+    return;
+  }
+  try {
+    const response = await fetch('/api/id-card/jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jobName: value('bulkJobName'),
+        contactName: value('bulkContactName'),
+        contactPhone: value('bulkContactPhone'),
+        contactEmail: value('bulkContactEmail'),
+        paperSize: 'a4',
+        orientation: value('paperOrientation'),
+        cardWidthMm: Number(value('cardWidth') || 85.6),
+        cardHeightMm: Number(value('cardHeight') || 54),
+        includeBackSheet: byId('includeBackSheet').checked,
+        templateName: value('template'),
+        records: bulkRecords,
+        notes: 'Created from ID Card Studio'
+      })
+    });
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to save job.');
+    }
+    setBulkMessage(`Bulk job saved. Job ID: ${data.jobId} (Records: ${data.recordsCount})`, false);
+  } catch (err) {
+    setBulkMessage(err.message || 'Failed to save bulk job.', true);
+  }
 }
 
 function bind() {
@@ -465,9 +665,9 @@ function bind() {
     const record = getFormData();
     const records = loadRecords();
     records.unshift(record);
-    saveRecords(records.slice(0, 100));
+    saveRecords(records.slice(0, 150));
     renderRecords();
-    setStatus('Record saved.', false);
+    setStatus('Record saved locally.', false);
   });
 
   byId('downloadPngBtn').addEventListener('click', () => {
@@ -479,13 +679,39 @@ function bind() {
     setStatus('PNG downloaded.', false);
   });
 
-  byId('exportA4Btn').addEventListener('click', () => exportPdf('a4'));
-  byId('exportA3Btn').addEventListener('click', () => exportPdf('a3'));
+  byId('exportA4Btn').addEventListener('click', () => {
+    const qty = Math.max(1, Number(value('quantity') || 1));
+    const base = currentDesignBase();
+    const records = Array.from({ length: qty }).map(() => ({ ...base }));
+    exportRecordsPdf('a4', records);
+  });
+  byId('exportA3Btn').addEventListener('click', () => {
+    const qty = Math.max(1, Number(value('quantity') || 1));
+    const base = currentDesignBase();
+    const records = Array.from({ length: qty }).map(() => ({ ...base }));
+    exportRecordsPdf('a3', records);
+  });
+
+  byId('downloadCsvTemplateBtn').addEventListener('click', downloadCsvTemplate);
+  byId('bulkCsvUpload').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    parseBulkCsv(file);
+  });
+  byId('bulkExportA4Btn').addEventListener('click', () => exportRecordsPdf('a4', bulkRecords));
+  byId('bulkExportA3Btn').addEventListener('click', () => exportRecordsPdf('a3', bulkRecords));
+  byId('bulkSaveJobBtn').addEventListener('click', saveBulkJobToServer);
+  byId('bulkClearBtn').addEventListener('click', () => {
+    bulkRecords = [];
+    renderBulkTable();
+    setBulkMessage('Bulk records cleared.', false);
+  });
 }
 
 bind();
 renderPreview();
 renderRecords();
+renderBulkTable();
 </script>
 </body>
 </html>

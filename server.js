@@ -120,6 +120,11 @@ const lanyardTypeUpload = upload.fields([
   { name: 'preview_base_image_file', maxCount: 1 }
 ]);
 
+const lanyardFittingUpload = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'preview_image_file', maxCount: 1 }
+]);
+
 function resolveUploadPath(urlPath) {
   const clean = (urlPath || '').replace(/^\/+/, '');
   if (clean.startsWith('uploads/')) {
@@ -166,6 +171,34 @@ function slugify(value) {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+function normalizeIdCardRecord(row = {}) {
+  const pick = (...keys) => {
+    for (const key of keys) {
+      if (row[key] !== undefined && row[key] !== null) {
+        const text = String(row[key]).trim();
+        if (text) return text;
+      }
+    }
+    return '';
+  };
+
+  return {
+    name: pick('name', 'Name', 'employee_name', 'EmployeeName', 'full_name'),
+    idNumber: pick('idNumber', 'id_number', 'ID', 'id', 'IdNumber'),
+    designation: pick('designation', 'Designation', 'role'),
+    department: pick('department', 'Department', 'dept'),
+    company: pick('company', 'Company', 'organization', 'Organisation'),
+    validTill: pick('validTill', 'valid_till', 'ValidTill', 'expiry')
+  };
+}
+
+function normalizeIdCardRecords(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .map((row) => normalizeIdCardRecord(row))
+    .filter((record) => record.name || record.idNumber || record.designation || record.department || record.company);
 }
 
 function isAiRequestLimited(ip) {
@@ -527,6 +560,7 @@ app.get('/api/lanyard/catalog', (req, res) => {
     ORDER BY sort_order, name
   `).all().map((row) => ({
     ...row,
+    preview_base_image: row.preview_base_image || row.image || '',
     is_breakaway_supported: Boolean(row.is_breakaway_supported)
   }));
 
@@ -537,6 +571,8 @@ app.get('/api/lanyard/catalog', (req, res) => {
     ORDER BY sort_order, name
   `).all().map((row) => ({
     ...row,
+    fitting_kind: row.fitting_kind || 'main',
+    preview_image: row.preview_image || row.image || '',
     preview_anchor: normalizeAnchorJson(row.preview_anchor_json)
   }));
 
@@ -654,6 +690,65 @@ app.post('/api/lanyard/submissions', async (req, res) => {
   res.json({ success: true, submissionId });
 });
 
+app.post('/api/id-card/jobs', (req, res) => {
+  const payload = req.body || {};
+  const records = normalizeIdCardRecords(payload.records);
+  if (!records.length) {
+    return res.status(400).json({ success: false, message: 'At least one valid ID card record is required.' });
+  }
+  if (records.length > 2000) {
+    return res.status(400).json({ success: false, message: 'Maximum 2000 records allowed per job.' });
+  }
+
+  const paperSize = String(payload.paperSize || 'a4').toLowerCase();
+  const orientation = String(payload.orientation || 'portrait').toLowerCase();
+  const templateName = String(payload.templateName || 'corporate');
+  const cardWidthMm = Number(payload.cardWidthMm || 85.6);
+  const cardHeightMm = Number(payload.cardHeightMm || 54);
+  const includeBackSheet = toBooleanFlag(payload.includeBackSheet, true) ? 1 : 0;
+  const now = new Date().toISOString();
+
+  if (!['a4', 'a3'].includes(paperSize)) {
+    return res.status(400).json({ success: false, message: 'Paper size must be a4 or a3.' });
+  }
+  if (!['portrait', 'landscape'].includes(orientation)) {
+    return res.status(400).json({ success: false, message: 'Orientation must be portrait or landscape.' });
+  }
+  if (!Number.isFinite(cardWidthMm) || !Number.isFinite(cardHeightMm) || cardWidthMm <= 0 || cardHeightMm <= 0) {
+    return res.status(400).json({ success: false, message: 'Invalid card size values.' });
+  }
+
+  const info = db.prepare(`
+    INSERT INTO id_card_jobs (
+      job_name, contact_name, contact_phone, contact_email, paper_size, orientation,
+      card_width_mm, card_height_mm, include_back_sheet, template_name, records_json,
+      status, notes, created_at, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?)
+  `).run(
+    String(payload.jobName || '').trim(),
+    String(payload.contactName || '').trim(),
+    String(payload.contactPhone || '').trim(),
+    String(payload.contactEmail || '').trim(),
+    paperSize,
+    orientation,
+    cardWidthMm,
+    cardHeightMm,
+    includeBackSheet,
+    templateName,
+    JSON.stringify(records),
+    String(payload.notes || '').trim(),
+    now,
+    now
+  );
+
+  res.json({
+    success: true,
+    jobId: info.lastInsertRowid,
+    recordsCount: records.length
+  });
+});
+
 app.post('/api/ai/lanyard-generate', async (req, res) => {
   if (!openAiKey) {
     return res.status(400).json({
@@ -746,6 +841,45 @@ app.post('/api/lanyard/export/pdf', (req, res) => {
 // Admin API routes
 app.use('/api/admin', requireAdmin);
 
+app.get('/api/admin/id-card/jobs', (req, res) => {
+  const status = (req.query.status || '').trim();
+  const rows = db.prepare(`
+    SELECT *
+    FROM id_card_jobs
+    ${status ? 'WHERE status = ?' : ''}
+    ORDER BY created_at DESC
+    LIMIT 300
+  `).all(...(status ? [status] : []));
+
+  const jobs = rows.map((row) => {
+    const records = safeJsonParse(row.records_json, []);
+    return {
+      ...row,
+      recordsCount: Array.isArray(records) ? records.length : 0
+    };
+  });
+  res.json({ success: true, jobs });
+});
+
+app.put('/api/admin/id-card/jobs/:id', (req, res) => {
+  const id = req.params.id;
+  const payload = req.body || {};
+  const current = db.prepare('SELECT * FROM id_card_jobs WHERE id = ?').get(id);
+  if (!current) {
+    return res.status(404).json({ success: false, message: 'ID card job not found.' });
+  }
+  const status = payload.status ? String(payload.status).trim() : current.status;
+  const notes = payload.notes !== undefined ? String(payload.notes) : (current.notes || '');
+  const now = new Date().toISOString();
+  db.prepare(`
+    UPDATE id_card_jobs
+    SET status = ?, notes = ?, updated_at = ?
+    WHERE id = ?
+  `).run(status, notes, now, id);
+  logAudit(req.admin.id, 'update', 'id_card_job', id, { status });
+  res.json({ success: true });
+});
+
 app.get('/api/admin/lanyard/types', (req, res) => {
   const types = db.prepare('SELECT * FROM lanyard_types ORDER BY sort_order, name').all();
   res.json({ success: true, types });
@@ -763,7 +897,9 @@ app.post('/api/admin/lanyard/types', lanyardTypeUpload, (req, res) => {
     ? req.files.preview_base_image_file[0]
     : null;
   const resolvedImage = typeImageFile ? `/uploads/${typeImageFile.filename}` : (payload.image || '');
-  const resolvedBasePreview = (payload.preview_base_image || '').trim() || (previewBaseFile ? `/uploads/${previewBaseFile.filename}` : '');
+  const resolvedBasePreview = (payload.preview_base_image || '').trim()
+    || (previewBaseFile ? `/uploads/${previewBaseFile.filename}` : '')
+    || resolvedImage;
 
   try {
     const info = db.prepare(`
@@ -808,6 +944,9 @@ app.put('/api/admin/lanyard/types/:id', lanyardTypeUpload, (req, res) => {
   }
   if (!previewBaseImage && previewBaseFile) {
     previewBaseImage = `/uploads/${previewBaseFile.filename}`;
+  }
+  if (!previewBaseImage) {
+    previewBaseImage = image || '';
   }
   try {
     db.prepare(`
@@ -858,7 +997,7 @@ app.get('/api/admin/lanyard/fittings', (req, res) => {
   res.json({ success: true, fittings });
 });
 
-app.post('/api/admin/lanyard/fittings', upload.single('image'), (req, res) => {
+app.post('/api/admin/lanyard/fittings', lanyardFittingUpload, (req, res) => {
   const payload = req.body || {};
   const name = (payload.name || '').trim();
   if (!name) {
@@ -867,6 +1006,14 @@ app.post('/api/admin/lanyard/fittings', upload.single('image'), (req, res) => {
   const now = new Date().toISOString();
   const fittingKind = payload.fitting_kind === 'addon' ? 'addon' : 'main';
   const previewAnchorJson = JSON.stringify(normalizeAnchorJson(payload.preview_anchor_json || '{}'));
+  const imageFile = req.files && req.files.image && req.files.image[0] ? req.files.image[0] : null;
+  const previewFile = req.files && req.files.preview_image_file && req.files.preview_image_file[0]
+    ? req.files.preview_image_file[0]
+    : null;
+  const resolvedImage = imageFile ? `/uploads/${imageFile.filename}` : (payload.image || '');
+  const resolvedPreview = (payload.preview_image || '').trim()
+    || (previewFile ? `/uploads/${previewFile.filename}` : '')
+    || resolvedImage;
   try {
     const info = db.prepare(`
       INSERT INTO lanyard_fittings (name, slug, description, image, fitting_kind, preview_image, preview_anchor_json, is_active, sort_order, created_at, updated_at)
@@ -875,9 +1022,9 @@ app.post('/api/admin/lanyard/fittings', upload.single('image'), (req, res) => {
       name,
       payload.slug ? slugify(payload.slug) : slugify(name),
       payload.description || '',
-      req.file ? `/uploads/${req.file.filename}` : (payload.image || ''),
+      resolvedImage,
       fittingKind,
-      payload.preview_image || '',
+      resolvedPreview,
       previewAnchorJson,
       toBooleanFlag(payload.is_active, true) ? 1 : 0,
       Number(payload.sort_order) || 0,
@@ -891,7 +1038,7 @@ app.post('/api/admin/lanyard/fittings', upload.single('image'), (req, res) => {
   }
 });
 
-app.put('/api/admin/lanyard/fittings/:id', upload.single('image'), (req, res) => {
+app.put('/api/admin/lanyard/fittings/:id', lanyardFittingUpload, (req, res) => {
   const id = req.params.id;
   const current = db.prepare('SELECT * FROM lanyard_fittings WHERE id = ?').get(id);
   if (!current) {
@@ -899,11 +1046,25 @@ app.put('/api/admin/lanyard/fittings/:id', upload.single('image'), (req, res) =>
   }
   const payload = req.body || {};
   const now = new Date().toISOString();
-  const image = req.file ? `/uploads/${req.file.filename}` : current.image;
+  const imageFile = req.files && req.files.image && req.files.image[0] ? req.files.image[0] : null;
+  const previewFile = req.files && req.files.preview_image_file && req.files.preview_image_file[0]
+    ? req.files.preview_image_file[0]
+    : null;
+  const image = imageFile ? `/uploads/${imageFile.filename}` : current.image;
   const fittingKind = payload.fitting_kind ? (payload.fitting_kind === 'addon' ? 'addon' : 'main') : (current.fitting_kind || 'main');
   const previewAnchorJson = payload.preview_anchor_json !== undefined
     ? JSON.stringify(normalizeAnchorJson(payload.preview_anchor_json))
     : (current.preview_anchor_json || '');
+  let previewImage = current.preview_image || '';
+  if (payload.preview_image !== undefined) {
+    previewImage = (payload.preview_image || '').trim();
+  }
+  if (!previewImage && previewFile) {
+    previewImage = `/uploads/${previewFile.filename}`;
+  }
+  if (!previewImage) {
+    previewImage = image || '';
+  }
   try {
     db.prepare(`
       UPDATE lanyard_fittings
@@ -915,7 +1076,7 @@ app.put('/api/admin/lanyard/fittings/:id', upload.single('image'), (req, res) =>
       payload.description ?? current.description,
       image,
       fittingKind,
-      payload.preview_image !== undefined ? payload.preview_image : current.preview_image,
+      previewImage,
       previewAnchorJson,
       payload.is_active !== undefined ? (toBooleanFlag(payload.is_active, true) ? 1 : 0) : current.is_active,
       payload.sort_order !== undefined ? Number(payload.sort_order) : current.sort_order,
@@ -1749,6 +1910,10 @@ app.get('/', (req, res) => {
 
 app.get('/product/id-card-studio', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'product', 'id-card-studio.html'));
+});
+
+app.get('/product/studio-suite', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'product', 'studio-suite.html'));
 });
 
 app.get('/product/:id', (req, res) => {

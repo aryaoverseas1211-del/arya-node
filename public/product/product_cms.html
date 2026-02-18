@@ -293,8 +293,8 @@
           <textarea id="lanyardTypeDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
           <input id="lanyardTypeImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
           <input id="lanyardTypeBaseImageFile" type="file" accept="image/*" class="w-full border rounded-lg p-2">
-          <input id="lanyardTypeBaseImage" type="text" placeholder="Preview base image URL (/uploads/...)" class="w-full border rounded-lg p-2">
-          <p class="text-xs text-slate-500">Upload a base preview image or provide URL. If URL is filled, it is used first.</p>
+          <input id="lanyardTypeBaseImage" type="hidden">
+          <p class="text-xs text-slate-500">Upload base preview image. If not uploaded, product image is used automatically.</p>
           <div class="grid grid-cols-2 gap-3">
             <select id="lanyardTypeBreakaway" class="w-full border rounded-lg p-2">
               <option value="1">Breakaway supported</option>
@@ -328,7 +328,9 @@
           </div>
           <textarea id="lanyardFittingDesc" rows="2" placeholder="Description" class="w-full border rounded-lg p-2"></textarea>
           <input id="lanyardFittingImage" type="file" accept="image/*" class="w-full border rounded-lg p-2">
-          <input id="lanyardFittingPreviewImage" type="text" placeholder="Preview image URL (/uploads/...)" class="w-full border rounded-lg p-2">
+          <input id="lanyardFittingPreviewImageFile" type="file" accept="image/*" class="w-full border rounded-lg p-2">
+          <input id="lanyardFittingPreviewImage" type="hidden">
+          <p class="text-xs text-slate-500">Upload preview image. If not uploaded, accessory image is used automatically.</p>
           <div class="grid grid-cols-4 gap-2">
             <input id="fittingAnchorX" type="number" step="0.1" placeholder="x" class="border rounded-lg p-2 text-sm">
             <input id="fittingAnchorY" type="number" step="0.1" placeholder="y" class="border rounded-lg p-2 text-sm">
@@ -874,9 +876,9 @@ function renderLanyardTypeList() {
           <p class="text-xs text-slate-500">${safeSlug} · sort ${item.sort_order || 0}</p>
           <p class="text-xs ${item.is_breakaway_supported ? 'text-emerald-700' : 'text-amber-700'}">${item.is_breakaway_supported ? 'Breakaway supported' : 'No breakaway'}</p>
           <p class="text-xs text-slate-500 mt-1">${safeDesc}</p>
-          <p class="text-xs text-slate-500 mt-1">Base preview: ${escapeHtml(item.preview_base_image || '-')}</p>
+          <p class="text-xs text-slate-500 mt-1">Base preview: ${escapeHtml(item.preview_base_image || item.image || '-')}</p>
         </div>
-        ${item.image ? `<img src="${escapeHtml(item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
+        ${(item.preview_base_image || item.image) ? `<img src="${escapeHtml(item.preview_base_image || item.image)}" class="w-12 h-12 rounded object-cover border" alt="${safeName}">` : ''}
       </div>
       <div class="mt-2 flex gap-3 text-xs">
         <button class="text-emerald-700" onclick="editLanyardType(${item.id})">Edit</button>
@@ -1004,6 +1006,7 @@ function renderLanyardHealth() {
 function resetLanyardTypeForm() {
   document.getElementById('lanyardTypeForm').reset();
   document.getElementById('lanyardTypeId').value = '';
+  document.getElementById('lanyardTypeBaseImage').value = '';
   document.getElementById('lanyardTypeBreakaway').value = '1';
   document.getElementById('lanyardTypeActive').value = '1';
 }
@@ -1011,6 +1014,7 @@ function resetLanyardTypeForm() {
 function resetLanyardFittingForm() {
   document.getElementById('lanyardFittingForm').reset();
   document.getElementById('lanyardFittingId').value = '';
+  document.getElementById('lanyardFittingPreviewImage').value = '';
   document.getElementById('lanyardFittingKind').value = 'main';
   document.getElementById('fittingAnchorX').value = 0;
   document.getElementById('fittingAnchorY').value = 0;
@@ -1532,6 +1536,8 @@ document.getElementById('lanyardFittingForm').addEventListener('submit', async (
   formData.append('is_active', document.getElementById('lanyardFittingActive').value);
   const file = document.getElementById('lanyardFittingImage').files[0];
   if (file) formData.append('image', file);
+  const previewFile = document.getElementById('lanyardFittingPreviewImageFile').files[0];
+  if (previewFile) formData.append('preview_image_file', previewFile);
 
   try {
     if (id) {
