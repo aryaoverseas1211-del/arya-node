@@ -15,7 +15,7 @@
   .panel { background: #fff; border: 1px solid #dbe7f7; border-radius: 16px; box-shadow: 0 12px 26px rgba(15, 40, 85, 0.08); }
   .input { width: 100%; border: 1px solid #c7d6ee; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
   .label { font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
-  .btn { border-radius: 10px; font-weight: 700; font-size: 14px; padding: 10px 12px; }
+  .btn { border-radius: 10px; font-weight: 700; font-size: 14px; padding: 10px 12px; min-height: 44px; }
   .btn-primary { background: #1d4ed8; color: #fff; }
   .btn-subtle { background: #f1f5f9; color: #0f172a; border: 1px solid #dbe7f7; }
   .canvas-wrap { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
@@ -218,6 +218,7 @@ let photoData = '';
 let logoData = '';
 let bulkRecords = [];
 let lastExportFormat = 'a4';
+let previewDrawToken = 0;
 
 function byId(id) {
   return document.getElementById(id);
@@ -248,6 +249,16 @@ function readFileAsDataUrl(file) {
   });
 }
 
+function loadImageSafe(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve(null);
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
 function currentDesignBase() {
   return {
     template: value('template'),
@@ -268,7 +279,7 @@ function currentDesignBase() {
   };
 }
 
-function drawCard(ctx, side, data) {
+async function drawCard(ctx, side, data) {
   const primary = data.primaryColor || '#1d4ed8';
   const textColor = data.textColor || '#ffffff';
   const template = data.template || 'corporate';
@@ -317,11 +328,18 @@ function drawCard(ctx, side, data) {
     ctx.fillText(`Valid: ${validTill || 'N/A'}`, 232, 406);
 
     if (data.photoData) {
-      const img = new Image();
-      img.onload = () => {
+      const img = await loadImageSafe(data.photoData);
+      if (img) {
         ctx.drawImage(img, 32, 150, 170, 220);
-      };
-      img.src = data.photoData;
+      } else {
+        ctx.strokeStyle = '#94a3b8';
+        ctx.setLineDash([8, 6]);
+        ctx.strokeRect(32, 150, 170, 220);
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '20px Arial';
+        ctx.fillText('PHOTO', 82, 266);
+      }
     } else {
       ctx.strokeStyle = '#94a3b8';
       ctx.setLineDash([8, 6]);
@@ -345,12 +363,13 @@ function drawCard(ctx, side, data) {
   }
 
   if (data.logoData) {
-    const logo = new Image();
-    logo.onload = () => {
+    const logo = await loadImageSafe(data.logoData);
+    if (logo) {
       ctx.drawImage(logo, w - 126, 18, 100, 68);
-    };
-    logo.src = data.logoData;
-  } else {
+      return;
+    }
+  }
+  {
     ctx.fillStyle = 'rgba(255,255,255,0.82)';
     ctx.fillRect(w - 130, 16, 102, 70);
     ctx.fillStyle = '#1e3a8a';
@@ -359,10 +378,12 @@ function drawCard(ctx, side, data) {
   }
 }
 
-function renderPreview() {
+async function renderPreview() {
+  const token = ++previewDrawToken;
   const data = currentDesignBase();
-  drawCard(fctx, 'front', data);
-  drawCard(bctx, 'back', data);
+  await drawCard(fctx, 'front', data);
+  if (token !== previewDrawToken) return;
+  await drawCard(bctx, 'back', data);
 }
 
 function getFormData() {
@@ -533,22 +554,22 @@ function parseBulkCsv(file) {
   });
 }
 
-function renderRecordToImages(record) {
+async function renderRecordToImages(record) {
   const merged = {
     ...currentDesignBase(),
     ...record,
     photoData: currentDesignBase().photoData,
     logoData: currentDesignBase().logoData
   };
-  drawCard(sfctx, 'front', merged);
-  drawCard(sbctx, 'back', merged);
+  await drawCard(sfctx, 'front', merged);
+  await drawCard(sbctx, 'back', merged);
   return {
     front: scratchFront.toDataURL('image/png'),
     back: scratchBack.toDataURL('image/png')
   };
 }
 
-function exportRecordsPdf(format, records) {
+async function exportRecordsPdf(format, records) {
   if (!records.length) {
     setStatus('No records available for export.', true);
     return;
@@ -575,29 +596,31 @@ function exportRecordsPdf(format, records) {
   const rows = Math.max(1, Math.floor((pageH - (margin * 2) + gap) / (cardH + gap)));
   const perPage = cols * rows;
 
-  records.forEach((record, idx) => {
+  for (let idx = 0; idx < records.length; idx += 1) {
+    const record = records[idx];
     if (idx > 0 && idx % perPage === 0) doc.addPage();
     const indexOnPage = idx % perPage;
     const row = Math.floor(indexOnPage / cols);
     const col = indexOnPage % cols;
     const x = margin + (col * (cardW + gap));
     const y = margin + (row * (cardH + gap));
-    const images = renderRecordToImages(record);
+    const images = await renderRecordToImages(record);
     doc.addImage(images.front, 'PNG', x, y, cardW, cardH);
-  });
+  }
 
   if (includeBack) {
     doc.addPage();
-    records.forEach((record, idx) => {
+    for (let idx = 0; idx < records.length; idx += 1) {
+      const record = records[idx];
       if (idx > 0 && idx % perPage === 0) doc.addPage();
       const indexOnPage = idx % perPage;
       const row = Math.floor(indexOnPage / cols);
       const col = indexOnPage % cols;
       const x = margin + (col * (cardW + gap));
       const y = margin + (row * (cardH + gap));
-      const images = renderRecordToImages(record);
+      const images = await renderRecordToImages(record);
       doc.addImage(images.back, 'PNG', x, y, cardW, cardH);
-    });
+    }
   }
 
   lastExportFormat = String(format).toLowerCase();
@@ -647,21 +670,21 @@ function bind() {
   watchIds.forEach((id) => {
     const el = byId(id);
     const ev = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input';
-    el.addEventListener(ev, renderPreview);
+    el.addEventListener(ev, () => { renderPreview(); });
   });
 
   byId('photoUpload').addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     photoData = await readFileAsDataUrl(file);
-    renderPreview();
+    await renderPreview();
   });
 
   byId('logoUpload').addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     logoData = await readFileAsDataUrl(file);
-    renderPreview();
+    await renderPreview();
   });
 
   byId('saveRecordBtn').addEventListener('click', () => {
@@ -673,8 +696,8 @@ function bind() {
     setStatus('Record saved locally.', false);
   });
 
-  byId('downloadPngBtn').addEventListener('click', () => {
-    renderPreview();
+  byId('downloadPngBtn').addEventListener('click', async () => {
+    await renderPreview();
     const a = document.createElement('a');
     a.href = frontCanvas.toDataURL('image/png');
     a.download = `id-card-front-${Date.now()}.png`;
@@ -682,17 +705,17 @@ function bind() {
     setStatus('PNG downloaded.', false);
   });
 
-  byId('exportA4Btn').addEventListener('click', () => {
+  byId('exportA4Btn').addEventListener('click', async () => {
     const qty = Math.max(1, Number(value('quantity') || 1));
     const base = currentDesignBase();
     const records = Array.from({ length: qty }).map(() => ({ ...base }));
-    exportRecordsPdf('a4', records);
+    await exportRecordsPdf('a4', records);
   });
-  byId('exportA3Btn').addEventListener('click', () => {
+  byId('exportA3Btn').addEventListener('click', async () => {
     const qty = Math.max(1, Number(value('quantity') || 1));
     const base = currentDesignBase();
     const records = Array.from({ length: qty }).map(() => ({ ...base }));
-    exportRecordsPdf('a3', records);
+    await exportRecordsPdf('a3', records);
   });
 
   byId('downloadCsvTemplateBtn').addEventListener('click', downloadCsvTemplate);
@@ -701,8 +724,8 @@ function bind() {
     if (!file) return;
     parseBulkCsv(file);
   });
-  byId('bulkExportA4Btn').addEventListener('click', () => exportRecordsPdf('a4', bulkRecords));
-  byId('bulkExportA3Btn').addEventListener('click', () => exportRecordsPdf('a3', bulkRecords));
+  byId('bulkExportA4Btn').addEventListener('click', async () => { await exportRecordsPdf('a4', bulkRecords); });
+  byId('bulkExportA3Btn').addEventListener('click', async () => { await exportRecordsPdf('a3', bulkRecords); });
   byId('bulkSaveJobBtn').addEventListener('click', saveBulkJobToServer);
   byId('bulkClearBtn').addEventListener('click', () => {
     bulkRecords = [];

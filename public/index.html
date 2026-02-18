@@ -539,10 +539,10 @@ header.scrolled {
     </a>
 
     <nav class="hidden md:flex items-center gap-8 font-medium">
-      <a href="#categories" class="relative group hover:text-blue-700 transition-colors">
+      <span class="relative group hover:text-blue-700 transition-colors cursor-default">
         Categories
         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
-      </a>
+      </span>
       <a href="#products" class="relative group hover:text-blue-700 transition-colors">
         Products
         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
@@ -551,7 +551,6 @@ header.scrolled {
         Arya Studio
         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 group-hover:w-full transition-all duration-300"></span>
       </a>
-      <a href="/login/index.html" class="hover:text-blue-700 transition-colors">Dealer Login</a>
       <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
          class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -572,10 +571,9 @@ header.scrolled {
   <!-- Mobile menu -->
   <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
     <div class="px-4 py-3 space-y-2">
-      <a href="#categories" class="block py-2 hover:text-blue-700 transition-colors">Categories</a>
+      <span class="block py-2 text-gray-700">Categories</span>
       <a href="#products" class="block py-2 hover:text-blue-700 transition-colors">Products</a>
       <a href="/product/studio-suite" class="block py-2 hover:text-blue-700 transition-colors">Arya Studio</a>
-      <a href="/login/index.html" class="block py-2 hover:text-blue-700 transition-colors">Dealer Login</a>
       <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer"
          class="block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2 rounded-full text-center font-semibold hover:from-blue-600 hover:to-blue-700 transition-all">
         WhatsApp
@@ -615,7 +613,7 @@ header.scrolled {
       </p>
 
       <div class="flex flex-wrap justify-center gap-4 mb-10 md:mb-12">
-        <a href="#categories"
+        <a href="#category-list"
            class="btn-primary bg-white/95 text-blue-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-white transition-all shadow-2xl transform hover:scale-105 flex items-center gap-2 w-full sm:w-auto justify-center">
           <span>Explore Categories</span>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -670,24 +668,7 @@ header.scrolled {
       </p>
     </div>
 
-    <div class="mb-10 rounded-3xl overflow-hidden border border-blue-200 shadow-xl bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white">
-      <div class="p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <p class="text-sm uppercase tracking-widest text-blue-100 mb-2">Custom Lanyards</p>
-          <h3 class="text-3xl md:text-4xl font-bold mb-2">Design Your Own Lanyard in Minutes</h3>
-          <p class="text-blue-50 max-w-2xl">Choose width, colors, text, and logo. Download the preview and request a quote instantly.</p>
-        </div>
-        <a href="/product/studio-suite"
-           class="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold px-6 py-3 rounded-full shadow-lg hover:opacity-90 transition">
-          Start Designing
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
-
-    <div class="category-ticker-wrap mb-10 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-blue-50 p-3">
+    <div id="category-list" class="category-ticker-wrap mb-10 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-blue-50 p-3">
       <div class="category-ticker-track gap-3 pr-3">
         <a href="/categories/lamination.html" class="category-pill">Lamination</a>
         <a href="/categories/binding.html" class="category-pill">Binding Solutions</a>
@@ -757,6 +738,23 @@ header.scrolled {
           <a href="/categories/id-cards-lanyards.html" class="b2b-link">Branding Accessories</a><span class="b2b-divider">•</span>
           <a href="/product/studio-suite" class="b2b-link">Arya Studio - Design Suite</a>
         </div>
+      </div>
+    </div>
+
+    <div class="mt-10 rounded-3xl overflow-hidden border border-blue-200 shadow-xl bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white">
+      <div class="p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <p class="text-sm uppercase tracking-widest text-blue-100 mb-2">Custom Lanyards</p>
+          <h3 class="text-3xl md:text-4xl font-bold mb-2">Design Your Own Lanyard in Minutes</h3>
+          <p class="text-blue-50 max-w-2xl">Choose width, colors, text, and logo. Download the preview and request a quote instantly.</p>
+        </div>
+        <a href="/product/studio-suite"
+           class="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold px-6 py-3 rounded-full shadow-lg hover:opacity-90 transition">
+          Start Designing
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
       </div>
     </div>
   </div>
@@ -881,7 +879,7 @@ header.scrolled {
         </svg>
         Chat on WhatsApp
       </a>
-      <a href="#categories"
+      <a href="#category-list"
          class="bg-transparent border-3 border-white text-white px-10 py-5 rounded-full text-lg font-bold hover:bg-white hover:text-blue-900 transition-all shadow-2xl transform hover:scale-105">
         Browse Categories
       </a>
@@ -905,10 +903,9 @@ header.scrolled {
       <div>
         <h3 class="text-white font-bold mb-4">Quick Links</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href="#categories" class="hover:text-white transition-colors">Categories</a></li>
+          <li><span class="text-gray-500 cursor-default">Categories</span></li>
           <li><a href="#products" class="hover:text-white transition-colors">Products</a></li>
           <li><a href="/product/studio-suite" class="hover:text-white transition-colors">Arya Studio</a></li>
-          <li><a href="/login/index.html" class="hover:text-white transition-colors">Dealer Login</a></li>
         </ul>
       </div>
       <div>
@@ -941,7 +938,7 @@ header.scrolled {
 
 <div class="fixed bottom-3 left-3 right-3 z-40 md:hidden">
   <div class="grid grid-cols-2 gap-2 rounded-2xl bg-white/95 backdrop-blur border border-blue-100 p-2 shadow-xl">
-    <a href="#categories" class="text-center bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold">Shop Categories</a>
+    <span class="text-center bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold">Categories</span>
     <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="text-center border border-blue-200 text-blue-800 py-2.5 rounded-xl text-sm font-semibold">Quick Quote</a>
   </div>
 </div>
