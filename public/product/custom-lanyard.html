@@ -3,250 +3,347 @@
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="/assets/veom-logo.png">
 <link rel="apple-touch-icon" href="/assets/veom-logo.png">
 <meta charset="UTF-8">
-<title>Arya Studio | Lanyard Designer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARYA STUDIO™ Enterprise Lanyard Customization Platform</title>
+<meta name="description" content="ARYA STUDIO Enterprise Lanyard Customization Platform. Design, preview, price, export-ready handoff, and production workflow for B2B orders.">
+<link rel="canonical" href="https://aryaoverseas.in/arya-studio-custom-lanyard-designer">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="/assets/theme.css">
 <style>
+  body { font-family: 'Manrope', sans-serif; background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 60%, #f3f7ff 100%); }
+  .platform-shell { border: 1px solid #dbe7fb; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-radius: 18px; box-shadow: 0 18px 36px rgba(15, 40, 85, 0.10); }
+  .step-card { border: 1px solid #dce7f8; border-radius: 14px; background: #f9fbff; padding: 12px; }
+  .step-title { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: #0f2d63; margin-bottom: 10px; }
+  .step-dot { width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; font-size: 12px; }
   .studio-card {
     border: 1px solid #dbe3f3;
-    border-radius: 14px;
-    background: #f8fbff;
+    border-radius: 12px;
+    background: #ffffff;
     padding: 8px;
     display: grid;
-    grid-template-rows: 56px auto;
+    grid-template-rows: 54px auto;
     gap: 6px;
     align-items: center;
     justify-items: center;
     transition: all 0.2s ease;
   }
-
-  .studio-card:hover {
-    border-color: #9db8e7;
-    transform: translateY(-1px);
-  }
-
-  .studio-card.active {
-    border-color: #1d4ed8;
-    background: #eaf1ff;
-    box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.2);
-  }
-
-  .studio-card-thumb {
-    width: 100%;
-    height: 56px;
-    border-radius: 10px;
-    object-fit: contain;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-  }
-
+  .studio-card:hover { border-color: #8eb0eb; transform: translateY(-1px); box-shadow: 0 6px 12px rgba(29, 78, 216, 0.08); }
+  .studio-card.active { border-color: #1d4ed8; box-shadow: 0 0 0 2px rgba(29,78,216,0.20); background: #eef4ff; }
+  .studio-card-thumb { width: 100%; height: 54px; border-radius: 8px; object-fit: contain; background: #fff; border: 1px solid #e5e7eb; }
   .studio-card-placeholder {
-    width: 100%;
-    height: 56px;
-    border-radius: 10px;
-    border: 1px dashed #cbd5e1;
+    width: 100%; height: 54px; border-radius: 8px; border: 1px dashed #bcd0ef;
     background: linear-gradient(135deg, #eff6ff, #f8fafc);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #334155; font-weight: 700;
   }
-
-  .studio-card-label {
-    font-size: 11px;
-    line-height: 1.2;
-    text-align: center;
-    color: #0f172a;
-    min-height: 26px;
+  .studio-card-label { font-size: 11px; line-height: 1.2; text-align: center; color: #0f172a; min-height: 24px; }
+  .chip-btn { border: 1px solid #cbd9ef; border-radius: 999px; padding: 7px 14px; font-size: 12px; font-weight: 700; color: #1e3a8a; background: #fff; }
+  .chip-btn.active { border-color: #1d4ed8; background: #1d4ed8; color: #fff; }
+  .mode-toggle { border: 1px solid #c8d8f3; border-radius: 999px; background: #fff; padding: 4px; display: inline-flex; gap: 4px; }
+  .mode-toggle button { border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 700; color: #1e3a8a; }
+  .mode-toggle button.active { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; }
+  .price-tile { border: 1px solid #d7e5fb; border-radius: 12px; padding: 10px; background: #f8fbff; }
+  .price-tile strong { display: block; color: #0f2d63; font-size: 14px; }
+  .price-tile span { color: #475569; font-size: 12px; }
+  .metal-btn { background: linear-gradient(135deg, #f6f9ff, #e8eef9); border: 1px solid #d4deee; color: #102a58; font-weight: 700; border-radius: 11px; }
+  .premium-btn { background: linear-gradient(135deg, #1d4ed8, #1551c4); color: #fff; border-radius: 11px; font-weight: 800; box-shadow: 0 10px 24px rgba(29, 78, 216, 0.26); }
+  .premium-btn:hover { filter: brightness(1.04); }
+  .preview-wrap { background: radial-gradient(circle at 18% 16%, #e5efff 0%, #f7fbff 50%, #edf3ff 100%); border: 1px solid #dbe7fb; border-radius: 16px; padding: 10px; }
+  .trust-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .trust-item { border: 1px solid #d8e5fa; border-radius: 12px; background: #f8fbff; padding: 10px; font-size: 12px; color: #1e3a8a; font-weight: 700; }
+  .dropzone { border: 1px dashed #8fb1ea; border-radius: 10px; padding: 12px; background: #f8fbff; text-align: center; }
+  .dropzone.drag { background: #eaf2ff; border-color: #1d4ed8; }
+  @media (max-width: 1023px) {
+    .sticky-mobile-bar { display: flex; }
+    body { padding-bottom: 78px; }
+  }
+  @media (min-width: 1024px) {
+    .sticky-mobile-bar { display: none; }
   }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "ARYA STUDIO Enterprise Lanyard Customization Platform",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Design, preview, live pricing, and production-ready lanyard ordering platform.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+      "url": "https://aryaoverseas.in/arya-studio-custom-lanyard-designer"
+    },
+    {
+      "@type": "Product",
+      "name": "Custom Printed Lanyards",
+      "brand": { "@type": "Brand", "name": "VEOM" },
+      "manufacturer": { "@type": "Organization", "name": "Arya Overseas" },
+      "category": "Custom Lanyards",
+      "description": "Wholesale custom lanyard manufacturing for schools, corporates, and channel partners in India."
+    }
+  ]
+}
+</script>
 </head>
+<body class="text-slate-900">
 
-<body class="bg-[#f3f7ff] text-gray-900">
-
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-  <div class="bg-white shadow rounded-2xl p-5 border border-blue-100">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-bold text-blue-900">Arya Studio Lanyard Designer</h1>
-        <p class="text-sm text-slate-600 mt-1">Enterprise-ready custom lanyard builder with live preview, accessories, and multi-design cart.</p>
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-5">
+  <div class="platform-shell p-5 md:p-7">
+    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div class="space-y-3">
+        <div class="flex items-center gap-3">
+          <img src="/assets/veom-logo.png" class="h-12 w-12 rounded-full bg-white p-1 border border-blue-100" alt="VEOM Logo" loading="eager">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-blue-700 font-bold">ARYA STUDIO™</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-blue-950 leading-tight">Enterprise Lanyard Customization Platform</h1>
+          </div>
+        </div>
+        <p class="text-sm md:text-base text-slate-700 font-medium">Design. Preview. Price. Export. Manufacture.</p>
+        <p class="text-xs text-slate-500">Arya Overseas • Since 2020 • 30+ Years Industry Expertise</p>
+        <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+          <span class="px-3 py-1 rounded-full bg-blue-50 border border-blue-100">ARYA • Distributor Power</span>
+          <span class="px-3 py-1 rounded-full bg-blue-50 border border-blue-100">VEOM • Premium Brand</span>
+          <span class="px-3 py-1 rounded-full bg-blue-50 border border-blue-100">KENT • Market Authority</span>
+        </div>
       </div>
-      <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold">WhatsApp</a>
+      <div class="grid sm:grid-cols-3 gap-2 md:min-w-[520px]">
+        <button id="heroQuoteBtn" class="premium-btn px-4 py-3 text-sm">Get Instant Quote</button>
+        <a href="https://wa.me/919667371899" target="_blank" rel="noopener noreferrer" class="premium-btn px-4 py-3 text-sm text-center" style="background:linear-gradient(135deg,#16a34a,#0f9f6e)">Talk to Production Team</a>
+        <button id="downloadTemplateBtn" class="metal-btn px-4 py-3 text-sm">Download Print-Ready Template</button>
+      </div>
     </div>
   </div>
 </section>
 
 <section id="configurator" class="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
-  <div class="grid lg:grid-cols-[1.05fr_0.95fr_0.5fr] gap-6">
-    <div class="bg-white shadow rounded-2xl p-6 lg:sticky lg:top-24 h-fit">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-xl font-semibold">Live Lanyard Preview</h2>
-        <span class="text-xs text-slate-500">Front + Back + Accessories</span>
+  <div class="grid xl:grid-cols-[1.05fr_0.95fr_0.58fr] gap-5">
+    <div class="platform-shell p-4 md:p-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <h2 class="text-lg md:text-xl font-extrabold text-blue-950">Live Production Preview</h2>
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <label class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-white border border-blue-100">
+            Zoom
+            <input id="previewZoom" type="range" min="80" max="140" value="100" class="w-20">
+          </label>
+          <label class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-white border border-blue-100">
+            Rotate
+            <input id="previewRotate" type="range" min="-20" max="20" value="0" class="w-20">
+          </label>
+          <label class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-white border border-blue-100">
+            <input id="neckMockup" type="checkbox" checked>
+            Neck Mockup
+          </label>
+        </div>
       </div>
-      <div class="border rounded-xl bg-slate-50 p-3">
-        <canvas id="livePreviewCanvas" width="1100" height="760" class="w-full rounded-lg bg-white"></canvas>
+      <div class="preview-wrap">
+        <canvas id="livePreviewCanvas" width="1300" height="860" class="w-full rounded-xl bg-white"></canvas>
       </div>
-      <p class="text-xs text-slate-500 mt-3">Preview is indicative for production planning.</p>
+      <p class="text-xs text-slate-500 mt-2">Real-time rendering with texture, shadow, and metallic fittings for approval-level preview.</p>
+      <div class="trust-grid mt-3">
+        <div class="trust-item">5000+ Designs Created</div>
+        <div class="trust-item">Avg Production Time: 72 Hours</div>
+        <div class="trust-item">Live Factory Pricing</div>
+        <div class="trust-item">Instant Digital Proof Workflow</div>
+      </div>
     </div>
 
-    <div class="space-y-6">
-      <div class="bg-white shadow rounded-2xl p-6">
-        <h3 class="text-lg font-semibold mb-4">Design Studio</h3>
-        <div class="grid md:grid-cols-2 gap-4">
-          <div>
-            <label class="font-medium">Lanyard Type</label>
-            <select id="typeSelect" class="w-full border rounded-lg p-3"></select>
-            <div id="typeCardDeck" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+    <div class="space-y-4">
+      <div class="platform-shell p-4 md:p-5">
+        <h3 class="text-lg font-extrabold text-blue-950 mb-3">Design Studio Workflow</h3>
+
+        <div class="step-card">
+          <div class="step-title"><span class="step-dot">1</span>Choose Material</div>
+          <select id="typeSelect" class="w-full border border-blue-100 rounded-lg p-2 text-sm mb-2"></select>
+          <div id="typeCardDeck" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        </div>
+
+        <div class="step-card mt-3">
+          <div class="step-title"><span class="step-dot">2</span>Select Width + Length</div>
+          <div class="flex flex-wrap gap-2 mb-2" id="widthChips">
+            <button class="chip-btn" data-width="16" type="button">16mm</button>
+            <button class="chip-btn active" data-width="20" type="button">20mm</button>
+            <button class="chip-btn" data-width="25" type="button">25mm</button>
           </div>
-          <div>
-            <label class="font-medium">Main Accessory</label>
-            <select id="mainAccessorySelect" class="w-full border rounded-lg p-3"></select>
-            <div id="mainAccessoryCardDeck" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-          </div>
-          <div>
-            <label class="font-medium">Add-on Accessory (Optional)</label>
-            <select id="addonAccessorySelect" class="w-full border rounded-lg p-3"></select>
-            <div id="addonAccessoryCardDeck" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-          </div>
-          <div>
-            <label class="font-medium">Qty for this design</label>
-            <input id="lineQty" type="number" min="1" value="100" class="w-full border rounded-lg p-3">
-          </div>
-          <div>
-            <label class="font-medium">Width (mm)</label>
-            <select id="width" class="w-full border rounded-lg p-3">
-              <option value="15">15 mm</option>
-              <option value="20" selected>20 mm</option>
-              <option value="25">25 mm</option>
-            </select>
-          </div>
-          <div>
-            <label class="font-medium">Length (mm)</label>
-            <select id="lengthMm" class="w-full border rounded-lg p-3">
-              <option value="800">800 mm</option>
-              <option value="900" selected>900 mm</option>
-              <option value="1000">1000 mm</option>
-            </select>
-          </div>
-          <div>
-            <label class="font-medium">Printing Style</label>
-            <select id="printing" class="w-full border rounded-lg p-3">
-              <option value="Laser Printing">Laser Printing</option>
-              <option value="Screen Printing">Screen Printing</option>
-              <option value="Sublimation">Sublimation</option>
-            </select>
-          </div>
-          <div>
-            <label class="font-medium">Quality</label>
-            <select id="quality" class="w-full border rounded-lg p-3">
-              <option value="Standard">Standard</option>
-              <option value="Premium">Premium</option>
-            </select>
+          <input id="width" type="hidden" value="20">
+          <label class="text-xs font-semibold text-slate-600">Length</label>
+          <select id="lengthMm" class="w-full border border-blue-100 rounded-lg p-2 text-sm mt-1">
+            <option value="850">850 mm</option>
+            <option value="900" selected>900 mm</option>
+            <option value="950">950 mm</option>
+          </select>
+        </div>
+
+        <div class="step-card mt-3">
+          <div class="step-title"><span class="step-dot">3</span>Select Hook</div>
+          <select id="mainAccessorySelect" class="w-full border border-blue-100 rounded-lg p-2 text-sm mb-2"></select>
+          <div id="mainAccessoryCardDeck" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        </div>
+
+        <div class="step-card mt-3">
+          <div class="step-title"><span class="step-dot">4</span>Add Accessories + Print</div>
+          <select id="addonAccessorySelect" class="w-full border border-blue-100 rounded-lg p-2 text-sm mb-2"></select>
+          <div id="addonAccessoryCardDeck" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2"></div>
+          <div class="grid sm:grid-cols-2 gap-2 mt-2">
+            <label class="text-xs font-semibold text-slate-600">Printing Style
+              <select id="printing" class="w-full border border-blue-100 rounded-lg p-2 text-sm mt-1">
+                <option value="Sublimation" selected>Sublimation</option>
+                <option value="Screen Printing">Screen Printing</option>
+                <option value="Laser Printing">Laser Printing</option>
+                <option value="Woven">Woven</option>
+              </select>
+            </label>
+            <label class="text-xs font-semibold text-slate-600">Print Side
+              <select id="printSide" class="w-full border border-blue-100 rounded-lg p-2 text-sm mt-1">
+                <option value="Double Side" selected>Double Side</option>
+                <option value="Single Side">Single Side</option>
+              </select>
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 mt-1">
+              <input id="breakawayToggle" type="checkbox" checked>
+              Safety Breakaway
+            </label>
+            <label class="text-xs font-semibold text-slate-600">Quality
+              <select id="quality" class="w-full border border-blue-100 rounded-lg p-2 text-sm mt-1">
+                <option value="Standard">Standard</option>
+                <option value="Premium" selected>Premium</option>
+              </select>
+            </label>
           </div>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label class="font-medium">Front Text *</label>
-            <input type="text" id="frontText" placeholder="Front Text" class="w-full border rounded-lg p-3">
+        <div class="step-card mt-3">
+          <div class="step-title"><span class="step-dot">5</span>Artwork + Text</div>
+          <div class="grid sm:grid-cols-2 gap-2 mb-2">
+            <input type="text" id="frontText" placeholder="Front text" class="w-full border border-blue-100 rounded-lg p-2 text-sm">
+            <input type="text" id="backText" placeholder="Back text" class="w-full border border-blue-100 rounded-lg p-2 text-sm">
           </div>
-          <div>
-            <label class="font-medium">Back Text *</label>
-            <input type="text" id="backText" placeholder="Back Text" class="w-full border rounded-lg p-3">
+          <div class="grid sm:grid-cols-2 gap-2 mb-2">
+            <label class="text-xs font-semibold text-slate-600">Lanyard Color
+              <input type="color" id="bgColor" value="#111111" class="w-full h-10 border border-blue-100 rounded-lg mt-1">
+            </label>
+            <label class="text-xs font-semibold text-slate-600">Text Color
+              <input type="color" id="textColor" value="#ffffff" class="w-full h-10 border border-blue-100 rounded-lg mt-1">
+            </label>
           </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label class="font-medium">Lanyard Color</label>
-            <input type="color" id="bgColor" value="#111111" class="w-full h-12 border rounded-lg">
+          <div id="logoDropzone" class="dropzone">
+            <p class="text-xs text-slate-600 font-semibold">Drag & drop logo or choose file</p>
+            <input type="file" id="logoUpload" accept="image/*" class="mt-2 text-xs w-full">
           </div>
-          <div>
-            <label class="font-medium">Text Color</label>
-            <input type="color" id="textColor" value="#ffffff" class="w-full h-12 border rounded-lg">
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <label class="font-medium">Upload Logo (optional)</label>
-          <input type="file" id="logoUpload" accept="image/*" class="w-full border rounded-lg p-3">
-        </div>
-
-        <div class="mt-4 border border-blue-100 rounded-xl p-3 bg-blue-50/40">
-          <label class="font-medium">AI Design Assist (Optional)</label>
-          <textarea id="aiPrompt" rows="2" class="w-full border rounded-lg p-3 mt-2" placeholder="Generate a premium lanyard motif, blue corporate style, clean icon pattern..."></textarea>
           <div class="grid grid-cols-[1fr_auto] gap-2 mt-2">
-            <select id="aiSize" class="border rounded-lg p-2">
-              <option value="1024x1024">Square</option>
-              <option value="1024x1536">Portrait</option>
-              <option value="1536x1024">Landscape</option>
-            </select>
-            <button id="aiGenerateBtn" class="bg-blue-700 text-white px-4 rounded-lg font-semibold">Generate</button>
+            <textarea id="aiPrompt" rows="2" class="w-full border border-blue-100 rounded-lg p-2 text-sm" placeholder="AI auto-fit prompt: premium blue corporate motif with clean geometric icons..."></textarea>
+            <button id="aiGenerateBtn" class="premium-btn px-3 py-2 text-xs">AI Auto-Fit</button>
           </div>
-          <p id="aiAssistMsg" class="text-xs text-slate-500 mt-2"></p>
-          <img id="aiPreviewImage" alt="AI generated lanyard concept" class="hidden mt-2 w-full max-h-44 object-contain border rounded-lg bg-white p-2">
+          <p id="aiAssistMsg" class="text-xs text-slate-500 mt-1"></p>
+          <img id="aiPreviewImage" alt="AI generated concept" class="hidden mt-2 w-full max-h-40 object-contain border rounded-lg bg-white p-2">
         </div>
 
-        <div class="mt-5 flex flex-wrap gap-2">
-          <button id="addToCartBtn" class="bg-blue-800 text-white px-5 py-2.5 rounded-full font-semibold w-full sm:w-auto">Add Design to Cart</button>
-          <button id="clearDesignBtn" class="border px-5 py-2.5 rounded-full w-full sm:w-auto">Clear Current</button>
+        <div class="step-card mt-3">
+          <div class="step-title"><span class="step-dot">6</span>Quantity + Auto Pricing</div>
+          <div class="grid sm:grid-cols-2 gap-2 items-end mb-2">
+            <label class="text-xs font-semibold text-slate-600">Qty
+              <input id="lineQty" type="number" min="1" value="100" class="w-full border border-blue-100 rounded-lg p-2 text-sm mt-1">
+            </label>
+            <div>
+              <label class="text-xs font-semibold text-slate-600">Mode</label>
+              <div class="mode-toggle mt-1">
+                <button id="modeRetail" type="button" class="active">Retail</button>
+                <button id="modeWholesale" type="button">Wholesale</button>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="pricingTiles">
+            <div class="price-tile"><strong id="slab100">₹0</strong><span>100 pcs</span></div>
+            <div class="price-tile"><strong id="slab500">₹0</strong><span>500 pcs</span></div>
+            <div class="price-tile"><strong id="slab1000">₹0</strong><span>1000 pcs</span></div>
+          </div>
+          <p id="savingsText" class="text-xs text-emerald-700 font-semibold mt-2">You save ₹0 at scale.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button id="addToCartBtn" class="premium-btn px-4 py-2 text-sm">Add Design to Cart</button>
+            <button id="clearDesignBtn" class="metal-btn px-4 py-2 text-sm">Reset</button>
+          </div>
         </div>
+
         <p id="visualCatalogMessage" class="text-xs text-slate-500 mt-3"></p>
-        <p id="designMessage" class="text-xs text-slate-500 mt-3"></p>
+        <p id="designMessage" class="text-xs text-slate-500 mt-1"></p>
       </div>
 
-      <div class="bg-white shadow rounded-2xl p-6">
-        <h3 class="text-lg font-semibold mb-4">Design Cart</h3>
+      <div class="platform-shell p-4 md:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-extrabold text-blue-950">Multi-Design Cart</h3>
+          <span id="cartCount" class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold">0 lines</span>
+        </div>
         <div id="designCartList" class="space-y-2"></div>
       </div>
 
-      <div class="bg-white shadow rounded-2xl p-6">
-        <h3 class="text-lg font-semibold mb-4">Submit Enquiry</h3>
-        <div class="grid md:grid-cols-2 gap-3 mb-3">
-          <input type="text" id="customerName" placeholder="Your name *" class="w-full border rounded-lg p-3">
-          <input type="text" id="customerPhone" placeholder="Phone *" class="w-full border rounded-lg p-3">
+      <div id="quoteSection" class="platform-shell p-4 md:p-5">
+        <h3 class="text-base font-extrabold text-blue-950 mb-3">Get Instant Quote</h3>
+        <div class="grid sm:grid-cols-2 gap-2 mb-2">
+          <input type="text" id="customerName" placeholder="Your name *" class="w-full border border-blue-100 rounded-lg p-2 text-sm">
+          <input type="text" id="customerPhone" placeholder="Phone *" class="w-full border border-blue-100 rounded-lg p-2 text-sm">
         </div>
-        <div class="grid md:grid-cols-2 gap-3 mb-3">
-          <input type="email" id="customerEmail" placeholder="Email" class="w-full border rounded-lg p-3">
-          <input type="text" id="customerCompany" placeholder="Company" class="w-full border rounded-lg p-3">
+        <div class="grid sm:grid-cols-2 gap-2 mb-2">
+          <input type="email" id="customerEmail" placeholder="Email" class="w-full border border-blue-100 rounded-lg p-2 text-sm">
+          <input type="text" id="customerCompany" placeholder="Company" class="w-full border border-blue-100 rounded-lg p-2 text-sm">
         </div>
-        <div class="grid md:grid-cols-2 gap-3">
-          <button id="submitRequestBtn" class="bg-blue-800 text-white w-full py-3 rounded-full text-sm sm:text-base font-semibold">Submit Design Request</button>
-          <button id="sendWhatsappBtn" class="bg-green-600 text-white w-full py-3 rounded-full text-sm sm:text-base font-semibold">Send on WhatsApp</button>
+        <div class="grid sm:grid-cols-2 gap-2">
+          <button id="submitRequestBtn" class="premium-btn w-full py-2.5 text-sm">Get Instant Quote</button>
+          <button id="sendWhatsappBtn" class="premium-btn w-full py-2.5 text-sm" style="background:linear-gradient(135deg,#16a34a,#0f9f6e)">Talk to Production Team</button>
         </div>
-        <p id="submitMessage" class="text-sm text-slate-500 mt-3"></p>
+        <p id="submitMessage" class="text-xs text-slate-500 mt-2"></p>
+      </div>
+
+      <div class="platform-shell p-4 md:p-5">
+        <h3 class="text-base font-extrabold text-blue-950 mb-2">Trust Signals</h3>
+        <div class="grid sm:grid-cols-2 gap-2 text-xs font-semibold text-slate-700">
+          <div class="border border-blue-100 rounded-lg p-2 bg-blue-50/60">✔ Made in India Manufacturing</div>
+          <div class="border border-blue-100 rounded-lg p-2 bg-blue-50/60">✔ Bulk Capacity: 50,000+ / day</div>
+          <div class="border border-blue-100 rounded-lg p-2 bg-blue-50/60">✔ Trusted by Schools & Corporates</div>
+          <div class="border border-blue-100 rounded-lg p-2 bg-blue-50/60">✔ PAN India Delivery</div>
+        </div>
       </div>
     </div>
 
-    <aside class="bg-white shadow rounded-2xl p-6 lg:sticky lg:top-24 h-fit">
-      <h3 class="text-lg font-semibold mb-4">Summary</h3>
+    <aside class="platform-shell p-4 md:p-5 h-fit xl:sticky xl:top-24">
+      <h3 class="text-base md:text-lg font-extrabold text-blue-950 mb-3">Production Summary</h3>
       <div class="space-y-2 text-sm">
-        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Length</span><span id="summaryLength" class="font-semibold">900 mm</span></div>
-        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Width</span><span id="summaryWidth" class="font-semibold">20 mm</span></div>
-        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Type</span><span id="summaryType" class="font-semibold">-</span></div>
-        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Main</span><span id="summaryMain" class="font-semibold">-</span></div>
-        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Add-on</span><span id="summaryAddon" class="font-semibold">None</span></div>
-        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Print</span><span id="summaryPrinting" class="font-semibold">Sublimation</span></div>
-        <div class="flex items-center justify-between"><span class="text-slate-600">Qty</span><span id="summaryQty" class="font-semibold">100</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Size</span><span id="summarySize" class="font-semibold">20mm × 900mm</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Printing</span><span id="summaryPrinting" class="font-semibold">Sublimation</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Hook</span><span id="summaryHook" class="font-semibold">-</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Accessories</span><span id="summaryAccessories" class="font-semibold">None</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Print</span><span id="summaryPrintSide" class="font-semibold">Double Side</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Dispatch</span><span id="summaryDispatch" class="font-semibold">3-5 Days</span></div>
+        <div class="flex items-center justify-between border-b pb-2"><span class="text-slate-600">Unit Cost</span><span id="summaryUnit" class="font-extrabold text-blue-900">₹0</span></div>
+        <div class="flex items-center justify-between"><span class="text-slate-600">Total</span><span id="summaryTotal" class="font-extrabold text-blue-900">₹0</span></div>
       </div>
-      <div class="mt-6">
-        <p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Export (Phase 2)</p>
-        <button id="exportSvgBtn" disabled class="w-full rounded-lg border border-slate-200 bg-slate-100 text-slate-500 py-2 text-sm font-semibold cursor-not-allowed">SVG (Print Ready) - Coming Soon</button>
-        <button id="exportPdfBtn" disabled class="w-full rounded-lg border border-slate-200 bg-slate-100 text-slate-500 py-2 text-sm font-semibold mt-2 cursor-not-allowed">PDF (Customer Proof) - Coming Soon</button>
+
+      <div class="mt-3 flex items-center gap-2">
+        <span id="stockBadge" class="px-2 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">In Stock Materials</span>
+        <span id="productionBadge" class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 hidden">Custom Production Required</span>
       </div>
-      <p class="text-xs text-slate-500 mt-4">Phase 1 includes live rendering + submission workflow.</p>
+
+      <div class="mt-4 border-t pt-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500 mb-2 font-bold">Export and Handoff</p>
+        <button id="generateProofBtn" class="metal-btn w-full py-2 text-sm mb-2">Generate Customer Proof (PDF)</button>
+        <button id="generateSvgBtn" class="metal-btn w-full py-2 text-sm mb-2">Generate Print File (AI / SVG)</button>
+        <button id="downloadProductionBtn" class="metal-btn w-full py-2 text-sm">Download Production Sheet</button>
+        <p class="text-xs text-slate-500 mt-2">If auto-export is unavailable, proof request is sent directly to production via WhatsApp.</p>
+      </div>
     </aside>
   </div>
 </section>
+
+<div class="sticky-mobile-bar fixed left-0 right-0 bottom-0 z-50 bg-white/95 backdrop-blur border-t border-blue-100 px-3 py-2 items-center justify-between gap-3">
+  <div>
+    <p class="text-[11px] uppercase tracking-wide text-slate-500 font-bold">Estimated Total</p>
+    <p id="stickyTotal" class="text-sm font-extrabold text-blue-900">₹0</p>
+  </div>
+  <button id="stickyQuoteBtn" class="premium-btn px-4 py-2 text-sm">Get Instant Quote</button>
+</div>
 
 <script>
 let logoData = null;
@@ -255,36 +352,59 @@ let designCart = [];
 let renderSequence = 0;
 let renderFrame = 0;
 let renderQueued = false;
+let pricingMode = 'retail';
 
 const canvas = document.getElementById('livePreviewCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 const imageCache = new Map();
 
-const typeSelect = document.getElementById('typeSelect');
-const mainAccessorySelect = document.getElementById('mainAccessorySelect');
-const addonAccessorySelect = document.getElementById('addonAccessorySelect');
-const frontTextInput = document.getElementById('frontText');
-const backTextInput = document.getElementById('backText');
-const widthInput = document.getElementById('width');
-const lengthMmInput = document.getElementById('lengthMm');
-const textColorInput = document.getElementById('textColor');
-const bgColorInput = document.getElementById('bgColor');
-const lineQtyInput = document.getElementById('lineQty');
-const qualityInput = document.getElementById('quality');
-const printingInput = document.getElementById('printing');
-let requestRender = () => queueRender();
+const refs = {
+  typeSelect: document.getElementById('typeSelect'),
+  mainAccessorySelect: document.getElementById('mainAccessorySelect'),
+  addonAccessorySelect: document.getElementById('addonAccessorySelect'),
+  frontTextInput: document.getElementById('frontText'),
+  backTextInput: document.getElementById('backText'),
+  widthInput: document.getElementById('width'),
+  lengthMmInput: document.getElementById('lengthMm'),
+  textColorInput: document.getElementById('textColor'),
+  bgColorInput: document.getElementById('bgColor'),
+  lineQtyInput: document.getElementById('lineQty'),
+  qualityInput: document.getElementById('quality'),
+  printingInput: document.getElementById('printing'),
+  printSideInput: document.getElementById('printSide'),
+  breakawayToggle: document.getElementById('breakawayToggle'),
+  previewZoom: document.getElementById('previewZoom'),
+  previewRotate: document.getElementById('previewRotate'),
+  neckMockup: document.getElementById('neckMockup')
+};
+
+function currencyInr(value) {
+  const amount = Number(value || 0);
+  return `₹${Math.round(amount).toLocaleString('en-IN')}`;
+}
 
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/\"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
 
 function findById(list, id) {
-  return list.find((item) => String(item.id) === String(id));
+  return (list || []).find((item) => String(item.id) === String(id));
+}
+
+function roundedRectPath(context, x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.arcTo(x + w, y, x + w, y + h, radius);
+  context.arcTo(x + w, y + h, x, y + h, radius);
+  context.arcTo(x, y + h, x, y, radius);
+  context.arcTo(x, y, x + w, y, radius);
+  context.closePath();
 }
 
 function queueRender() {
@@ -310,184 +430,317 @@ async function getImage(src) {
   return p;
 }
 
-function currentLineItem() {
+function getCurrentLineItem() {
   return {
     lineId: `line-${Date.now()}`,
-    lanyardTypeId: Number(typeSelect.value || 0),
-    mainAccessoryId: Number(mainAccessorySelect.value || 0),
-    addonAccessoryId: addonAccessorySelect.value ? Number(addonAccessorySelect.value) : null,
-    widthMm: Number(widthInput.value || 20),
-    lengthMm: Number(lengthMmInput.value || 900),
-    frontText: (frontTextInput.value || '').trim(),
-    backText: (backTextInput.value || '').trim() || (frontTextInput.value || '').trim(),
-    textColor: textColorInput.value,
-    bgColor: bgColorInput.value,
+    lanyardTypeId: Number(refs.typeSelect.value || 0),
+    mainAccessoryId: Number(refs.mainAccessorySelect.value || 0),
+    addonAccessoryId: refs.addonAccessorySelect.value ? Number(refs.addonAccessorySelect.value) : null,
+    widthMm: Number(refs.widthInput.value || 20),
+    lengthMm: Number(refs.lengthMmInput.value || 900),
+    frontText: (refs.frontTextInput.value || '').trim(),
+    backText: (refs.backTextInput.value || '').trim() || (refs.frontTextInput.value || '').trim(),
+    textColor: refs.textColorInput.value,
+    bgColor: refs.bgColorInput.value,
     logoData: logoData || '',
     repeatSpacingPx: 120,
-    quantity: Number(lineQtyInput.value || 0),
-    quality: qualityInput.value,
-    printingStyle: printingInput.value
+    quantity: Number(refs.lineQtyInput.value || 0),
+    quality: refs.qualityInput.value,
+    printingStyle: refs.printingInput.value,
+    printSide: refs.printSideInput.value,
+    breakaway: Boolean(refs.breakawayToggle.checked),
+    mode: pricingMode
   };
 }
 
-function drawRepeatedStrip(text, y, widthPx, logoImg, color, bg, lengthMm) {
-  const stripHeight = Math.max(14, widthPx);
-  const startX = 90;
-  const stripWidth = Math.max(560, Math.min(920, Math.round((Number(lengthMm) || 900) * 0.95)));
-  ctx.fillStyle = bg;
-  ctx.fillRect(startX, y, stripWidth, stripHeight);
-  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-  ctx.strokeRect(startX, y, stripWidth, stripHeight);
-
-  ctx.fillStyle = color;
-  ctx.font = `${Math.max(11, widthPx * 0.58)}px Manrope`;
-  const textWidth = Math.max(80, ctx.measureText(text || 'YOUR TEXT').width);
-  const logoSlot = logoImg ? stripHeight + 10 : 0;
-  const blockWidth = logoSlot + textWidth + 45;
-  const repeatCount = Math.max(2, Math.floor(stripWidth / blockWidth));
-
-  for (let i = 0; i < repeatCount; i += 1) {
-    const x = startX + 14 + (i * blockWidth);
-    if (logoImg) {
-      ctx.drawImage(logoImg, x, y + 2, stripHeight - 4, stripHeight - 4);
-    } else {
-      ctx.strokeStyle = color;
-      ctx.strokeRect(x, y + 3, stripHeight - 6, stripHeight - 6);
-      ctx.fillStyle = color;
-      ctx.font = `${Math.max(9, widthPx * 0.42)}px Manrope`;
-      ctx.fillText('LOGO', x + 4, y + stripHeight - 8);
-    }
-    ctx.fillStyle = color;
-    ctx.font = `${Math.max(11, widthPx * 0.58)}px Manrope`;
-    ctx.fillText(text || 'YOUR TEXT', x + logoSlot + 5, y + stripHeight - Math.max(4, widthPx * 0.2));
-  }
+function baseMaterialRate(materialName) {
+  const label = String(materialName || '').toLowerCase();
+  if (label.includes('satin')) return 21;
+  if (label.includes('polyester')) return 18;
+  if (label.includes('woven')) return 24;
+  if (label.includes('sublimation')) return 22;
+  return 20;
 }
 
-function drawAccessory(image, baseX, baseY, anchor, defaultSize) {
-  if (!image) return;
-  const scale = Number(anchor.scale) || 1;
-  const width = defaultSize * scale;
-  const height = defaultSize * scale;
-  const x = baseX + (Number(anchor.x) || 0);
-  const y = baseY + (Number(anchor.y) || 0);
-  const rotation = (Number(anchor.rotation) || 0) * (Math.PI / 180);
+function computePricing(line, type) {
+  const widthAdj = line.widthMm >= 25 ? 4 : line.widthMm >= 20 ? 2 : 0;
+  const printAdj = /sublimation/i.test(line.printingStyle) ? 2 : /laser/i.test(line.printingStyle) ? 1 : 0;
+  const qualityAdj = /premium/i.test(line.quality) ? 2 : 0;
+  const sideAdj = /double/i.test(line.printSide || '') ? 1 : 0;
+  const addonAdj = line.addonAccessoryId ? 1 : 0;
+  const accessoryAdj = line.mainAccessoryId ? 2 : 0;
+  const wholesaleAdj = pricingMode === 'wholesale' ? -1.5 : 0;
+  const base = baseMaterialRate(type ? type.name : '') + widthAdj + printAdj + qualityAdj + sideAdj + accessoryAdj + addonAdj + wholesaleAdj;
+
+  const unitForQty = (qty) => {
+    if (qty >= 1000) return Math.max(8, base - 6);
+    if (qty >= 500) return Math.max(9, base - 3.2);
+    if (qty >= 100) return Math.max(10, base);
+    return Math.max(12, base + 4.5);
+  };
+
+  const qty = Math.max(1, Number(line.quantity || 1));
+  const unit = unitForQty(qty);
+  const total = unit * qty;
+  const unitAt100 = unitForQty(100);
+  const savings = Math.max(0, (unitAt100 - unit) * qty);
+
+  return {
+    qty,
+    unit,
+    total,
+    savings,
+    slabs: [
+      { qty: 100, unit: unitForQty(100) },
+      { qty: 500, unit: unitForQty(500) },
+      { qty: 1000, unit: unitForQty(1000) }
+    ]
+  };
+}
+
+function drawTextureFill(x, y, w, h, textColor) {
   ctx.save();
-  ctx.translate(x + (width / 2), y + (height / 2));
-  ctx.rotate(rotation);
-  ctx.drawImage(image, -(width / 2), -(height / 2), width, height);
+  ctx.beginPath();
+  roundedRectPath(ctx, x, y, w, h, w / 2);
+  ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,255,0.09)';
+  for (let i = -h; i < w + h; i += 10) {
+    ctx.beginPath();
+    ctx.moveTo(x + i, y);
+    ctx.lineTo(x + i - h, y + h);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  for (let i = 0; i < h; i += 7) {
+    ctx.beginPath();
+    ctx.moveTo(x, y + i);
+    ctx.lineTo(x + w, y + i);
+    ctx.stroke();
+  }
   ctx.restore();
 }
 
-function updateSummary(line, type, main, addon) {
+function drawLaneText(text, logoImg, strapW, strapLen, textColor, reverse) {
+  const content = text || 'YOUR TEXT';
+  const logoSize = Math.max(14, strapW * 0.72);
+  const baseFont = Math.max(15, strapW * 0.62);
+  ctx.fillStyle = textColor;
+  ctx.font = `700 ${baseFont}px Manrope`;
+  const textWidth = Math.max(80, ctx.measureText(content).width);
+  const block = logoSize + textWidth + 28;
+  const repeat = Math.max(2, Math.floor((strapLen - 28) / block));
+
+  for (let i = 0; i < repeat; i += 1) {
+    const y = 20 + (i * block);
+    ctx.save();
+    ctx.translate(0, y);
+    ctx.rotate(reverse ? -Math.PI / 2 : Math.PI / 2);
+    if (logoImg) {
+      ctx.drawImage(logoImg, -logoSize - 8, -logoSize / 2, logoSize, logoSize);
+    } else {
+      ctx.strokeStyle = textColor;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-logoSize - 8, -logoSize / 2, logoSize - 2, logoSize - 2);
+      ctx.font = `700 ${Math.max(9, strapW * 0.35)}px Manrope`;
+      ctx.fillStyle = textColor;
+      ctx.fillText('LOGO', -logoSize - 4, 4);
+      ctx.font = `700 ${baseFont}px Manrope`;
+    }
+    ctx.fillStyle = textColor;
+    ctx.fillText(content, 8, baseFont / 3);
+    ctx.restore();
+  }
+}
+
+function drawStrapSegment(cx, cy, strapW, strapLen, angleRad, color, textColor, text, logoImg, reverse) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angleRad);
+
+  ctx.shadowColor = 'rgba(15, 23, 42, 0.24)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 8;
+  roundedRectPath(ctx, -strapW / 2, 0, strapW, strapLen, strapW / 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  const gloss = ctx.createLinearGradient(0, 0, strapW, 0);
+  gloss.addColorStop(0, 'rgba(255,255,255,0.22)');
+  gloss.addColorStop(0.45, 'rgba(255,255,255,0.03)');
+  gloss.addColorStop(1, 'rgba(0,0,0,0.12)');
+  ctx.globalCompositeOperation = 'source-atop';
+  ctx.fillStyle = gloss;
+  ctx.fillRect(-strapW / 2, 0, strapW, strapLen);
+  ctx.globalCompositeOperation = 'source-over';
+
+  drawTextureFill(-strapW / 2, 0, strapW, strapLen, textColor);
+
+  ctx.save();
+  roundedRectPath(ctx, -strapW / 2, 0, strapW, strapLen, strapW / 2);
+  ctx.clip();
+  drawLaneText(text, logoImg, strapW, strapLen, textColor, reverse);
+  ctx.restore();
+
+  ctx.restore();
+
+  return {
+    x: cx + Math.sin(angleRad) * strapLen,
+    y: cy + Math.cos(angleRad) * strapLen
+  };
+}
+
+function drawConnector(x, y, width, breakawayOn) {
+  const grad = ctx.createLinearGradient(x - width / 2, y, x + width / 2, y + 14);
+  grad.addColorStop(0, '#f8fafc');
+  grad.addColorStop(0.5, '#94a3b8');
+  grad.addColorStop(1, '#e2e8f0');
+  roundedRectPath(ctx, x - width / 2, y, width, 16, 6);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  if (breakawayOn) {
+    roundedRectPath(ctx, x - 22, y - 30, 44, 16, 6);
+    ctx.fillStyle = '#1f2937';
+    ctx.fill();
+  }
+}
+
+function drawMetalPlaceholder(x, y, size) {
+  const g = ctx.createLinearGradient(x, y, x + size, y + size);
+  g.addColorStop(0, '#f8fafc');
+  g.addColorStop(0.5, '#94a3b8');
+  g.addColorStop(1, '#e2e8f0');
+  roundedRectPath(ctx, x, y, size, size * 0.9, 9);
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(15,23,42,0.22)';
+  ctx.stroke();
+}
+
+function drawSingleLanyard(rootX, rootY, label, text, line, logoImg, mainImg, addonImg, mirror) {
+  const strapW = Math.max(24, Math.min(40, Math.round(line.widthMm * 1.35)));
+  const strapLen = Math.max(330, Math.min(460, Math.round(line.lengthMm * 0.46)));
+  const leftAngle = mirror ? -0.24 : 0.24;
+  const rightAngle = mirror ? 0.24 : -0.24;
+
+  const leftEnd = drawStrapSegment(rootX - 58, rootY, strapW, strapLen, leftAngle, line.bgColor, line.textColor, text, logoImg, false);
+  const rightEnd = drawStrapSegment(rootX + 58, rootY, strapW, strapLen, rightAngle, line.bgColor, line.textColor, text, logoImg, true);
+
+  drawConnector(rootX, rootY - 6, 56, line.breakaway);
+
+  const joinX = (leftEnd.x + rightEnd.x) / 2;
+  const joinY = (leftEnd.y + rightEnd.y) / 2;
+  drawConnector(joinX, joinY - 6, 44, false);
+
+  if (mainImg) {
+    ctx.drawImage(mainImg, joinX - 28, joinY + 10, 56, 56);
+  } else {
+    drawMetalPlaceholder(joinX - 26, joinY + 10, 52);
+  }
+
+  if (addonImg) {
+    ctx.drawImage(addonImg, joinX + 40, joinY + 14, 38, 38);
+  }
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '700 20px Manrope';
+  ctx.fillText(label, rootX - 24, rootY + strapLen + 110);
+}
+
+function updateSummary(line, type, main, addon, pricing) {
   const setText = (id, value) => {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
   };
-  setText('summaryLength', `${line.lengthMm} mm`);
-  setText('summaryWidth', `${line.widthMm} mm`);
-  setText('summaryType', type ? type.name : '-');
-  setText('summaryMain', main ? main.name : '-');
-  setText('summaryAddon', addon ? addon.name : 'None');
+
+  setText('summarySize', `${line.widthMm}mm × ${line.lengthMm}mm`);
   setText('summaryPrinting', line.printingStyle || '-');
-  setText('summaryQty', String(line.quantity || '-'));
+  setText('summaryHook', main ? main.name : '-');
+  setText('summaryAccessories', addon ? addon.name : 'None');
+  setText('summaryPrintSide', line.printSide || 'Double Side');
+  setText('summaryUnit', `${currencyInr(pricing.unit)} / pc`);
+  setText('summaryTotal', currencyInr(pricing.total));
+  setText('stickyTotal', currencyInr(pricing.total));
+
+  const customRequired = pricing.qty > 5000 || !type || !main;
+  setText('summaryDispatch', customRequired ? '5-7 Days' : '3-5 Days');
+  const stock = document.getElementById('stockBadge');
+  const production = document.getElementById('productionBadge');
+  if (stock && production) {
+    if (customRequired) {
+      stock.classList.add('hidden');
+      production.classList.remove('hidden');
+    } else {
+      production.classList.add('hidden');
+      stock.classList.remove('hidden');
+    }
+  }
+}
+
+function updatePricingTiles(pricing) {
+  document.getElementById('slab100').textContent = `${currencyInr(pricing.slabs[0].unit)}/pc`;
+  document.getElementById('slab500').textContent = `${currencyInr(pricing.slabs[1].unit)}/pc`;
+  document.getElementById('slab1000').textContent = `${currencyInr(pricing.slabs[2].unit)}/pc`;
+  document.getElementById('savingsText').textContent = pricing.savings > 0
+    ? `You save ${currencyInr(pricing.savings)} at current quantity.`
+    : 'Scale quantity to unlock wholesale savings.';
 }
 
 async function renderLivePreview() {
   if (!ctx || !canvas) return;
   const seq = ++renderSequence;
-  const line = currentLineItem();
+  const line = getCurrentLineItem();
   const type = findById(catalog.types, line.lanyardTypeId);
   const main = findById(catalog.mainAccessories, line.mainAccessoryId);
   const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+  const pricing = computePricing(line, type);
+
+  const logoImg = line.logoData ? await getImage(line.logoData) : null;
+  const mainImg = await getImage((main && (main.preview_image || main.image)) || '');
+  const addonImg = await getImage((addon && (addon.preview_image || addon.image)) || '');
+  if (seq !== renderSequence) return;
+
+  const zoom = Number(refs.previewZoom.value || 100) / 100;
+  const rot = (Number(refs.previewRotate.value || 0) * Math.PI) / 180;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#f8fafc';
+  const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  bg.addColorStop(0, '#f8fbff');
+  bg.addColorStop(1, '#edf4ff');
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = '#0f172a';
-  ctx.font = 'bold 32px Manrope';
-  ctx.fillText('Live Lanyard Artwork', 40, 46);
-
-  ctx.fillStyle = '#334155';
-  ctx.font = '18px Manrope';
-  ctx.fillText(`Type: ${type ? type.name : '-'}`, 40, 80);
-  ctx.fillText(`Length: ${line.lengthMm} mm  •  Width: ${line.widthMm} mm`, 40, 108);
-
-  const stripPx = Math.max(18, Math.min(42, Math.round(line.widthMm * 1.4)));
-  const logoImg = line.logoData ? await getImage(line.logoData) : null;
-  if (seq !== renderSequence) return;
-  drawRepeatedStrip(line.frontText, 140, stripPx, logoImg, line.textColor, line.bgColor, line.lengthMm);
-  ctx.fillStyle = '#0f172a';
-  ctx.font = '16px Manrope';
-  ctx.fillText('Front', 40, 160);
-
-  drawRepeatedStrip(line.backText, 220, stripPx, logoImg, line.textColor, line.bgColor, line.lengthMm);
-  ctx.fillStyle = '#0f172a';
-  ctx.fillText('Back', 40, 240);
-
-  const baseY = 350;
-  ctx.fillStyle = line.bgColor;
-  ctx.fillRect(130, baseY, 780, stripPx + 4);
-  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-  ctx.strokeRect(130, baseY, 780, stripPx + 4);
-
-  const mainImage = await getImage((main && (main.preview_image || main.image)) || '');
-  const addonImage = await getImage((addon && (addon.preview_image || addon.image)) || '');
-  if (seq !== renderSequence) return;
-  const mainAnchor = main && main.preview_anchor ? main.preview_anchor : { x: -34, y: -16, scale: 1, rotation: 0 };
-  const addonAnchor = addon && addon.preview_anchor ? addon.preview_anchor : { x: 4, y: -14, scale: 1, rotation: 0 };
-
-  if (mainImage) {
-    drawAccessory(mainImage, 130, baseY, mainAnchor, 52);
-  } else {
-    ctx.fillStyle = '#111827';
-    ctx.fillRect(95, baseY - 10, 40, 24);
-  }
-  if (addonImage) {
-    drawAccessory(addonImage, 910, baseY, addonAnchor, 40);
-  } else if (addon) {
-    ctx.fillStyle = '#6b7280';
-    ctx.fillRect(920, baseY - 2, 24, 24);
+  if (refs.neckMockup.checked) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(148,163,184,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2, 120, 170, 70, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2, 240, 250, 120, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
-  const baseImg = await getImage((type && (type.preview_base_image || type.image)) || '');
-  if (seq !== renderSequence) return;
-  if (baseImg) {
-    ctx.globalAlpha = 0.16;
-    ctx.drawImage(baseImg, 680, 100, 360, 220);
-    ctx.globalAlpha = 1;
-  }
+  ctx.fillStyle = '#0f2d63';
+  ctx.font = '800 30px Manrope';
+  ctx.fillText('Live Factory Preview', 40, 52);
+  ctx.fillStyle = '#475569';
+  ctx.font = '600 16px Manrope';
+  ctx.fillText(`${type ? type.name : 'Material'} • ${line.widthMm}mm • ${line.lengthMm}mm • ${line.printingStyle}`, 40, 82);
 
-  updateSummary(line, type, main, addon);
-}
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2 + 35);
+  ctx.scale(zoom, zoom);
+  ctx.rotate(rot);
+  ctx.translate(-(canvas.width / 2), -(canvas.height / 2 + 35));
 
-function renderCart() {
-  const container = document.getElementById('designCartList');
-  container.innerHTML = '';
-  if (!designCart.length) {
-    container.innerHTML = '<p class="text-sm text-slate-500">No designs added yet.</p>';
-    return;
-  }
-  designCart.forEach((line, idx) => {
-    const type = findById(catalog.types, line.lanyardTypeId);
-    const main = findById(catalog.mainAccessories, line.mainAccessoryId);
-    const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
-    const row = document.createElement('div');
-    row.className = 'border rounded-lg p-3';
-    row.innerHTML = `
-      <p class="font-semibold text-sm">Line ${idx + 1} · ${escapeHtml(type ? type.name : '-')}</p>
-      <p class="text-xs text-slate-500">${escapeHtml(line.frontText)} / ${escapeHtml(line.backText)}</p>
-      <p class="text-xs text-slate-500">Main: ${escapeHtml(main ? main.name : '-')} · Add-on: ${escapeHtml(addon ? addon.name : '-')} · Qty: ${line.quantity || '-'}</p>
-      <button class="text-xs text-red-600 mt-2" data-remove="${line.lineId}">Remove</button>
-    `;
-    container.appendChild(row);
-  });
-  container.querySelectorAll('[data-remove]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      designCart = designCart.filter((item) => item.lineId !== btn.getAttribute('data-remove'));
-      renderCart();
-    });
-  });
+  drawSingleLanyard(380, 170, 'Front', line.frontText || 'FRONT TEXT', line, logoImg, mainImg, addonImg, false);
+  drawSingleLanyard(920, 170, 'Back', line.backText || line.frontText || 'BACK TEXT', line, logoImg, mainImg, addonImg, true);
+
+  ctx.restore();
+
+  updatePricingTiles(pricing);
+  updateSummary(line, type, main, addon, pricing);
 }
 
 function getCardImage(item, kind) {
@@ -538,48 +791,49 @@ function renderDeck(containerId, items, selectedId, selectId, kind, includeNone)
       if (!target) return;
       target.value = btn.getAttribute('data-id');
       syncVisualPickers();
-      requestRender();
+      queueRender();
     });
   });
 }
 
 function syncVisualPickers() {
-  renderDeck('typeCardDeck', catalog.types, typeSelect.value, 'typeSelect', 'type', false);
-  renderDeck('mainAccessoryCardDeck', catalog.mainAccessories, mainAccessorySelect.value, 'mainAccessorySelect', 'main', false);
-  renderDeck('addonAccessoryCardDeck', catalog.addonAccessories, addonAccessorySelect.value, 'addonAccessorySelect', 'addon', true);
+  renderDeck('typeCardDeck', catalog.types, refs.typeSelect.value, 'typeSelect', 'type', false);
+  renderDeck('mainAccessoryCardDeck', catalog.mainAccessories, refs.mainAccessorySelect.value, 'mainAccessorySelect', 'main', false);
+  renderDeck('addonAccessoryCardDeck', catalog.addonAccessories, refs.addonAccessorySelect.value, 'addonAccessorySelect', 'addon', true);
 
   const visualMessage = document.getElementById('visualCatalogMessage');
   if (!visualMessage) return;
   const warnings = [];
   if (!catalog.types.length) warnings.push('No lanyard types available.');
   if (!catalog.mainAccessories.length) warnings.push('No main accessories available.');
-  if (!catalog.addonAccessories.length) warnings.push('Add-on accessories are not configured yet.');
+  if (!catalog.addonAccessories.length) warnings.push('Add-on accessories not configured yet.');
   visualMessage.textContent = warnings.join(' ');
 }
 
 function populateCatalogSelects() {
-  typeSelect.innerHTML = '';
-  mainAccessorySelect.innerHTML = '';
-  addonAccessorySelect.innerHTML = '<option value="">No add-on</option>';
+  refs.typeSelect.innerHTML = '';
+  refs.mainAccessorySelect.innerHTML = '';
+  refs.addonAccessorySelect.innerHTML = '<option value="">No add-on</option>';
 
   if (!catalog.types.length) {
-    typeSelect.insertAdjacentHTML('beforeend', '<option value="">No types found</option>');
+    refs.typeSelect.insertAdjacentHTML('beforeend', '<option value="">No types found</option>');
   }
   if (!catalog.mainAccessories.length) {
-    mainAccessorySelect.insertAdjacentHTML('beforeend', '<option value="">No main accessories found</option>');
+    refs.mainAccessorySelect.insertAdjacentHTML('beforeend', '<option value="">No main accessories found</option>');
   }
 
   catalog.types.forEach((type) => {
-    typeSelect.insertAdjacentHTML('beforeend', `<option value="${type.id}">${escapeHtml(type.name)}</option>`);
+    refs.typeSelect.insertAdjacentHTML('beforeend', `<option value="${type.id}">${escapeHtml(type.name)}</option>`);
   });
   catalog.mainAccessories.forEach((item) => {
-    mainAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
+    refs.mainAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
   });
   catalog.addonAccessories.forEach((item) => {
-    addonAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
+    refs.addonAccessorySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${escapeHtml(item.name)}</option>`);
   });
-  if (catalog.types.length && !typeSelect.value) typeSelect.value = String(catalog.types[0].id);
-  if (catalog.mainAccessories.length && !mainAccessorySelect.value) mainAccessorySelect.value = String(catalog.mainAccessories[0].id);
+
+  if (catalog.types.length && !refs.typeSelect.value) refs.typeSelect.value = String(catalog.types[0].id);
+  if (catalog.mainAccessories.length && !refs.mainAccessorySelect.value) refs.mainAccessorySelect.value = String(catalog.mainAccessories[0].id);
   syncVisualPickers();
 }
 
@@ -602,63 +856,69 @@ async function loadCatalog() {
       mainAccessories: normalizedMain,
       addonAccessories: normalizedAddon
     };
+
     populateCatalogSelects();
-    if (!catalog.types.length || !catalog.mainAccessories.length) {
-      document.getElementById('designMessage').textContent = 'Catalog is incomplete. Add active lanyard types and main accessories in CMS.';
-    } else {
-      document.getElementById('designMessage').textContent = '';
-    }
-    renderLivePreview();
+    queueRender();
   } catch (err) {
     document.getElementById('designMessage').textContent = 'Unable to load lanyard catalog. Please try again.';
   }
 }
 
+function renderCart() {
+  const container = document.getElementById('designCartList');
+  container.innerHTML = '';
+  document.getElementById('cartCount').textContent = `${designCart.length} line${designCart.length === 1 ? '' : 's'}`;
+  if (!designCart.length) {
+    container.innerHTML = '<p class="text-sm text-slate-500">No designs added yet.</p>';
+    return;
+  }
+
+  designCart.forEach((line, idx) => {
+    const type = findById(catalog.types, line.lanyardTypeId);
+    const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+    const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+    const pricing = computePricing(line, type);
+    const row = document.createElement('div');
+    row.className = 'border border-blue-100 rounded-lg p-3 bg-blue-50/40';
+    row.innerHTML = `
+      <div class="flex items-center justify-between gap-2">
+        <p class="font-semibold text-sm text-blue-950">Line ${idx + 1} · ${escapeHtml(type ? type.name : '-')}</p>
+        <p class="text-xs font-bold text-blue-800">${currencyInr(pricing.total)}</p>
+      </div>
+      <p class="text-xs text-slate-600 mt-1">${escapeHtml(line.frontText)} / ${escapeHtml(line.backText)}</p>
+      <p class="text-xs text-slate-500 mt-1">${escapeHtml(main ? main.name : '-')} · ${escapeHtml(addon ? addon.name : 'No add-on')} · Qty ${line.quantity}</p>
+      <button class="text-xs text-red-600 mt-2" data-remove="${line.lineId}">Remove</button>
+    `;
+    container.appendChild(row);
+  });
+
+  container.querySelectorAll('[data-remove]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      designCart = designCart.filter((item) => item.lineId !== btn.getAttribute('data-remove'));
+      renderCart();
+      queueRender();
+    });
+  });
+}
+
 function validateCurrentDesign(line) {
   if (!line.lanyardTypeId || !line.mainAccessoryId || !line.frontText || !line.backText || !line.quantity) {
-    return 'Type, main accessory, front/back text, and quantity are required.';
+    return 'Type, main hook, front/back text, and quantity are required.';
+  }
+  if (pricingMode === 'wholesale' && line.quantity < 100) {
+    return 'Wholesale mode requires minimum 100 quantity.';
   }
   return '';
 }
 
-function getRequiredElements() {
-  return [
-    ['typeSelect', typeSelect],
-    ['mainAccessorySelect', mainAccessorySelect],
-    ['addonAccessorySelect', addonAccessorySelect],
-    ['frontText', frontTextInput],
-    ['backText', backTextInput],
-    ['width', widthInput],
-    ['lengthMm', lengthMmInput],
-    ['textColor', textColorInput],
-    ['bgColor', bgColorInput],
-    ['lineQty', lineQtyInput],
-    ['quality', qualityInput],
-    ['printing', printingInput]
-  ];
-}
-
-function verifyPageBindings() {
-  const missing = getRequiredElements().filter(([, el]) => !el).map(([name]) => name);
-  if (!canvas || !ctx) missing.push('livePreviewCanvas');
-  if (missing.length) {
-    const msg = `Lanyard studio could not initialize. Missing: ${missing.join(', ')}`;
-    const submitMsg = document.getElementById('submitMessage');
-    if (submitMsg) submitMsg.textContent = msg;
-    console.error(msg);
-    return false;
-  }
-  return true;
-}
-
 async function submitDesignRequest() {
-  const name = document.getElementById('customerName').value.trim();
-  const phone = document.getElementById('customerPhone').value.trim();
-  const email = document.getElementById('customerEmail').value.trim();
-  const company = document.getElementById('customerCompany').value.trim();
+  const name = (document.getElementById('customerName').value || '').trim();
+  const phone = (document.getElementById('customerPhone').value || '').trim();
+  const email = (document.getElementById('customerEmail').value || '').trim();
+  const company = (document.getElementById('customerCompany').value || '').trim();
 
   if (!name || !phone || !designCart.length) {
-    document.getElementById('submitMessage').textContent = 'Name, phone, and at least one design in cart are required.';
+    document.getElementById('submitMessage').textContent = 'Name, phone, and at least one design line are required.';
     return;
   }
 
@@ -668,8 +928,8 @@ async function submitDesignRequest() {
     email,
     company,
     lineItems: designCart,
-    sourcePage: '/product/custom-lanyard.html',
-    notes: ''
+    sourcePage: '/arya-studio-custom-lanyard-designer',
+    notes: `mode:${pricingMode}`
   };
 
   try {
@@ -680,7 +940,7 @@ async function submitDesignRequest() {
     });
     const data = await response.json();
     if (!data.success) throw new Error(data.message || 'Failed to submit request');
-    document.getElementById('submitMessage').textContent = `Request saved successfully. ID: ${data.submissionId}`;
+    document.getElementById('submitMessage').textContent = `Request submitted. Submission ID: ${data.submissionId}`;
   } catch (err) {
     document.getElementById('submitMessage').textContent = err.message || 'Failed to submit request.';
   }
@@ -688,127 +948,278 @@ async function submitDesignRequest() {
 
 async function generateAiImage() {
   const promptEl = document.getElementById('aiPrompt');
-  const sizeEl = document.getElementById('aiSize');
   const btn = document.getElementById('aiGenerateBtn');
   const msg = document.getElementById('aiAssistMsg');
   const preview = document.getElementById('aiPreviewImage');
   const prompt = promptEl ? promptEl.value.trim() : '';
   if (!prompt || prompt.length < 8) {
-    if (msg) msg.textContent = 'Enter a more detailed prompt (minimum 8 characters).';
+    if (msg) msg.textContent = 'Enter a detailed prompt (minimum 8 characters).';
     return;
   }
 
   try {
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'Generating...';
-    }
-    if (msg) msg.textContent = 'Generating AI concept image...';
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    if (msg) msg.textContent = 'Generating concept...';
     const response = await fetch('/api/ai/lanyard-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, size: sizeEl ? sizeEl.value : '1024x1024' })
+      body: JSON.stringify({ prompt, size: '1024x1024' })
     });
     const data = await response.json();
-    if (!data.success) {
-      throw new Error(data.message || 'AI generation failed.');
-    }
+    if (!data.success) throw new Error(data.message || 'AI generation failed.');
     logoData = data.imageUrl;
     if (preview) {
       preview.src = data.imageUrl;
       preview.classList.remove('hidden');
     }
-    if (msg) msg.textContent = 'AI image ready. Applied to live preview.';
-    requestRender();
+    if (msg) msg.textContent = 'AI concept applied to preview.';
+    queueRender();
   } catch (err) {
     if (msg) msg.textContent = err.message || 'AI generation failed.';
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = 'Generate';
-    }
+    btn.disabled = false;
+    btn.textContent = 'AI Auto-Fit';
   }
 }
 
-function sendWhatsApp() {
-  if (!designCart.length) {
-    document.getElementById('submitMessage').textContent = 'Add at least one design before sending to WhatsApp.';
-    return;
-  }
-  const lines = designCart.map((line, idx) => {
+function buildWhatsAppSummary() {
+  const lines = designCart.length ? designCart : [getCurrentLineItem()];
+  const message = lines.map((line, idx) => {
     const type = findById(catalog.types, line.lanyardTypeId);
     const main = findById(catalog.mainAccessories, line.mainAccessoryId);
     const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
-    return `Line ${idx + 1}: ${type ? type.name : '-'} | Front: ${line.frontText} | Back: ${line.backText} | Main: ${main ? main.name : '-'} | Add-on: ${addon ? addon.name : '-'} | Qty: ${line.quantity || '-'}`;
+    const price = computePricing(line, type);
+    return `Line ${idx + 1}: ${type ? type.name : '-'} | ${line.widthMm}mm x ${line.lengthMm}mm | Front:${line.frontText} | Back:${line.backText} | Hook:${main ? main.name : '-'} | Add-on:${addon ? addon.name : 'None'} | Qty:${line.quantity} | Unit:${currencyInr(price.unit)} | Total:${currencyInr(price.total)}`;
   }).join('\n');
-  const msg = `Custom Lanyard Enquiry\n${lines}`;
+  return `ARYA STUDIO Enquiry\nMode: ${pricingMode}\n${message}`;
+}
+
+function sendWhatsApp() {
+  const msg = buildWhatsAppSummary();
   window.location.href = `https://wa.me/919667371899?text=${encodeURIComponent(msg)}`;
 }
 
-if (verifyPageBindings()) {
-  requestRender = queueRender;
+function downloadTemplate() {
+  const template = [
+    'ARYA STUDIO PRINT READY BRIEF',
+    '----------------------------------------',
+    'Material:',
+    'Width (mm):',
+    'Length (mm):',
+    'Front Text:',
+    'Back Text:',
+    'Print Side: Single / Double',
+    'Main Hook:',
+    'Add-on:',
+    'Quantity:',
+    'Brand Colors (Hex):',
+    'Special Notes:'
+  ].join('\n');
 
-  document.getElementById('logoUpload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
+  const blob = new Blob([template], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'arya-studio-lanyard-template.txt';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function requestExport(kind) {
+  const endpoint = kind === 'pdf' ? '/api/lanyard/export/pdf' : '/api/lanyard/export/svg';
+  const line = getCurrentLineItem();
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lineItem: line })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Export unavailable.');
+    }
+  } catch (err) {
+    document.getElementById('submitMessage').textContent = `${err.message} Sending request to production team.`;
+    sendWhatsApp();
+  }
+}
+
+function downloadProductionSheet() {
+  const line = getCurrentLineItem();
+  const type = findById(catalog.types, line.lanyardTypeId);
+  const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+  const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+  const price = computePricing(line, type);
+  const sheet = [
+    `Material: ${type ? type.name : '-'}`,
+    `Size: ${line.widthMm}mm x ${line.lengthMm}mm`,
+    `Front Text: ${line.frontText}`,
+    `Back Text: ${line.backText}`,
+    `Hook: ${main ? main.name : '-'}`,
+    `Add-on: ${addon ? addon.name : 'None'}`,
+    `Printing: ${line.printingStyle}`,
+    `Print Side: ${line.printSide}`,
+    `Breakaway: ${line.breakaway ? 'Yes' : 'No'}`,
+    `Quantity: ${line.quantity}`,
+    `Unit Cost: ${currencyInr(price.unit)}`,
+    `Total: ${currencyInr(price.total)}`
+  ].join('\n');
+  const blob = new Blob([sheet], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'arya-studio-production-sheet.txt';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function bindWidthChips() {
+  document.querySelectorAll('[data-width]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('[data-width]').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      refs.widthInput.value = chip.getAttribute('data-width') || '20';
+      queueRender();
+    });
+  });
+}
+
+function setPricingMode(mode) {
+  pricingMode = mode === 'wholesale' ? 'wholesale' : 'retail';
+  document.getElementById('modeRetail').classList.toggle('active', pricingMode === 'retail');
+  document.getElementById('modeWholesale').classList.toggle('active', pricingMode === 'wholesale');
+  queueRender();
+}
+
+function bindDropzone() {
+  const zone = document.getElementById('logoDropzone');
+  const input = document.getElementById('logoUpload');
+  if (!zone || !input) return;
+
+  const readLogo = (file) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       logoData = reader.result;
-      requestRender();
+      queueRender();
     };
     reader.readAsDataURL(file);
+  };
+
+  input.addEventListener('change', (e) => readLogo(e.target.files && e.target.files[0]));
+
+  ['dragenter', 'dragover'].forEach((evt) => zone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    zone.classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach((evt) => zone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+  }));
+
+  zone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    readLogo(file);
+  });
+}
+
+function verifyPageBindings() {
+  const missing = Object.entries(refs).filter(([, el]) => !el).map(([name]) => name);
+  if (!canvas || !ctx) missing.push('livePreviewCanvas');
+  if (missing.length) {
+    const msg = `Lanyard studio could not initialize. Missing: ${missing.join(', ')}`;
+    const submitMsg = document.getElementById('submitMessage');
+    if (submitMsg) submitMsg.textContent = msg;
+    return false;
+  }
+  return true;
+}
+
+function bindEvents() {
+  bindWidthChips();
+  bindDropzone();
+
+  [
+    refs.frontTextInput,
+    refs.backTextInput,
+    refs.textColorInput,
+    refs.bgColorInput,
+    refs.lineQtyInput,
+    refs.lengthMmInput,
+    refs.printingInput,
+    refs.qualityInput,
+    refs.printSideInput,
+    refs.breakawayToggle,
+    refs.typeSelect,
+    refs.mainAccessorySelect,
+    refs.addonAccessorySelect,
+    refs.previewZoom,
+    refs.previewRotate,
+    refs.neckMockup
+  ].forEach((el) => {
+    if (!el) return;
+    el.addEventListener('input', queueRender);
+    el.addEventListener('change', () => {
+      syncVisualPickers();
+      queueRender();
+    });
   });
 
-  [frontTextInput, backTextInput, textColorInput, bgColorInput, lineQtyInput]
-    .forEach((el) => {
-      if (el) el.addEventListener('input', requestRender);
-    });
-  [typeSelect, mainAccessorySelect, addonAccessorySelect, widthInput, lengthMmInput, qualityInput, printingInput]
-    .forEach((el) => {
-      if (el) el.addEventListener('change', () => {
-        syncVisualPickers();
-        requestRender();
-      });
-    });
+  document.getElementById('modeRetail').addEventListener('click', () => setPricingMode('retail'));
+  document.getElementById('modeWholesale').addEventListener('click', () => setPricingMode('wholesale'));
 
-  const addBtn = document.getElementById('addToCartBtn');
-  if (addBtn) {
-    addBtn.addEventListener('click', () => {
-      const line = currentLineItem();
-      const error = validateCurrentDesign(line);
-      if (error) {
-        document.getElementById('designMessage').textContent = error;
-        return;
-      }
-      designCart.push(line);
-      document.getElementById('designMessage').textContent = 'Design added to cart.';
-      renderCart();
-    });
-  }
+  document.getElementById('heroQuoteBtn').addEventListener('click', () => {
+    document.getElementById('quoteSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('stickyQuoteBtn').addEventListener('click', () => {
+    document.getElementById('quoteSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('downloadTemplateBtn').addEventListener('click', downloadTemplate);
 
-  const clearBtn = document.getElementById('clearDesignBtn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      frontTextInput.value = '';
-      backTextInput.value = '';
-      lineQtyInput.value = 100;
-      logoData = null;
-      document.getElementById('logoUpload').value = '';
-      requestRender();
-    });
-  }
+  document.getElementById('aiGenerateBtn').addEventListener('click', generateAiImage);
 
-  const submitBtn = document.getElementById('submitRequestBtn');
-  if (submitBtn) submitBtn.addEventListener('click', submitDesignRequest);
-  const waBtn = document.getElementById('sendWhatsappBtn');
-  if (waBtn) waBtn.addEventListener('click', sendWhatsApp);
-  const aiBtn = document.getElementById('aiGenerateBtn');
-  if (aiBtn) aiBtn.addEventListener('click', generateAiImage);
+  document.getElementById('addToCartBtn').addEventListener('click', () => {
+    const line = getCurrentLineItem();
+    const error = validateCurrentDesign(line);
+    if (error) {
+      document.getElementById('designMessage').textContent = error;
+      return;
+    }
+    designCart.push(line);
+    document.getElementById('designMessage').textContent = 'Design line added to cart.';
+    renderCart();
+    queueRender();
+  });
 
+  document.getElementById('clearDesignBtn').addEventListener('click', () => {
+    refs.frontTextInput.value = '';
+    refs.backTextInput.value = '';
+    refs.lineQtyInput.value = 100;
+    logoData = null;
+    document.getElementById('logoUpload').value = '';
+    document.getElementById('aiPreviewImage').classList.add('hidden');
+    document.getElementById('aiAssistMsg').textContent = '';
+    queueRender();
+  });
+
+  document.getElementById('submitRequestBtn').addEventListener('click', submitDesignRequest);
+  document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsApp);
+
+  document.getElementById('generateProofBtn').addEventListener('click', () => requestExport('pdf'));
+  document.getElementById('generateSvgBtn').addEventListener('click', () => requestExport('svg'));
+  document.getElementById('downloadProductionBtn').addEventListener('click', downloadProductionSheet);
+}
+
+if (verifyPageBindings()) {
+  bindEvents();
   renderCart();
   loadCatalog();
 }
 </script>
-
 </body>
 </html>

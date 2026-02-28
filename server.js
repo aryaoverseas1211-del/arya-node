@@ -668,7 +668,7 @@ app.post('/api/lanyard/submissions', async (req, res) => {
     first.textColor,
     first.logoData || '',
     JSON.stringify(normalizedItems),
-    payload.sourcePage || '/product/custom-lanyard.html',
+    payload.sourcePage || '/arya-studio-custom-lanyard-designer',
     payload.notes || '',
     now
   );
@@ -682,7 +682,7 @@ app.post('/api/lanyard/submissions', async (req, res) => {
     company: (payload.company || '').trim(),
     lineItemsCount: normalizedItems.length,
     lineItems: normalizedItems,
-    sourcePage: payload.sourcePage || '/product/custom-lanyard.html',
+    sourcePage: payload.sourcePage || '/arya-studio-custom-lanyard-designer',
     status: 'new',
     createdAt: now
   });
@@ -1910,6 +1910,10 @@ app.get('/', (req, res) => {
 
 app.get('/product/id-card-studio', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'product', 'id-card-studio.html'));
+});
+
+app.get('/arya-studio-custom-lanyard-designer', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'product', 'custom-lanyard.html'));
 });
 
 app.get('/product/studio-suite', (req, res) => {
