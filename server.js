@@ -24,6 +24,8 @@ const dataDir = path.join(APP_ROOT, 'data');
 const backupDir = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups');
 const sheetsWebhookUrl = (process.env.GOOGLE_SHEETS_WEBHOOK_URL || '').trim();
 const openAiKey = (process.env.OPENAI_API_KEY || '').trim();
+const ga4MeasurementId = (process.env.GA4_MEASUREMENT_ID || '').trim();
+const clarityProjectId = (process.env.CLARITY_PROJECT_ID || '').trim();
 const aiRateWindowMs = 10 * 60 * 1000;
 const aiRateLimitPerIp = 12;
 const aiRequestBuckets = new Map();
@@ -655,6 +657,15 @@ app.get('/api/hero-media', (req, res) => {
     ORDER BY sort_order, id
   `).all();
   res.json({ success: true, assets });
+});
+
+app.get('/api/tracking-config', (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=300');
+  res.json({
+    success: true,
+    ga4MeasurementId: ga4MeasurementId || null,
+    clarityProjectId: clarityProjectId || null
+  });
 });
 
 app.get('/api/categories', (req, res) => {
