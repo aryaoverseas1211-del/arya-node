@@ -75,10 +75,16 @@ body {
   width: min(26vw, 320px);
   min-width: 200px;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  filter: saturate(1.08) contrast(1.02);
   opacity: 0.28;
+  overflow: hidden;
+}
+
+.hero-media-item img,
+.hero-media-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.08) contrast(1.02);
 }
 
 @keyframes heroMediaSlide {
@@ -616,10 +622,10 @@ header.scrolled {
 <section class="animated-bg text-white relative overflow-hidden min-h-[75vh] md:min-h-[90vh] flex items-center">
   <div class="hero-media" aria-hidden="true">
     <div id="heroMediaTrack" class="hero-media-track">
-      <div class="hero-media-item" style="background-image:url('/assets/veom-logo.png')"></div>
-      <div class="hero-media-item" style="background-image:url('/assets/veom-logo.png')"></div>
-      <div class="hero-media-item" style="background-image:url('/assets/veom-logo.png')"></div>
-      <div class="hero-media-item" style="background-image:url('/assets/veom-logo.png')"></div>
+      <div class="hero-media-item"><img src="/assets/veom-logo.png" alt="" loading="lazy"></div>
+      <div class="hero-media-item"><img src="/assets/veom-logo.png" alt="" loading="lazy"></div>
+      <div class="hero-media-item"><img src="/assets/veom-logo.png" alt="" loading="lazy"></div>
+      <div class="hero-media-item"><img src="/assets/veom-logo.png" alt="" loading="lazy"></div>
     </div>
   </div>
   <!-- Animated Background Elements -->
@@ -983,6 +989,63 @@ window.addEventListener('scroll', () => {
 
 // API Configuration
 const API_BASE = window.location.origin;
+let heroMediaConfigured = false;
+
+function resolveImageSrc(rawImage) {
+  if (!rawImage) return '/assets/veom-logo.png';
+  const clean = String(rawImage).trim().replace(/\\/g, '/');
+  if (/^https?:\/\//i.test(clean)) return encodeURI(clean);
+
+  const uploadsIndex = clean.indexOf('/uploads/');
+  if (uploadsIndex >= 0) {
+    return `${API_BASE}${encodeURI(clean.slice(uploadsIndex))}`;
+  }
+
+  if (clean.startsWith('uploads/')) {
+    return `${API_BASE}/${encodeURI(clean)}`;
+  }
+
+  if (clean.startsWith('/')) {
+    return `${API_BASE}${encodeURI(clean)}`;
+  }
+
+  return `${API_BASE}/${encodeURI(clean)}`;
+}
+
+async function loadHeroMedia() {
+  const heroMediaTrack = document.getElementById('heroMediaTrack');
+  if (!heroMediaTrack) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/hero-media`);
+    const data = await response.json();
+    const assets = data.success && Array.isArray(data.assets) ? data.assets : [];
+    if (!assets.length) return;
+
+    const normalized = assets
+      .map((asset) => {
+        const mediaPath = String(asset.media_path || '').trim();
+        if (!mediaPath) return null;
+        const mediaType = asset.media_type === 'video' ? 'video' : 'image';
+        const src = /^https?:\/\//i.test(mediaPath)
+          ? mediaPath
+          : `${API_BASE}${mediaPath.startsWith('/') ? '' : '/'}${mediaPath}`;
+        return { src, mediaType };
+      })
+      .filter(Boolean);
+
+    if (!normalized.length) return;
+    const repeated = [...normalized, ...normalized];
+    heroMediaTrack.innerHTML = repeated.map((item) => {
+      if (item.mediaType === 'video') {
+        return `<div class="hero-media-item"><video autoplay muted loop playsinline preload="metadata"><source src="${String(item.src).replace(/"/g, '&quot;')}"></video></div>`;
+      }
+      return `<div class="hero-media-item"><img src="${String(item.src).replace(/"/g, '&quot;')}" alt="" loading="lazy"></div>`;
+    }).join('');
+    heroMediaConfigured = true;
+  } catch (error) {
+    console.error('Hero media load failed:', error);
+  }
+}
 
 // Load products from API
 async function loadProducts() {
@@ -991,41 +1054,21 @@ async function loadProducts() {
   const noProducts = document.getElementById('noProducts');
   const heroMediaTrack = document.getElementById('heroMediaTrack');
 
-  function resolveImageSrc(rawImage) {
-    if (!rawImage) return '/assets/veom-logo.png';
-    const clean = String(rawImage).trim().replace(/\\/g, '/');
-    if (/^https?:\/\//i.test(clean)) return encodeURI(clean);
-
-    const uploadsIndex = clean.indexOf('/uploads/');
-    if (uploadsIndex >= 0) {
-      return `${API_BASE}${encodeURI(clean.slice(uploadsIndex))}`;
-    }
-
-    if (clean.startsWith('uploads/')) {
-      return `${API_BASE}/${encodeURI(clean)}`;
-    }
-
-    if (clean.startsWith('/')) {
-      return `${API_BASE}${encodeURI(clean)}`;
-    }
-
-    return `${API_BASE}/${encodeURI(clean)}`;
-  }
-
-  function buildWhatsAppShareUrl(product, imageSrc, detailLink) {
+  function buildWhatsAppShareUrl(product) {
     const title = product.title || 'Arya Overseas Product';
     const shortText = product.shortDesc || (product.description || '').slice(0, 140);
+    const shareLink = `${API_BASE}/share/product/${product.id}`;
     const message = [
       `*${title}*`,
       shortText,
-      `Product link: ${API_BASE}${detailLink}`,
-      `Image: ${imageSrc}`
+      `Product link: ${shareLink}`
     ].filter(Boolean).join('\n\n');
     return `https://wa.me/919667371899?text=${encodeURIComponent(message)}`;
   }
 
-  function renderHeroMedia(products) {
+  function renderHeroMediaFromProducts(products) {
     if (!heroMediaTrack) return;
+    if (heroMediaConfigured) return;
     const imageList = (products || [])
       .map((product) => resolveImageSrc(product.image))
       .filter(Boolean)
@@ -1038,7 +1081,7 @@ async function loadProducts() {
 
     const repeated = [...imageList, ...imageList];
     heroMediaTrack.innerHTML = repeated.map((src) => (
-      `<div class="hero-media-item" style="background-image:url('${String(src).replace(/'/g, '%27')}')"></div>`
+      `<div class="hero-media-item"><img src="${String(src).replace(/"/g, '&quot;')}" alt="" loading="lazy"></div>`
     )).join('');
   }
   
@@ -1049,12 +1092,12 @@ async function loadProducts() {
     loadingSpinner.style.display = 'none';
     
     if (data.success && data.products && data.products.length > 0) {
-      renderHeroMedia(data.products);
+      renderHeroMediaFromProducts(data.products);
       grid.innerHTML = '';
       data.products.forEach((p, index) => {
         const imageSrc = resolveImageSrc(p.image);
         const detailLink = `/product/${p.id}`;
-        const shareLink = buildWhatsAppShareUrl(p, imageSrc, detailLink);
+        const shareLink = buildWhatsAppShareUrl(p);
         const pricingTiers = Array.isArray(p.pricing) ? p.pricing : [];
         let minPrice = null;
         if (pricingTiers.length > 0) {
@@ -1165,7 +1208,7 @@ const observer = new IntersectionObserver((entries) => {
 
 // Observe all stagger items
 document.addEventListener('DOMContentLoaded', () => {
-  loadProducts();
+  loadHeroMedia().finally(() => loadProducts());
   
   // Animate stats on scroll
   const stats = document.querySelectorAll('.stat-number');

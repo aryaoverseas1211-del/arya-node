@@ -61,6 +61,7 @@
 
   <div class="flex flex-wrap gap-2 mb-6">
     <button class="tab-btn tab-active px-4 py-2 rounded-lg text-sm font-semibold" data-tab="products">Products</button>
+    <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="homepage">Homepage</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="categories">Categories</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="inventory">Inventory</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="lanyards">Lanyards</button>
@@ -177,6 +178,51 @@
             <tbody id="productTable"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOMEPAGE TAB -->
+  <section id="tab-homepage" class="hidden-section">
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Hero Media Manager</h2>
+        <form id="heroMediaForm" class="space-y-3">
+          <input type="hidden" id="heroMediaId">
+          <div>
+            <label class="text-sm font-medium">Title</label>
+            <input id="heroMediaTitle" type="text" class="w-full border rounded-lg p-2" placeholder="Optional label">
+          </div>
+          <div>
+            <label class="text-sm font-medium">Media (Image/Video)</label>
+            <input id="heroMediaFile" type="file" accept="image/*,video/mp4,video/webm" class="w-full border rounded-lg p-2">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">Sort order</label>
+              <input id="heroMediaSort" type="number" value="0" class="w-full border rounded-lg p-2">
+            </div>
+            <div>
+              <label class="text-sm font-medium">Active</label>
+              <select id="heroMediaActive" class="w-full border rounded-lg p-2">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button type="submit" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg">Save</button>
+            <button type="button" id="resetHeroMedia" class="flex-1 border rounded-lg py-2">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold">Hero Media Assets</h2>
+          <button id="refreshHeroMedia" class="border rounded-lg px-3 py-2 text-sm">Refresh</button>
+        </div>
+        <div id="heroMediaList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </div>
   </section>
@@ -569,6 +615,7 @@ const state = {
   audit: [],
   database: null,
   backups: [],
+  heroMedia: [],
   lanyardTypes: [],
   lanyardFittings: [],
   lanyardSubmissions: [],
@@ -707,6 +754,7 @@ async function loadAll() {
     loadAudit(),
     loadVisits(),
     loadDbStatus(),
+    loadHeroMediaAssets(),
     loadLanyardTypes(),
     loadLanyardFittings(),
     loadLanyardSubmissions()
@@ -761,6 +809,12 @@ async function loadDbStatus() {
   renderDbStatus();
   renderLanyardHealth();
   renderOpsOverview();
+}
+
+async function loadHeroMediaAssets() {
+  const data = await fetchJSON('/api/admin/hero-media');
+  state.heroMedia = data.assets || [];
+  renderHeroMediaAssets();
 }
 
 async function loadLanyardTypes() {
@@ -967,6 +1021,36 @@ function renderDbStatus() {
       <a class="text-emerald-700 text-xs font-semibold" href="/api/admin/db/download?name=${encodeURIComponent(item.name)}">Download</a>
     `;
     backupList.appendChild(row);
+  });
+}
+
+function renderHeroMediaAssets() {
+  const list = document.getElementById('heroMediaList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!state.heroMedia.length) {
+    list.innerHTML = '<p class="text-sm text-slate-500">No hero media uploaded yet.</p>';
+    return;
+  }
+
+  state.heroMedia.forEach((item) => {
+    const card = document.createElement('div');
+    card.className = 'border rounded-xl p-3';
+    const mediaPath = item.media_path || '';
+    const preview = item.media_type === 'video'
+      ? `<video src="${escapeHtml(mediaPath)}" muted loop playsinline controls class="w-full h-28 rounded-lg object-cover border"></video>`
+      : `<img src="${escapeHtml(mediaPath)}" alt="" class="w-full h-28 rounded-lg object-cover border">`;
+    card.innerHTML = `
+      ${preview}
+      <p class="text-sm font-semibold mt-2">${escapeHtml(item.title || 'Untitled')}</p>
+      <p class="text-xs text-slate-500">${escapeHtml(item.media_type || 'image')} · sort ${Number(item.sort_order || 0)}</p>
+      <p class="text-xs ${item.is_active ? 'text-emerald-700' : 'text-slate-500'}">${item.is_active ? 'Active' : 'Inactive'}</p>
+      <div class="mt-2 flex gap-3 text-xs">
+        <button class="text-emerald-700" onclick="editHeroMedia(${item.id})">Edit</button>
+        <button class="text-red-600" onclick="deleteHeroMedia(${item.id})">Delete</button>
+      </div>
+    `;
+    list.appendChild(card);
   });
 }
 
@@ -1456,6 +1540,34 @@ async function updateSubmission(id) {
   }
 }
 
+function resetHeroMediaForm() {
+  document.getElementById('heroMediaForm').reset();
+  document.getElementById('heroMediaId').value = '';
+  document.getElementById('heroMediaSort').value = '0';
+  document.getElementById('heroMediaActive').value = '1';
+}
+
+async function editHeroMedia(id) {
+  const item = state.heroMedia.find((entry) => String(entry.id) === String(id));
+  if (!item) return;
+  document.getElementById('heroMediaId').value = item.id;
+  document.getElementById('heroMediaTitle').value = item.title || '';
+  document.getElementById('heroMediaSort').value = item.sort_order || 0;
+  document.getElementById('heroMediaActive').value = item.is_active ? '1' : '0';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteHeroMedia(id) {
+  if (!confirm('Delete this hero media asset?')) return;
+  try {
+    await fetchJSON(`/api/admin/hero-media/${id}`, { method: 'DELETE' });
+    showMessage('Hero media deleted');
+    await loadHeroMediaAssets();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+}
+
 async function generateAiImageForProduct() {
   const prompt = document.getElementById('aiPrompt').value.trim();
   const size = document.getElementById('aiImageSize').value;
@@ -1503,6 +1615,39 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden-section');
   });
 });
+
+document.getElementById('heroMediaForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('heroMediaId').value;
+  const formData = new FormData();
+  formData.append('title', document.getElementById('heroMediaTitle').value.trim());
+  formData.append('sort_order', document.getElementById('heroMediaSort').value);
+  formData.append('is_active', document.getElementById('heroMediaActive').value);
+  const file = document.getElementById('heroMediaFile').files[0];
+  if (file) {
+    formData.append('media', file);
+  }
+
+  try {
+    if (!id && !file) {
+      throw new Error('Select an image/video file before saving.');
+    }
+    if (id) {
+      await fetchJSON(`/api/admin/hero-media/${id}`, { method: 'PUT', body: formData });
+      showMessage('Hero media updated');
+    } else {
+      await fetchJSON('/api/admin/hero-media', { method: 'POST', body: formData });
+      showMessage('Hero media created');
+    }
+    resetHeroMediaForm();
+    await loadHeroMediaAssets();
+  } catch (err) {
+    showMessage(err.message, 'error');
+  }
+});
+
+document.getElementById('resetHeroMedia').addEventListener('click', resetHeroMediaForm);
+document.getElementById('refreshHeroMedia').addEventListener('click', loadHeroMediaAssets);
 
 // Product form
 

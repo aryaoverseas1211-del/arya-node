@@ -127,6 +127,26 @@ const lanyardFittingUpload = upload.fields([
   { name: 'preview_image_file', maxCount: 1 }
 ]);
 
+const heroMediaUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadsDir),
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, `hero-${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
+  }),
+  limits: { fileSize: 30 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const imageExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+    const videoExt = ['.mp4', '.webm'];
+    const isImage = imageExt.includes(ext) && /^image\//.test(file.mimetype);
+    const isVideo = videoExt.includes(ext) && /^video\//.test(file.mimetype);
+    if (isImage || isVideo) return cb(null, true);
+    cb(new Error('Hero media must be an image (jpg/png/webp/gif) or video (mp4/webm).'));
+  }
+});
+
 function resolveUploadPath(urlPath) {
   const clean = (urlPath || '').replace(/^\/+/, '');
   if (clean.startsWith('uploads/')) {
@@ -209,6 +229,15 @@ function hashText(value) {
 
 function clampText(value, max = 400) {
   return String(value || '').trim().slice(0, max);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function isHtmlNavigationRequest(req) {
@@ -618,6 +647,16 @@ app.use('/uploads', express.static(uploadsDir));
 app.use('/uploads', express.static(legacyUploadsDir));
 
 // Public API routes
+app.get('/api/hero-media', (req, res) => {
+  const assets = db.prepare(`
+    SELECT id, title, media_type, media_path, sort_order
+    FROM hero_media_assets
+    WHERE is_active = 1
+    ORDER BY sort_order, id
+  `).all();
+  res.json({ success: true, assets });
+});
+
 app.get('/api/categories', (req, res) => {
   const categories = db.prepare(`
     SELECT id, name, slug, description, banner_title, banner_subtitle, banner_cta_text, banner_cta_url, sort_order, is_active
@@ -919,6 +958,101 @@ app.post('/api/lanyard/export/pdf', (req, res) => {
 
 // Admin API routes
 app.use('/api/admin', requireAdmin);
+
+app.get('/api/admin/hero-media', (req, res) => {
+  const assets = db.prepare(`
+    SELECT *
+    FROM hero_media_assets
+    ORDER BY sort_order, id
+  `).all();
+  res.json({ success: true, assets });
+});
+
+app.post('/api/admin/hero-media', heroMediaUpload.single('media'), (req, res) => {
+  const payload = req.body || {};
+  const mediaFile = req.file;
+  if (!mediaFile) {
+    return res.status(400).json({ success: false, message: 'Media file is required.' });
+  }
+
+  const mediaPath = `/uploads/${mediaFile.filename}`;
+  const extension = path.extname(mediaFile.originalname).toLowerCase();
+  const mediaType = ['.mp4', '.webm'].includes(extension) ? 'video' : 'image';
+  const now = new Date().toISOString();
+  const info = db.prepare(`
+    INSERT INTO hero_media_assets (title, media_type, media_path, sort_order, is_active, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    clampText(payload.title || '', 140),
+    mediaType,
+    mediaPath,
+    Number(payload.sort_order) || 0,
+    toBooleanFlag(payload.is_active, true) ? 1 : 0,
+    now,
+    now
+  );
+  logAudit(req.admin.id, 'create', 'hero_media_asset', info.lastInsertRowid, { mediaType, mediaPath });
+  res.json({ success: true, id: info.lastInsertRowid });
+});
+
+app.put('/api/admin/hero-media/:id', heroMediaUpload.single('media'), (req, res) => {
+  const id = req.params.id;
+  const payload = req.body || {};
+  const existing = db.prepare('SELECT * FROM hero_media_assets WHERE id = ?').get(id);
+  if (!existing) {
+    return res.status(404).json({ success: false, message: 'Media asset not found.' });
+  }
+
+  let mediaPath = existing.media_path;
+  let mediaType = existing.media_type || 'image';
+  if (req.file) {
+    mediaPath = `/uploads/${req.file.filename}`;
+    const extension = path.extname(req.file.originalname).toLowerCase();
+    mediaType = ['.mp4', '.webm'].includes(extension) ? 'video' : 'image';
+  }
+
+  db.prepare(`
+    UPDATE hero_media_assets
+    SET title = ?, media_type = ?, media_path = ?, sort_order = ?, is_active = ?, updated_at = ?
+    WHERE id = ?
+  `).run(
+    clampText(payload.title ?? existing.title, 140),
+    mediaType,
+    mediaPath,
+    payload.sort_order !== undefined ? Number(payload.sort_order) : existing.sort_order,
+    payload.is_active !== undefined ? (toBooleanFlag(payload.is_active, true) ? 1 : 0) : existing.is_active,
+    new Date().toISOString(),
+    id
+  );
+
+  if (req.file && existing.media_path && existing.media_path.startsWith('/uploads/')) {
+    const oldPath = resolveUploadPath(existing.media_path);
+    if (fs.existsSync(oldPath)) {
+      try { fs.unlinkSync(oldPath); } catch (err) {}
+    }
+  }
+
+  logAudit(req.admin.id, 'update', 'hero_media_asset', id, { mediaType, mediaPath });
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/hero-media/:id', (req, res) => {
+  const id = req.params.id;
+  const existing = db.prepare('SELECT * FROM hero_media_assets WHERE id = ?').get(id);
+  if (!existing) {
+    return res.status(404).json({ success: false, message: 'Media asset not found.' });
+  }
+
+  db.prepare('DELETE FROM hero_media_assets WHERE id = ?').run(id);
+  if (existing.media_path && existing.media_path.startsWith('/uploads/')) {
+    const oldPath = resolveUploadPath(existing.media_path);
+    if (fs.existsSync(oldPath)) {
+      try { fs.unlinkSync(oldPath); } catch (err) {}
+    }
+  }
+  logAudit(req.admin.id, 'delete', 'hero_media_asset', id, { mediaPath: existing.media_path });
+  res.json({ success: true });
+});
 
 app.get('/api/admin/analytics/visits', (req, res) => {
   const now = new Date();
@@ -2090,6 +2224,54 @@ app.get('/arya-studio-custom-lanyard-designer', (req, res) => {
 
 app.get('/product/studio-suite', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'product', 'studio-suite.html'));
+});
+
+app.get('/share/product/:id', (req, res) => {
+  const row = db.prepare(`
+    SELECT p.*, c.name AS category_name, c.slug AS category_slug
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    WHERE p.id = ? AND p.status = 'published'
+  `).get(req.params.id);
+
+  if (!row) {
+    return res.status(404).send('Product not found');
+  }
+
+  const product = toProductResponse(row);
+  const host = `${req.protocol}://${req.get('host')}`;
+  const detailUrl = `${host}/product/${product.id}`;
+  const imagePath = String(product.image || '').trim();
+  const imageUrl = imagePath
+    ? (/^https?:\/\//i.test(imagePath) ? imagePath : `${host}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`)
+    : `${host}/assets/veom-logo.png`;
+  const title = escapeHtml(product.title || 'Arya Overseas Product');
+  const description = escapeHtml((product.shortDesc || product.description || 'View product details at Arya Overseas.').slice(0, 180));
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta property="og:url" content="${escapeHtml(detailUrl)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(detailUrl)}">
+</head>
+<body>
+  <p>Redirecting to <a href="${escapeHtml(detailUrl)}">product page</a>...</p>
+  <script>window.location.replace(${JSON.stringify(detailUrl)});</script>
+</body>
+</html>`);
 });
 
 app.get('/product/:id', (req, res) => {

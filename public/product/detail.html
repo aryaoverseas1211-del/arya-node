@@ -483,8 +483,7 @@ function renderProduct(p) {
 // Send WhatsApp message
 function sendWhatsApp(mode = 'quote') {
   if (!product) return;
-  const productUrl = `${API_BASE}/product/${product.id}`;
-  const imageUrl = product.image ? `${API_BASE}${product.image}` : '';
+  const productUrl = `${API_BASE}/share/product/${product.id}`;
 
   // Build pricing text
   let pricingText = "";
@@ -509,8 +508,7 @@ function sendWhatsApp(mode = 'quote') {
     `*${product.title}*`,
     product.shortDesc || product.description || '',
     pricingText ? `\n*Pricing & Variants*\n${pricingText}` : '',
-    `Product link: ${productUrl}`,
-    imageUrl ? `Image: ${imageUrl}` : ''
+    `Product link: ${productUrl}`
   ].filter(Boolean).join('\n\n');
   const message = mode === 'share'
     ? `${common}\n\nSharing this from Arya Overseas.`

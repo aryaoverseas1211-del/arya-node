@@ -19,7 +19,7 @@ function resolveDbPath() {
 }
 
 const DB_PATH = resolveDbPath();
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 let dbInstance;
 let sqlInstance;
@@ -300,6 +300,17 @@ function migrate(db) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS hero_media_assets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      media_type TEXT DEFAULT 'image',
+      media_path TEXT NOT NULL,
+      sort_order INTEGER DEFAULT 0,
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
     CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
     CREATE INDEX IF NOT EXISTS idx_variants_product ON variants(product_id);
@@ -312,6 +323,7 @@ function migrate(db) {
     CREATE INDEX IF NOT EXISTS idx_site_visits_created ON site_visits(created_at);
     CREATE INDEX IF NOT EXISTS idx_site_visits_visitor ON site_visits(visitor_key, created_at);
     CREATE INDEX IF NOT EXISTS idx_site_visits_path ON site_visits(path, created_at);
+    CREATE INDEX IF NOT EXISTS idx_hero_media_active ON hero_media_assets(is_active, sort_order);
   `);
 }
 
@@ -376,6 +388,18 @@ function evolveSchema(db) {
       created_at TEXT NOT NULL
     )
   `);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS hero_media_assets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      media_type TEXT DEFAULT 'image',
+      media_path TEXT NOT NULL,
+      sort_order INTEGER DEFAULT 0,
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
 
   db.exec(`UPDATE lanyard_fittings SET fitting_kind = 'main' WHERE fitting_kind IS NULL OR fitting_kind = ''`);
   db.exec(`UPDATE lanyard_types SET is_breakaway_supported = 1 WHERE is_breakaway_supported IS NULL`);
@@ -386,6 +410,7 @@ function evolveSchema(db) {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_site_visits_created ON site_visits(created_at)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_site_visits_visitor ON site_visits(visitor_key, created_at)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_site_visits_path ON site_visits(path, created_at)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_hero_media_active ON hero_media_assets(is_active, sort_order)`);
 
   const currentVersion = readSchemaVersion(db);
   if (currentVersion >= SCHEMA_VERSION) {
