@@ -12,6 +12,7 @@
 <meta name="description" content="ARYA STUDIO Enterprise Lanyard Customization Platform. Design, preview, price, export-ready handoff, and production workflow for B2B orders.">
 <link rel="canonical" href="https://aryaoverseas.in/arya-studio-custom-lanyard-designer">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="/assets/theme.css">
 <style>
   body { font-family: 'Manrope', sans-serif; background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 60%, #f3f7ff 100%); }
@@ -857,10 +858,25 @@ async function loadCatalog() {
       addonAccessories: normalizedAddon
     };
 
+    if (!catalog.types.length) {
+      catalog.types = [{ id: 1, name: 'Full Sublimation', slug: 'full-sublimation' }];
+    }
+    if (!catalog.mainAccessories.length) {
+      catalog.mainAccessories = [{ id: 1, name: 'Dog Hook', slug: 'dog-hook' }];
+    }
+
     populateCatalogSelects();
+    document.getElementById('designMessage').textContent = '';
     queueRender();
   } catch (err) {
-    document.getElementById('designMessage').textContent = 'Unable to load lanyard catalog. Please try again.';
+    catalog = {
+      types: [{ id: 1, name: 'Full Sublimation', slug: 'full-sublimation' }],
+      mainAccessories: [{ id: 1, name: 'Dog Hook', slug: 'dog-hook' }],
+      addonAccessories: []
+    };
+    populateCatalogSelects();
+    document.getElementById('designMessage').textContent = 'Live catalog unavailable. Running in fallback preview mode.';
+    queueRender();
   }
 }
 
@@ -1028,23 +1044,74 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 
-async function requestExport(kind) {
-  const endpoint = kind === 'pdf' ? '/api/lanyard/export/pdf' : '/api/lanyard/export/svg';
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportSvgNow() {
   const line = getCurrentLineItem();
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lineItem: line })
-    });
-    const data = await response.json();
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Export unavailable.');
+  const type = findById(catalog.types, line.lanyardTypeId);
+  const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+  const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+  const pricing = computePricing(line, type);
+  const safeFront = escapeHtml(line.frontText || 'FRONT TEXT');
+  const safeBack = escapeHtml(line.backText || 'BACK TEXT');
+  const safeBg = escapeHtml(line.bgColor || '#111111');
+  const safeText = escapeHtml(line.textColor || '#ffffff');
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">\n  <defs>\n    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">\n      <stop offset="0%" stop-color="#f8fbff"/><stop offset="100%" stop-color="#edf4ff"/>\n    </linearGradient>\n  </defs>\n  <rect width="1600" height="900" fill="url(#bg)"/>\n  <text x="60" y="70" font-family="Manrope, Arial" font-size="42" font-weight="800" fill="#0f2d63">ARYA STUDIO Production SVG</text>\n  <text x="60" y="115" font-family="Manrope, Arial" font-size="22" font-weight="600" fill="#475569">${escapeHtml(type ? type.name : '-')} · ${line.widthMm}mm × ${line.lengthMm}mm · ${escapeHtml(line.printingStyle || '-')}</text>\n  <rect x="250" y="170" width="110" height="520" rx="55" fill="${safeBg}"/>\n  <rect x="1240" y="170" width="110" height="520" rx="55" fill="${safeBg}"/>\n  <text x="305" y="440" transform="rotate(90 305 440)" text-anchor="middle" font-family="Manrope, Arial" font-size="34" font-weight="700" fill="${safeText}">${safeFront}</text>\n  <text x="1295" y="440" transform="rotate(-90 1295 440)" text-anchor="middle" font-family="Manrope, Arial" font-size="34" font-weight="700" fill="${safeText}">${safeBack}</text>\n  <rect x="744" y="622" width="112" height="22" rx="8" fill="#94a3b8"/>\n  <text x="800" y="690" text-anchor="middle" font-family="Manrope, Arial" font-size="24" font-weight="700" fill="#0f172a">${escapeHtml(main ? main.name : '-')}</text>\n  <text x="800" y="725" text-anchor="middle" font-family="Manrope, Arial" font-size="18" fill="#334155">${escapeHtml(addon ? addon.name : 'No add-on')}</text>\n  <text x="800" y="780" text-anchor="middle" font-family="Manrope, Arial" font-size="20" font-weight="700" fill="#0f2d63">Qty ${line.quantity} · Unit ${currencyInr(pricing.unit)} · Total ${currencyInr(pricing.total)}</text>\n</svg>`;
+  downloadBlob(`arya-studio-lanyard-${Date.now()}.svg`, new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+  document.getElementById('submitMessage').textContent = 'SVG file downloaded.';
+}
+
+function exportPdfNow() {
+  const line = getCurrentLineItem();
+  const type = findById(catalog.types, line.lanyardTypeId);
+  const main = findById(catalog.mainAccessories, line.mainAccessoryId);
+  const addon = findById(catalog.addonAccessories, line.addonAccessoryId);
+  const pricing = computePricing(line, type);
+
+  const jsPdfApi = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPdfApi) {
+    const pngBlob = canvas ? canvas.toDataURL('image/png') : '';
+    if (pngBlob) {
+      const a = document.createElement('a');
+      a.href = pngBlob;
+      a.download = `arya-studio-proof-${Date.now()}.png`;
+      a.click();
+      document.getElementById('submitMessage').textContent = 'PDF engine unavailable, downloaded proof image.';
+      return;
     }
-  } catch (err) {
-    document.getElementById('submitMessage').textContent = `${err.message} Sending request to production team.`;
-    sendWhatsApp();
+    document.getElementById('submitMessage').textContent = 'Unable to generate proof right now.';
+    return;
   }
+
+  const doc = new jsPdfApi({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const imageData = canvas.toDataURL('image/png');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text('ARYA STUDIO - Customer Proof', 10, 12);
+  doc.addImage(imageData, 'PNG', 8, 18, 200, 130);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Material: ${type ? type.name : '-'}`, 215, 28);
+  doc.text(`Size: ${line.widthMm}mm x ${line.lengthMm}mm`, 215, 36);
+  doc.text(`Front Text: ${line.frontText || '-'}`, 215, 44);
+  doc.text(`Back Text: ${line.backText || '-'}`, 215, 52);
+  doc.text(`Hook: ${main ? main.name : '-'}`, 215, 60);
+  doc.text(`Add-on: ${addon ? addon.name : 'None'}`, 215, 68);
+  doc.text(`Printing: ${line.printingStyle || '-'}`, 215, 76);
+  doc.text(`Qty: ${line.quantity}`, 215, 84);
+  doc.text(`Unit Cost: ${currencyInr(pricing.unit)}`, 215, 92);
+  doc.text(`Total: ${currencyInr(pricing.total)}`, 215, 100);
+  doc.save(`arya-studio-customer-proof-${Date.now()}.pdf`);
+  document.getElementById('submitMessage').textContent = 'Customer proof PDF downloaded.';
 }
 
 function downloadProductionSheet() {
@@ -1067,15 +1134,8 @@ function downloadProductionSheet() {
     `Unit Cost: ${currencyInr(price.unit)}`,
     `Total: ${currencyInr(price.total)}`
   ].join('\n');
-  const blob = new Blob([sheet], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'arya-studio-production-sheet.txt';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob('arya-studio-production-sheet.txt', new Blob([sheet], { type: 'text/plain;charset=utf-8' }));
+  document.getElementById('submitMessage').textContent = 'Production sheet downloaded.';
 }
 
 function bindWidthChips() {
@@ -1210,14 +1270,15 @@ function bindEvents() {
   document.getElementById('submitRequestBtn').addEventListener('click', submitDesignRequest);
   document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsApp);
 
-  document.getElementById('generateProofBtn').addEventListener('click', () => requestExport('pdf'));
-  document.getElementById('generateSvgBtn').addEventListener('click', () => requestExport('svg'));
+  document.getElementById('generateProofBtn').addEventListener('click', exportPdfNow);
+  document.getElementById('generateSvgBtn').addEventListener('click', exportSvgNow);
   document.getElementById('downloadProductionBtn').addEventListener('click', downloadProductionSheet);
 }
 
 if (verifyPageBindings()) {
   bindEvents();
   renderCart();
+  queueRender();
   loadCatalog();
 }
 </script>
