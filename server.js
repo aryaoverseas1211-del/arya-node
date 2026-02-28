@@ -27,6 +27,8 @@ const openAiKey = (process.env.OPENAI_API_KEY || '').trim();
 const aiRateWindowMs = 10 * 60 * 1000;
 const aiRateLimitPerIp = 12;
 const aiRequestBuckets = new Map();
+const visitThrottleMs = 30 * 60 * 1000;
+const visitThrottle = new Map();
 
 // Middleware
 app.use(cors());
@@ -201,6 +203,59 @@ function normalizeIdCardRecords(rows) {
     .filter((record) => record.name || record.idNumber || record.designation || record.department || record.company);
 }
 
+function hashText(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex');
+}
+
+function clampText(value, max = 400) {
+  return String(value || '').trim().slice(0, max);
+}
+
+function isHtmlNavigationRequest(req) {
+  const accept = String(req.headers.accept || '').toLowerCase();
+  if (!accept.includes('text/html')) return false;
+  if (req.method !== 'GET') return false;
+  const pathName = req.path || '';
+  if (pathName.startsWith('/api/')) return false;
+  if (pathName.startsWith('/admin')) return false;
+  if (pathName.startsWith('/product/product_cms')) return false;
+  if (pathName.startsWith('/uploads/')) return false;
+  if (pathName.startsWith('/assets/')) return false;
+  if (pathName.startsWith('/favicon')) return false;
+  return true;
+}
+
+function trackSiteVisit(req) {
+  if (!db || !isHtmlNavigationRequest(req)) return;
+  const ipRaw = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').toString().split(',')[0].trim();
+  const ua = clampText(req.headers['user-agent'] || '', 500);
+  const referrer = clampText(req.headers.referer || req.headers.referrer || '', 500);
+  const pathName = clampText(req.path || '/', 240) || '/';
+  const visitorKey = hashText(`${ipRaw}|${ua}`);
+  const ipHash = hashText(ipRaw || 'unknown');
+  const throttleKey = `${visitorKey}|${pathName}`;
+  const nowMs = Date.now();
+  const previous = visitThrottle.get(throttleKey);
+  if (previous && nowMs - previous < visitThrottleMs) return;
+  visitThrottle.set(throttleKey, nowMs);
+
+  if (visitThrottle.size > 4000) {
+    const cutoff = nowMs - visitThrottleMs;
+    for (const [key, value] of visitThrottle.entries()) {
+      if (value < cutoff) visitThrottle.delete(key);
+    }
+  }
+
+  try {
+    db.prepare(`
+      INSERT INTO site_visits (visitor_key, path, referrer, user_agent, ip_hash, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(visitorKey, pathName, referrer, ua, ipHash, new Date(nowMs).toISOString());
+  } catch (err) {
+    console.error('Site visit track error:', err);
+  }
+}
+
 function isAiRequestLimited(ip) {
   const key = ip || 'unknown';
   const now = Date.now();
@@ -221,6 +276,67 @@ function writeBase64ImageToUploads(base64Data, prefix) {
   const fullPath = path.join(uploadsDir, fileName);
   fs.writeFileSync(fullPath, Buffer.from(base64Data, 'base64'));
   return `/uploads/${fileName}`;
+}
+
+function resolveImagePathInput(value) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+  if (candidate.startsWith('/uploads/')) return candidate;
+  if (/^https?:\/\//i.test(candidate)) return candidate;
+  return '';
+}
+
+async function generateAiImageAsset({ prompt, size = '1024x1024', prefix = 'ai-lanyard' }) {
+  if (!openAiKey) {
+    throw new Error('AI generation is disabled. Set OPENAI_API_KEY on server.');
+  }
+
+  const allowedSizes = new Set(['1024x1024', '1024x1536', '1536x1024']);
+  const finalSize = allowedSizes.has(size) ? size : '1024x1024';
+  const safePrompt = String(prompt || '').trim();
+
+  if (!safePrompt || safePrompt.length < 8) {
+    throw new Error('Prompt must be at least 8 characters.');
+  }
+  if (safePrompt.length > 1500) {
+    throw new Error('Prompt is too long.');
+  }
+
+  const aiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-image-1',
+      prompt: safePrompt,
+      size: finalSize
+    })
+  });
+
+  const aiData = await aiResponse.json();
+  if (!aiResponse.ok) {
+    throw new Error(aiData && aiData.error && aiData.error.message
+      ? aiData.error.message
+      : 'AI generation failed.');
+  }
+
+  const first = aiData && aiData.data && aiData.data[0] ? aiData.data[0] : null;
+  if (!first) {
+    throw new Error('AI response missing image data.');
+  }
+
+  let imageUrl = '';
+  if (first.b64_json) {
+    imageUrl = writeBase64ImageToUploads(first.b64_json, prefix);
+  } else if (first.url) {
+    imageUrl = first.url;
+  } else {
+    throw new Error('AI response format is not supported.');
+  }
+
+  return { imageUrl, size: finalSize };
 }
 
 function formatFileSize(bytes) {
@@ -484,6 +600,16 @@ app.get('/admin', requireAdmin, (req, res) => {
 
 app.get('/product/product_cms.html', requireAdmin, (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'product', 'product_cms.html'));
+});
+
+// Track public page visits (deduplicated per visitor+path window).
+app.use((req, res, next) => {
+  try {
+    trackSiteVisit(req);
+  } catch (err) {
+    console.error('Visit middleware error:', err);
+  }
+  next();
 });
 
 // Serve static files
@@ -750,74 +876,27 @@ app.post('/api/id-card/jobs', (req, res) => {
 });
 
 app.post('/api/ai/lanyard-generate', async (req, res) => {
-  if (!openAiKey) {
-    return res.status(400).json({
-      success: false,
-      message: 'AI generation is disabled. Set OPENAI_API_KEY on server.'
-    });
-  }
-
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').toString().split(',')[0].trim();
   if (isAiRequestLimited(ip)) {
     return res.status(429).json({ success: false, message: 'Too many AI requests. Please retry in a few minutes.' });
   }
 
-  const prompt = String((req.body && req.body.prompt) || '').trim();
-  const size = String((req.body && req.body.size) || '1024x1024').trim();
-  const allowedSizes = new Set(['1024x1024', '1024x1536', '1536x1024']);
-  const finalSize = allowedSizes.has(size) ? size : '1024x1024';
-
-  if (!prompt || prompt.length < 8) {
-    return res.status(400).json({ success: false, message: 'Prompt must be at least 8 characters.' });
-  }
-  if (prompt.length > 1500) {
-    return res.status(400).json({ success: false, message: 'Prompt is too long.' });
-  }
-
   try {
-    const aiResponse = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-image-1',
-        prompt,
-        size: finalSize
-      })
+    const result = await generateAiImageAsset({
+      prompt: req.body && req.body.prompt,
+      size: req.body && req.body.size,
+      prefix: 'ai-lanyard'
     });
-
-    const aiData = await aiResponse.json();
-    if (!aiResponse.ok) {
-      return res.status(502).json({
-        success: false,
-        message: aiData && aiData.error && aiData.error.message ? aiData.error.message : 'AI generation failed.'
-      });
-    }
-
-    const first = aiData && aiData.data && aiData.data[0] ? aiData.data[0] : null;
-    if (!first) {
-      return res.status(502).json({ success: false, message: 'AI response missing image data.' });
-    }
-
-    let imageUrl = '';
-    if (first.b64_json) {
-      imageUrl = writeBase64ImageToUploads(first.b64_json, 'ai-lanyard');
-    } else if (first.url) {
-      imageUrl = first.url;
-    } else {
-      return res.status(502).json({ success: false, message: 'AI response format is not supported.' });
-    }
-
     res.json({
       success: true,
-      imageUrl,
-      size: finalSize
+      imageUrl: result.imageUrl,
+      size: result.size
     });
   } catch (err) {
     console.error('AI lanyard generation failed:', err);
-    res.status(500).json({ success: false, message: 'AI generation failed. Try again.' });
+    const message = err.message || 'AI generation failed. Try again.';
+    const badRequest = /prompt|disabled|too long|at least|not supported/i.test(message);
+    res.status(badRequest ? 400 : 500).json({ success: false, message });
   }
 });
 
@@ -840,6 +919,95 @@ app.post('/api/lanyard/export/pdf', (req, res) => {
 
 // Admin API routes
 app.use('/api/admin', requireAdmin);
+
+app.get('/api/admin/analytics/visits', (req, res) => {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+  const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+
+  const totals = db.prepare('SELECT COUNT(*) AS totalViews, COUNT(DISTINCT visitor_key) AS totalVisitors FROM site_visits').get() || {};
+  const today = db.prepare(`
+    SELECT COUNT(*) AS views, COUNT(DISTINCT visitor_key) AS visitors
+    FROM site_visits
+    WHERE created_at >= ?
+  `).get(todayStart.toISOString()) || {};
+  const sevenDays = db.prepare(`
+    SELECT COUNT(*) AS views, COUNT(DISTINCT visitor_key) AS visitors
+    FROM site_visits
+    WHERE created_at >= ?
+  `).get(sevenDaysAgo.toISOString()) || {};
+  const thirtyDays = db.prepare(`
+    SELECT COUNT(*) AS views, COUNT(DISTINCT visitor_key) AS visitors
+    FROM site_visits
+    WHERE created_at >= ?
+  `).get(thirtyDaysAgo.toISOString()) || {};
+
+  const topPages = db.prepare(`
+    SELECT path, COUNT(*) AS views, COUNT(DISTINCT visitor_key) AS visitors
+    FROM site_visits
+    WHERE created_at >= ?
+    GROUP BY path
+    ORDER BY views DESC
+    LIMIT 12
+  `).all(sevenDaysAgo.toISOString());
+
+  const topReferrers = db.prepare(`
+    SELECT referrer, COUNT(*) AS visits
+    FROM site_visits
+    WHERE referrer IS NOT NULL AND referrer != '' AND created_at >= ?
+    GROUP BY referrer
+    ORDER BY visits DESC
+    LIMIT 8
+  `).all(thirtyDaysAgo.toISOString());
+
+  const recent = db.prepare(`
+    SELECT path, referrer, user_agent, created_at
+    FROM site_visits
+    ORDER BY created_at DESC
+    LIMIT 40
+  `).all();
+
+  res.json({
+    success: true,
+    summary: {
+      totalViews: Number(totals.totalViews || 0),
+      totalVisitors: Number(totals.totalVisitors || 0),
+      todayViews: Number(today.views || 0),
+      todayVisitors: Number(today.visitors || 0),
+      weekViews: Number(sevenDays.views || 0),
+      weekVisitors: Number(sevenDays.visitors || 0),
+      monthViews: Number(thirtyDays.views || 0),
+      monthVisitors: Number(thirtyDays.visitors || 0)
+    },
+    topPages,
+    topReferrers,
+    recent
+  });
+});
+
+app.post('/api/admin/ai/product-image', async (req, res) => {
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').toString().split(',')[0].trim();
+  if (isAiRequestLimited(ip)) {
+    return res.status(429).json({ success: false, message: 'Too many AI requests. Please retry in a few minutes.' });
+  }
+
+  try {
+    const result = await generateAiImageAsset({
+      prompt: req.body && req.body.prompt,
+      size: req.body && req.body.size,
+      prefix: 'ai-product'
+    });
+    logAudit(req.admin.id, 'generate', 'ai_product_image', null, { imageUrl: result.imageUrl, size: result.size });
+    res.json({ success: true, imageUrl: result.imageUrl, size: result.size });
+  } catch (err) {
+    console.error('Admin AI product image generation failed:', err);
+    const message = err.message || 'AI generation failed. Try again.';
+    const badRequest = /prompt|disabled|too long|at least|not supported/i.test(message);
+    res.status(badRequest ? 400 : 500).json({ success: false, message });
+  }
+});
 
 app.get('/api/admin/id-card/jobs', (req, res) => {
   const status = (req.query.status || '').trim();
@@ -1265,14 +1433,15 @@ app.get('/api/admin/products/:id', (req, res) => {
 
 app.post('/api/admin/products', upload.single('image'), (req, res) => {
   try {
-    const { title, shortDesc, description, categoryId, status, pricing, variants, lowStockThreshold } = req.body;
+    const { title, shortDesc, description, categoryId, status, pricing, variants, lowStockThreshold, imagePath: imagePathInput } = req.body;
 
     if (!title || !description) {
       return res.status(400).json({ success: false, message: 'Title and description are required' });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Product image is required' });
+    const generatedImagePath = resolveImagePathInput(imagePathInput);
+    if (!req.file && !generatedImagePath) {
+      return res.status(400).json({ success: false, message: 'Product image is required (upload or AI generated image).' });
     }
 
     const now = new Date().toISOString();
@@ -1294,7 +1463,7 @@ app.post('/api/admin/products', upload.single('image'), (req, res) => {
         title.trim(),
         shortDesc ? shortDesc.trim() : '',
         description.trim(),
-        `/uploads/${req.file.filename}`,
+        req.file ? `/uploads/${req.file.filename}` : generatedImagePath,
         categoryId ? Number(categoryId) : null,
         status || 'draft',
         lowStockThreshold ? Number(lowStockThreshold) : null,
@@ -1338,12 +1507,13 @@ app.put('/api/admin/products/:id', upload.single('image'), (req, res) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    const { title, shortDesc, description, categoryId, status, pricing, variants, lowStockThreshold } = req.body;
+    const { title, shortDesc, description, categoryId, status, pricing, variants, lowStockThreshold, imagePath: imagePathInput } = req.body;
     const now = new Date().toISOString();
     const pricingJson = pricing ? JSON.stringify(safeJsonParse(pricing, [])) : existing.pricing_json;
     const variantList = variants ? safeJsonParse(variants, []) : null;
 
     let imagePath = existing.image;
+    const providedImagePath = resolveImagePathInput(imagePathInput);
     if (req.file) {
       // Delete old image if exists
       const oldImagePath = resolveUploadPath(existing.image);
@@ -1351,6 +1521,8 @@ app.put('/api/admin/products/:id', upload.single('image'), (req, res) => {
         fs.unlinkSync(oldImagePath);
       }
       imagePath = `/uploads/${req.file.filename}`;
+    } else if (providedImagePath && providedImagePath !== existing.image) {
+      imagePath = providedImagePath;
     }
 
     const updateProduct = db.prepare(`

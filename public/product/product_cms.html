@@ -16,6 +16,9 @@
   .hidden-section { display: none; }
   .tab-active { background: #0f766e; color: #fff; }
   .table-row:hover { background: rgba(15, 118, 110, 0.05); }
+  .metric-card { border: 1px solid rgba(15, 118, 110, 0.14); background: #fff; border-radius: 14px; padding: 12px; }
+  .metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+  .metric-value { font-size: 24px; font-weight: 700; color: #0f172a; margin-top: 4px; }
 </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -37,11 +40,31 @@
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
   <div id="message" class="mb-4"></div>
 
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    <div class="metric-card">
+      <p class="metric-label">Products</p>
+      <p id="opsProducts" class="metric-value">0</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">SKUs</p>
+      <p id="opsSkus" class="metric-value">0</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Lanyard Leads</p>
+      <p id="opsLeads" class="metric-value">0</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">7-Day Visitors</p>
+      <p id="opsVisitors" class="metric-value">0</p>
+    </div>
+  </div>
+
   <div class="flex flex-wrap gap-2 mb-6">
     <button class="tab-btn tab-active px-4 py-2 rounded-lg text-sm font-semibold" data-tab="products">Products</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="categories">Categories</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="inventory">Inventory</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="lanyards">Lanyards</button>
+    <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="analytics">Analytics</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="imports">Import/Export</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="audit">Audit Log</button>
     <button class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold" data-tab="admins">Admins</button>
@@ -86,7 +109,23 @@
           <div>
             <label class="text-sm font-medium">Product Image</label>
             <input id="imageUpload" type="file" accept="image/*" class="w-full border rounded-lg p-2">
-            <p class="text-xs text-slate-500">Required for new products.</p>
+            <p class="text-xs text-slate-500">Required for new products (upload or AI image).</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <p class="text-sm font-semibold text-slate-800">AI Image Assistant</p>
+            <textarea id="aiPrompt" rows="3" placeholder="Describe the product image you want (example: premium blue stationery pouch on white background, ecommerce lighting)." class="w-full border rounded-lg p-2 text-sm"></textarea>
+            <div class="grid grid-cols-2 gap-2">
+              <select id="aiImageSize" class="w-full border rounded-lg p-2 text-sm">
+                <option value="1024x1024">Square (1024x1024)</option>
+                <option value="1536x1024">Landscape (1536x1024)</option>
+                <option value="1024x1536">Portrait (1024x1536)</option>
+              </select>
+              <button type="button" id="generateAiImage" class="bg-slate-900 text-white rounded-lg text-sm font-semibold">Generate</button>
+            </div>
+            <input id="aiImagePath" type="hidden">
+            <p id="aiImageStatus" class="text-xs text-slate-500"></p>
+            <img id="aiImagePreview" class="hidden w-full rounded-lg border border-slate-200 object-cover max-h-56" alt="AI generated preview">
           </div>
 
           <div>
@@ -366,6 +405,50 @@
     </div>
   </section>
 
+  <!-- ANALYTICS TAB -->
+  <section id="tab-analytics" class="hidden-section">
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Today Views</p>
+        <p id="visitTodayViews" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Today Visitors</p>
+        <p id="visitTodayVisitors" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">7-Day Views</p>
+        <p id="visitWeekViews" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-500">7-Day Visitors</p>
+        <p id="visitWeekVisitors" class="text-2xl font-bold mt-1">0</p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Top Pages (7 Days)</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-slate-500">
+                <th class="p-2">Path</th>
+                <th class="p-2">Views</th>
+                <th class="p-2">Visitors</th>
+              </tr>
+            </thead>
+            <tbody id="visitTopPages"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Top Referrers</h2>
+        <div id="visitTopReferrers" class="space-y-2 text-sm"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- IMPORTS TAB -->
   <section id="tab-imports" class="hidden-section">
     <div class="grid lg:grid-cols-3 gap-6">
@@ -489,7 +572,8 @@ const state = {
   lanyardTypes: [],
   lanyardFittings: [],
   lanyardSubmissions: [],
-  lanyardMetrics: null
+  lanyardMetrics: null,
+  visits: null
 };
 
 const API = '';
@@ -509,6 +593,21 @@ async function fetchJSON(url, options) {
   const data = await res.json();
   if (!data.success) throw new Error(data.message || 'Request failed');
   return data;
+}
+
+function updateAiImageState(pathValue = '', statusText = '') {
+  const pathInput = document.getElementById('aiImagePath');
+  const preview = document.getElementById('aiImagePreview');
+  const statusEl = document.getElementById('aiImageStatus');
+  pathInput.value = pathValue || '';
+  statusEl.textContent = statusText || '';
+  if (pathValue) {
+    preview.src = pathValue;
+    preview.classList.remove('hidden');
+  } else {
+    preview.removeAttribute('src');
+    preview.classList.add('hidden');
+  }
 }
 
 function isLowStock(variant) {
@@ -606,11 +705,13 @@ async function loadAll() {
     loadVariants(),
     loadAdmins(),
     loadAudit(),
+    loadVisits(),
     loadDbStatus(),
     loadLanyardTypes(),
     loadLanyardFittings(),
     loadLanyardSubmissions()
   ]);
+  renderOpsOverview();
 }
 
 async function loadCategories() {
@@ -624,12 +725,14 @@ async function loadProducts() {
   const data = await fetchJSON('/api/admin/products');
   state.products = data.products;
   renderProductTable();
+  renderOpsOverview();
 }
 
 async function loadVariants() {
   const data = await fetchJSON('/api/admin/variants');
   state.variants = data.variants;
   renderInventoryTable();
+  renderOpsOverview();
 }
 
 async function loadAdmins() {
@@ -644,6 +747,12 @@ async function loadAudit() {
   renderAuditTable();
 }
 
+async function loadVisits() {
+  const data = await fetchJSON('/api/admin/analytics/visits');
+  state.visits = data;
+  renderVisits();
+}
+
 async function loadDbStatus() {
   const data = await fetchJSON('/api/admin/db/status');
   state.database = data.database;
@@ -651,6 +760,7 @@ async function loadDbStatus() {
   state.lanyardMetrics = data.lanyardMetrics || null;
   renderDbStatus();
   renderLanyardHealth();
+  renderOpsOverview();
 }
 
 async function loadLanyardTypes() {
@@ -673,6 +783,7 @@ async function loadLanyardSubmissions() {
   const data = await fetchJSON(`/api/admin/lanyard/submissions${query}`);
   state.lanyardSubmissions = data.submissions || [];
   renderSubmissionList();
+  renderOpsOverview();
 }
 
 function renderCategorySelects() {
@@ -857,6 +968,60 @@ function renderDbStatus() {
     `;
     backupList.appendChild(row);
   });
+}
+
+function renderOpsOverview() {
+  const leadCount = state.lanyardMetrics ? Number(state.lanyardMetrics.submissionsCount || 0) : Number(state.lanyardSubmissions.length || 0);
+  const weekVisitors = state.visits && state.visits.summary ? Number(state.visits.summary.weekVisitors || 0) : 0;
+  document.getElementById('opsProducts').textContent = state.products.length;
+  document.getElementById('opsSkus').textContent = state.variants.length;
+  document.getElementById('opsLeads').textContent = leadCount;
+  document.getElementById('opsVisitors').textContent = weekVisitors;
+}
+
+function renderVisits() {
+  const summary = state.visits && state.visits.summary ? state.visits.summary : {};
+  document.getElementById('visitTodayViews').textContent = Number(summary.todayViews || 0);
+  document.getElementById('visitTodayVisitors').textContent = Number(summary.todayVisitors || 0);
+  document.getElementById('visitWeekViews').textContent = Number(summary.weekViews || 0);
+  document.getElementById('visitWeekVisitors').textContent = Number(summary.weekVisitors || 0);
+
+  const topPagesTable = document.getElementById('visitTopPages');
+  topPagesTable.innerHTML = '';
+  const topPages = Array.isArray(state.visits && state.visits.topPages) ? state.visits.topPages : [];
+  if (!topPages.length) {
+    topPagesTable.innerHTML = '<tr><td class="p-2 text-slate-500" colspan="3">No visit data yet.</td></tr>';
+  } else {
+    topPages.forEach((page) => {
+      const row = document.createElement('tr');
+      row.className = 'table-row';
+      row.innerHTML = `
+        <td class="p-2 text-xs">${escapeHtml(page.path || '/')}</td>
+        <td class="p-2 text-xs">${Number(page.views || 0)}</td>
+        <td class="p-2 text-xs">${Number(page.visitors || 0)}</td>
+      `;
+      topPagesTable.appendChild(row);
+    });
+  }
+
+  const refContainer = document.getElementById('visitTopReferrers');
+  refContainer.innerHTML = '';
+  const topReferrers = Array.isArray(state.visits && state.visits.topReferrers) ? state.visits.topReferrers : [];
+  if (!topReferrers.length) {
+    refContainer.innerHTML = '<p class="text-sm text-slate-500">No referrer data yet.</p>';
+  } else {
+    topReferrers.forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'border rounded-lg p-2';
+      row.innerHTML = `
+        <p class="text-xs text-slate-700 break-all">${escapeHtml(item.referrer || 'Direct')}</p>
+        <p class="text-xs text-slate-500 mt-1">${Number(item.visits || 0)} visits</p>
+      `;
+      refContainer.appendChild(row);
+    });
+  }
+
+  renderOpsOverview();
 }
 
 function renderLanyardTypeList() {
@@ -1122,6 +1287,8 @@ async function editProduct(id) {
     addVariantRow();
   }
 
+  updateAiImageState(product.image || '', product.image ? 'Current product image loaded.' : '');
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1289,6 +1456,36 @@ async function updateSubmission(id) {
   }
 }
 
+async function generateAiImageForProduct() {
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  const size = document.getElementById('aiImageSize').value;
+  const button = document.getElementById('generateAiImage');
+
+  if (!prompt) {
+    showMessage('Enter an image prompt first.', 'error');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Generating...';
+  updateAiImageState('', 'Generating image...');
+  try {
+    const data = await fetchJSON('/api/admin/ai/product-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, size })
+    });
+    updateAiImageState(data.imageUrl, 'AI image ready. Save product to attach this image.');
+    showMessage('AI image generated');
+  } catch (err) {
+    updateAiImageState('', `AI generation failed: ${err.message}`);
+    showMessage(err.message, 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Generate';
+  }
+}
+
 // Event bindings
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -1311,6 +1508,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 document.getElementById('addPricingTier').addEventListener('click', () => addPricingTierRow());
 document.getElementById('addVariant').addEventListener('click', () => addVariantRow());
+document.getElementById('generateAiImage').addEventListener('click', generateAiImageForProduct);
+document.getElementById('imageUpload').addEventListener('change', (event) => {
+  if (event.target.files && event.target.files[0]) {
+    updateAiImageState(document.getElementById('aiImagePath').value.trim(), 'Manual upload selected. Uploaded image will be used.');
+  }
+});
 
 document.getElementById('productForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1325,6 +1528,7 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   formData.append('lowStockThreshold', document.getElementById('lowStock').value);
   formData.append('pricing', JSON.stringify(collectPricingTiers()));
   formData.append('variants', JSON.stringify(collectVariants()));
+  formData.append('imagePath', document.getElementById('aiImagePath').value.trim());
 
   const imageFile = document.getElementById('imageUpload').files[0];
   if (imageFile) {
@@ -1352,6 +1556,7 @@ function resetProductForm() {
   document.getElementById('productForm').reset();
   document.getElementById('pricingTiers').innerHTML = '';
   document.getElementById('variantList').innerHTML = '';
+  updateAiImageState('', '');
   addPricingTierRow();
   addVariantRow();
 }
