@@ -779,7 +779,10 @@ app.post('/api/lanyard/submissions', async (req, res) => {
       repeatSpacingPx: payload.repeatSpacingPx || null,
       quantity: payload.quantity || null,
       quality: payload.quality || '',
-      printingStyle: payload.printingStyle || ''
+      printingStyle: payload.printingStyle || '',
+      printSide: payload.printSide || '',
+      breakaway: toBooleanFlag(payload.breakaway, true),
+      mode: payload.mode || 'retail'
     }] : []);
 
   if (!name || !phone) {
@@ -813,7 +816,10 @@ app.post('/api/lanyard/submissions', async (req, res) => {
       repeatSpacingPx: item.repeatSpacingPx ? Number(item.repeatSpacingPx) : null,
       quantity: item.quantity ? Number(item.quantity) : null,
       quality: item.quality || '',
-      printingStyle: item.printingStyle || ''
+      printingStyle: item.printingStyle || '',
+      printSide: item.printSide || '',
+      breakaway: toBooleanFlag(item.breakaway, true),
+      mode: item.mode || 'retail'
     });
   }
 

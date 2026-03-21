@@ -499,20 +499,44 @@ function computePricing(line, type) {
   };
 }
 
-function drawTextureFill(x, y, w, h, textColor) {
+function drawImageCover(image, x, y, w, h, opacity = 1) {
+  if (!image) return;
+  const sourceWidth = image.naturalWidth || image.width || w;
+  const sourceHeight = image.naturalHeight || image.height || h;
+  const scale = Math.max(w / sourceWidth, h / sourceHeight);
+  const drawWidth = sourceWidth * scale;
+  const drawHeight = sourceHeight * scale;
+  const drawX = x + ((w - drawWidth) / 2);
+  const drawY = y + ((h - drawHeight) / 2);
+  const previousAlpha = ctx.globalAlpha;
+  ctx.globalAlpha = opacity;
+  ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+  ctx.globalAlpha = previousAlpha;
+}
+
+function drawTextureFill(x, y, w, h, textColor, materialName, typeImg) {
   ctx.save();
   ctx.beginPath();
   roundedRectPath(ctx, x, y, w, h, w / 2);
   ctx.clip();
-  ctx.strokeStyle = 'rgba(255,255,255,0.09)';
-  for (let i = -h; i < w + h; i += 10) {
+
+  if (typeImg) {
+    drawImageCover(typeImg, x, y, w, h, 0.18);
+  }
+
+  const material = String(materialName || '').toLowerCase();
+  const weaveGap = material.includes('woven') ? 7 : material.includes('polyester') ? 9 : 10;
+  const weaveAlpha = material.includes('satin') ? 0.14 : material.includes('woven') ? 0.18 : 0.09;
+  ctx.strokeStyle = `rgba(255,255,255,${weaveAlpha})`;
+  for (let i = -h; i < w + h; i += weaveGap) {
     ctx.beginPath();
     ctx.moveTo(x + i, y);
     ctx.lineTo(x + i - h, y + h);
     ctx.stroke();
   }
-  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-  for (let i = 0; i < h; i += 7) {
+
+  ctx.strokeStyle = material.includes('woven') ? 'rgba(0,0,0,0.10)' : 'rgba(0,0,0,0.08)';
+  for (let i = 0; i < h; i += (material.includes('woven') ? 7 : 10)) {
     ctx.beginPath();
     ctx.moveTo(x, y + i);
     ctx.lineTo(x + w, y + i);
@@ -553,7 +577,7 @@ function drawLaneText(text, logoImg, strapW, strapLen, textColor, reverse) {
   }
 }
 
-function drawStrapSegment(cx, cy, strapW, strapLen, angleRad, color, textColor, text, logoImg, reverse) {
+function drawStrapSegment(cx, cy, strapW, strapLen, angleRad, color, textColor, text, logoImg, reverse, materialName, typeImg) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(angleRad);
@@ -574,7 +598,7 @@ function drawStrapSegment(cx, cy, strapW, strapLen, angleRad, color, textColor, 
   ctx.fillRect(-strapW / 2, 0, strapW, strapLen);
   ctx.globalCompositeOperation = 'source-over';
 
-  drawTextureFill(-strapW / 2, 0, strapW, strapLen, textColor);
+  drawTextureFill(-strapW / 2, 0, strapW, strapLen, textColor, materialName, typeImg);
 
   ctx.save();
   roundedRectPath(ctx, -strapW / 2, 0, strapW, strapLen, strapW / 2);
@@ -617,14 +641,71 @@ function drawMetalPlaceholder(x, y, size) {
   ctx.stroke();
 }
 
-function drawSingleLanyard(rootX, rootY, label, text, line, logoImg, mainImg, addonImg, mirror) {
+function resolveAnchor(anchor, fallbackX, fallbackY, fallbackScale = 1) {
+  const normalized = anchor && typeof anchor === 'object' ? anchor : {};
+  return {
+    x: fallbackX + (Number(normalized.x) || 0),
+    y: fallbackY + (Number(normalized.y) || 0),
+    scale: fallbackScale * (Number(normalized.scale) || 1),
+    rotation: Number(normalized.rotation) || 0
+  };
+}
+
+function drawAccessoryAsset(image, placement, fallbackSize) {
+  const targetSize = Math.max(20, fallbackSize * (placement.scale || 1));
+  if (!image) {
+    drawMetalPlaceholder(placement.x - (targetSize / 2), placement.y - (targetSize / 2), targetSize);
+    return;
+  }
+
+  const naturalWidth = image.naturalWidth || image.width || targetSize;
+  const naturalHeight = image.naturalHeight || image.height || targetSize;
+  const scale = Math.min(targetSize / naturalWidth, targetSize / naturalHeight);
+  const drawWidth = naturalWidth * scale;
+  const drawHeight = naturalHeight * scale;
+
+  ctx.save();
+  ctx.translate(placement.x, placement.y);
+  ctx.rotate((placement.rotation || 0) * (Math.PI / 180));
+  ctx.shadowColor = 'rgba(15, 23, 42, 0.18)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 4;
+  ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+  ctx.restore();
+}
+
+function drawTypeReferenceCard(type, typeImg) {
+  if (!type || !typeImg) return;
+  const cardX = canvas.width - 270;
+  const cardY = 34;
+  const cardW = 220;
+  const cardH = 134;
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.strokeStyle = '#dbe7fb';
+  ctx.lineWidth = 1;
+  roundedRectPath(ctx, cardX, cardY, cardW, cardH, 18);
+  ctx.fill();
+  ctx.stroke();
+  drawImageCover(typeImg, cardX + 12, cardY + 14, cardW - 24, 72, 1);
+  ctx.fillStyle = '#0f2d63';
+  ctx.font = '800 13px Manrope';
+  ctx.fillText('Material Reference', cardX + 14, cardY + 102);
+  ctx.fillStyle = '#334155';
+  ctx.font = '600 12px Manrope';
+  ctx.fillText(type.name || 'Selected Type', cardX + 14, cardY + 121);
+  ctx.restore();
+}
+
+function drawSingleLanyard(rootX, rootY, label, text, line, logoImg, typeImg, mainImg, addonImg, mainAnchor, addonAnchor, mirror, materialName) {
   const strapW = Math.max(24, Math.min(40, Math.round(line.widthMm * 1.35)));
   const strapLen = Math.max(330, Math.min(460, Math.round(line.lengthMm * 0.46)));
   const leftAngle = mirror ? -0.24 : 0.24;
   const rightAngle = mirror ? 0.24 : -0.24;
 
-  const leftEnd = drawStrapSegment(rootX - 58, rootY, strapW, strapLen, leftAngle, line.bgColor, line.textColor, text, logoImg, false);
-  const rightEnd = drawStrapSegment(rootX + 58, rootY, strapW, strapLen, rightAngle, line.bgColor, line.textColor, text, logoImg, true);
+  const leftEnd = drawStrapSegment(rootX - 58, rootY, strapW, strapLen, leftAngle, line.bgColor, line.textColor, text, logoImg, false, materialName, typeImg);
+  const rightEnd = drawStrapSegment(rootX + 58, rootY, strapW, strapLen, rightAngle, line.bgColor, line.textColor, text, logoImg, true, materialName, typeImg);
 
   drawConnector(rootX, rootY - 6, 56, line.breakaway);
 
@@ -632,15 +713,10 @@ function drawSingleLanyard(rootX, rootY, label, text, line, logoImg, mainImg, ad
   const joinY = (leftEnd.y + rightEnd.y) / 2;
   drawConnector(joinX, joinY - 6, 44, false);
 
-  if (mainImg) {
-    ctx.drawImage(mainImg, joinX - 28, joinY + 10, 56, 56);
-  } else {
-    drawMetalPlaceholder(joinX - 26, joinY + 10, 52);
-  }
-
-  if (addonImg) {
-    ctx.drawImage(addonImg, joinX + 40, joinY + 14, 38, 38);
-  }
+  const mainPlacement = resolveAnchor(mainAnchor, joinX, joinY + 40, 1);
+  const addonPlacement = resolveAnchor(addonAnchor, joinX + 56, joinY + 36, 0.8);
+  drawAccessoryAsset(mainImg, mainPlacement, 62);
+  if (addonImg) drawAccessoryAsset(addonImg, addonPlacement, 42);
 
   ctx.fillStyle = '#0f172a';
   ctx.font = '700 20px Manrope';
@@ -696,6 +772,7 @@ async function renderLivePreview() {
   const pricing = computePricing(line, type);
 
   const logoImg = line.logoData ? await getImage(line.logoData) : null;
+  const typeImg = await getImage((type && (type.preview_base_image || type.image)) || '');
   const mainImg = await getImage((main && (main.preview_image || main.image)) || '');
   const addonImg = await getImage((addon && (addon.preview_image || addon.image)) || '');
   if (seq !== renderSequence) return;
@@ -728,6 +805,7 @@ async function renderLivePreview() {
   ctx.fillStyle = '#475569';
   ctx.font = '600 16px Manrope';
   ctx.fillText(`${type ? type.name : 'Material'} • ${line.widthMm}mm • ${line.lengthMm}mm • ${line.printingStyle}`, 40, 82);
+  drawTypeReferenceCard(type, typeImg);
 
   ctx.save();
   ctx.translate(canvas.width / 2, canvas.height / 2 + 35);
@@ -735,8 +813,36 @@ async function renderLivePreview() {
   ctx.rotate(rot);
   ctx.translate(-(canvas.width / 2), -(canvas.height / 2 + 35));
 
-  drawSingleLanyard(380, 170, 'Front', line.frontText || 'FRONT TEXT', line, logoImg, mainImg, addonImg, false);
-  drawSingleLanyard(920, 170, 'Back', line.backText || line.frontText || 'BACK TEXT', line, logoImg, mainImg, addonImg, true);
+  drawSingleLanyard(
+    380,
+    170,
+    'Front',
+    line.frontText || 'FRONT TEXT',
+    line,
+    logoImg,
+    typeImg,
+    mainImg,
+    addonImg,
+    main && main.preview_anchor,
+    addon && addon.preview_anchor,
+    false,
+    type ? type.name : ''
+  );
+  drawSingleLanyard(
+    920,
+    170,
+    'Back',
+    line.backText || line.frontText || 'BACK TEXT',
+    line,
+    logoImg,
+    typeImg,
+    mainImg,
+    addonImg,
+    main && main.preview_anchor,
+    addon && addon.preview_anchor,
+    true,
+    type ? type.name : ''
+  );
 
   ctx.restore();
 
